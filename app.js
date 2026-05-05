@@ -248,7 +248,7 @@ function switchView(target) {
 function renderHeader() {
   const { teacher, school, class: classroom } = dashboardService.getDashboard(state.classId);
   document.getElementById("schoolLine").textContent = `${school.school_name} - ${classroom.subject}`;
-  document.getElementById("greeting").textContent = `Good morning, ${teacher.first_name} ${teacher.last_name}`;
+  document.getElementById("greeting").textContent = "Good Morning Teach!";
 }
 
 function renderStats() {
