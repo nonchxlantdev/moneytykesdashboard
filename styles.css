@@ -401,6 +401,10 @@ input {
   display: none;
 }
 
+.mobile-tabbar {
+  display: none;
+}
+
 .stats-grid,
 .quick-action-grid {
   display: grid;
@@ -1051,10 +1055,54 @@ input {
 }
 
 @media (max-width: 500px) {
+  body {
+    background:
+      radial-gradient(circle at -12% 4%, rgba(255, 255, 255, 0.95) 0 62px, transparent 64px),
+      radial-gradient(circle at 112% 9%, rgba(255, 255, 255, 0.64) 0 74px, transparent 76px),
+      linear-gradient(180deg, #ffdfad 0%, #fff2df 42%, #f7f4ff 100%);
+  }
+
+  body::before,
+  body::after {
+    position: fixed;
+    z-index: -1;
+    color: rgba(127, 93, 188, 0.22);
+    font-size: 28px;
+    font-weight: 900;
+    pointer-events: none;
+  }
+
+  body::before {
+    content: "✦";
+    top: 68px;
+    left: 20px;
+  }
+
+  body::after {
+    content: "★";
+    right: 24px;
+    bottom: 128px;
+  }
+
+  .app-shell {
+    min-height: 100svh;
+  }
+
+  .dashboard {
+    width: min(100%, 430px);
+    margin: 0 auto;
+    padding: 18px 14px 104px;
+  }
+
   .topbar {
     display: grid;
     grid-template-columns: 44px minmax(0, 1fr);
     gap: 10px;
+    margin: 0 0 16px;
+    padding: 0;
+    background: transparent;
+    border-bottom: 0;
+    backdrop-filter: none;
   }
 
   .mobile-menu,
@@ -1064,21 +1112,30 @@ input {
   }
 
   h1 {
-    font-size: 21px;
+    font-size: 19px;
+    line-height: 1.1;
   }
 
   .eyebrow {
+    margin-bottom: 3px;
+    color: #6b5b4c;
     font-size: 12px;
+    font-weight: 750;
   }
 
   .page-heading h2 {
-    font-size: 23px;
+    font-size: 25px;
+    line-height: 1;
   }
 
   .stat-card {
-    grid-template-columns: 42px 1fr;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    min-height: 112px;
     padding: 16px;
-    min-height: 118px;
+    border: 0;
+    border-radius: 22px;
+    box-shadow: 0 14px 32px rgba(112, 81, 49, 0.1);
   }
 
   .stat-icon,
@@ -1092,8 +1149,37 @@ input {
     font-size: 22px;
   }
 
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .quick-actions {
+    background: #252a2d;
+    color: #fff;
+  }
+
+  .quick-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quick-action {
+    min-height: 112px;
+    border: 0;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+
+  .quick-action span {
+    color: rgba(255, 255, 255, 0.72);
+  }
+
   .section-panel {
     padding: 16px;
+    border: 0;
+    border-radius: 24px;
+    box-shadow: 0 18px 42px rgba(112, 81, 49, 0.12);
   }
 
   .section-heading {
@@ -1105,8 +1191,21 @@ input {
     width: 100%;
   }
 
+  .student-tools,
+  .student-tools select,
+  .search-box,
+  .stacked-form input,
+  .stacked-form select {
+    border-radius: 16px;
+  }
+
   .student-row {
     grid-template-columns: 1fr;
+    margin-bottom: 10px;
+    padding: 14px;
+    background: #f9f7ff;
+    border: 0;
+    border-radius: 18px;
   }
 
   .student-row > span:last-child,
@@ -1124,14 +1223,66 @@ input {
   .history-row,
   .insight-card {
     grid-template-columns: 1fr;
+    border: 0;
+    border-radius: 18px;
+    background: #fff;
   }
 
   .tip-bar {
     grid-template-columns: 42px minmax(0, 1fr);
     padding: 16px;
+    border: 0;
+    border-radius: 22px;
   }
 
   .tip-bar > svg {
     display: none;
+  }
+
+  .mobile-tabbar {
+    position: fixed;
+    left: 50%;
+    bottom: 14px;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    width: min(390px, calc(100vw - 28px));
+    min-height: 70px;
+    padding: 8px;
+    background: #252a2d;
+    border-radius: 28px;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+    transform: translateX(-50%);
+  }
+
+  .mobile-tab {
+    display: grid;
+    place-items: center;
+    gap: 3px;
+    min-width: 0;
+    color: rgba(255, 255, 255, 0.66);
+    background: transparent;
+    border: 0;
+    border-radius: 22px;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .mobile-tab svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .mobile-tab.active {
+    color: #fff;
+    background: #0b0d18;
+  }
+
+  .toast {
+    right: 14px;
+    bottom: 96px;
+    left: 14px;
+    max-width: none;
   }
 }

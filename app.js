@@ -34,6 +34,17 @@ const state = {
   db: loadDatabase()
 };
 
+const navigationItems = [
+  ["Dashboard", icons.dashboard, "dashboard"],
+  ["Students", icons.users, "students"],
+  ["Tasks", icons.clipboard, "tasks"],
+  ["Rewards", icons.gift, "rewards"],
+  ["Leaderboard", icons.trophy, "leaderboard"],
+  ["Reports", icons.chart, "reports"],
+  ["Literacy", icons.cap, "literacy"],
+  ["Settings", icons.settings, "settings"]
+];
+
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("pageTaskDueDate").value = addDays(today(), 7);
   bindEvents();
@@ -191,24 +202,25 @@ function render() {
 }
 
 function renderNavigation() {
-  const items = [
-    ["Dashboard", icons.dashboard, "dashboard"],
-    ["Students", icons.users, "students"],
-    ["Assign & Tasks", icons.clipboard, "tasks"],
-    ["Rewards", icons.gift, "rewards"],
-    ["Leaderboard", icons.trophy, "leaderboard"],
-    ["Reports", icons.chart, "reports"],
-    ["Financial Literacy", icons.cap, "literacy"],
-    ["Class Settings", icons.settings, "settings"]
-  ];
+  const sidebarLabels = {
+    tasks: "Assign & Tasks",
+    literacy: "Financial Literacy",
+    settings: "Class Settings"
+  };
 
-  document.getElementById("navList").innerHTML = items.map(([label, svg, target], index) => `
+  document.getElementById("navList").innerHTML = navigationItems.map(([label, svg, target], index) => `
     <button class="nav-item ${index === 0 ? "active" : ""}" type="button" title="${label}" data-nav="${target}">
+      ${svg}<span>${sidebarLabels[target] || label}</span>
+    </button>
+  `).join("");
+
+  document.getElementById("mobileTabbar").innerHTML = navigationItems.slice(0, 5).map(([label, svg, target], index) => `
+    <button class="mobile-tab ${index === 0 ? "active" : ""}" type="button" aria-label="${label}" data-nav="${target}">
       ${svg}<span>${label}</span>
     </button>
   `).join("");
 
-  document.querySelectorAll(".nav-item").forEach(button => {
+  document.querySelectorAll(".nav-item, .mobile-tab").forEach(button => {
     button.addEventListener("click", () => handleNavClick(button.dataset.nav));
   });
 }
@@ -219,6 +231,9 @@ function handleNavClick(target) {
 
 function switchView(target) {
   document.querySelectorAll(".nav-item").forEach(button => {
+    button.classList.toggle("active", button.dataset.nav === target);
+  });
+  document.querySelectorAll(".mobile-tab").forEach(button => {
     button.classList.toggle("active", button.dataset.nav === target);
   });
   document.querySelectorAll(".view").forEach(view => {
