@@ -81,32 +81,8 @@ svg {
   object-fit: contain;
 }
 
-.brand strong {
-  display: block;
-  color: var(--navy);
-  font-size: 26px;
-  line-height: 1;
-}
-
 .brand:has(.brand-logo) {
   justify-content: flex-start;
-}
-
-.brand:has(.brand-logo) div {
-  display: none;
-}
-
-.brand span {
-  display: inline-block;
-  margin-top: 5px;
-  padding: 3px 7px;
-  color: #fff;
-  background: var(--orange);
-  border-radius: 3px;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
 }
 
 .nav-list {
@@ -869,7 +845,6 @@ input {
     width: 60px;
   }
 
-  .brand div:last-child,
   .nav-item span,
   .challenge-card,
   .teacher-chip div,
@@ -931,7 +906,6 @@ input {
     transform: translateX(0);
   }
 
-  .brand div:last-child,
   .nav-item span,
   .challenge-card,
   .teacher-chip div,
