@@ -241,8 +241,7 @@ function switchView(target) {
   });
   document.querySelector(".sidebar").classList.remove("open");
 
-  const topbar = document.querySelector(".topbar");
-  if (topbar) topbar.scrollIntoView({ behavior: "smooth", block: "start" });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function renderHeader() {
