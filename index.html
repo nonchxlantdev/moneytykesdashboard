@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MoneyTykes Teacher Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <div class="brand">
+          <img class="brand-logo" src="Logo.png" alt="MoneyTykes">
+          <div>
+            <strong>MoneyTykes</strong>
+            <span>Learn. Earn. Level Up.</span>
+          </div>
+        </div>
+
+        <nav class="nav-list" id="navList"></nav>
+
+        <section class="challenge-card" aria-labelledby="challengeTitle">
+          <div class="challenge-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img">
+              <path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Z"></path>
+              <path d="M5 5H3v2a4 4 0 0 0 4 4M19 5h2v2a4 4 0 0 1-4 4"></path>
+            </svg>
+          </div>
+          <h2 id="challengeTitle">Run a Challenge</h2>
+          <p>Boost engagement with class competitions.</p>
+          <button class="secondary-action" id="createChallengeBtn">Create Challenge</button>
+        </section>
+
+        <button class="teacher-chip" id="teacherChip" type="button"></button>
+      </aside>
+
+      <main class="dashboard">
+        <header class="topbar">
+          <button class="icon-button mobile-menu" id="mobileMenu" type="button" aria-label="Open menu">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+          </button>
+          <div>
+            <p class="eyebrow" id="schoolLine"></p>
+            <h1 id="greeting"></h1>
+          </div>
+          <div class="topbar-actions">
+          <label class="date-select" for="dashboardDate">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"></path></svg>
+              <input id="dashboardDate" type="date">
+            </label>
+            <button class="notification-button" type="button" aria-label="Notifications">
+              <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"></path></svg>
+              <span>3</span>
+            </button>
+          </div>
+        </header>
+
+        <section class="view active" data-view="dashboard">
+        <section class="stats-grid" id="statsGrid" aria-label="Class statistics"></section>
+
+        <section class="quick-actions section-panel" aria-labelledby="quickActionsTitle">
+          <div class="section-heading">
+            <h2 id="quickActionsTitle">Quick Actions</h2>
+          </div>
+          <div class="quick-action-grid" id="quickActions"></div>
+        </section>
+
+        <section class="content-grid">
+          <article class="section-panel student-overview">
+            <div class="section-heading">
+              <h2>Student Overview</h2>
+            </div>
+            <div class="student-tools">
+              <label class="search-box" for="studentSearch">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z"></path></svg>
+                <input id="studentSearch" type="search" placeholder="Search students...">
+              </label>
+              <select id="statusFilter" aria-label="Filter students by status">
+                <option value="all">All statuses</option>
+                <option value="on_track">On Track</option>
+                <option value="at_risk">At Risk</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="student-table" id="studentTable"></div>
+            <button class="wide-button" id="viewAllStudents" type="button">Add Student</button>
+          </article>
+
+          <article class="section-panel">
+            <div class="section-heading inline-control">
+              <h2>Top Earners</h2>
+              <select id="leaderboardRange" aria-label="Leaderboard range">
+                <option value="week">This Week</option>
+                <option value="month" selected>This Month</option>
+                <option value="all">All Time</option>
+              </select>
+            </div>
+            <ol class="earners-list" id="earnersList"></ol>
+            <button class="wide-button" id="fullLeaderboardBtn" type="button">View Full Leaderboard</button>
+          </article>
+
+          <article class="section-panel">
+            <div class="section-heading inline-control">
+              <h2>Recent Tasks</h2>
+              <button class="link-button" id="viewTasksBtn" type="button">Create Task</button>
+            </div>
+            <div class="task-list" id="taskList"></div>
+          </article>
+
+          <article class="section-panel">
+            <div class="section-heading inline-control">
+              <h2>Class Insights</h2>
+              <select id="insightRange" aria-label="Insight range">
+                <option>This Month</option>
+                <option>This Term</option>
+              </select>
+            </div>
+            <div class="insight-grid" id="insightGrid"></div>
+          </article>
+        </section>
+
+        <section class="tip-bar" id="tipBar" aria-label="Tip of the day"></section>
+        </section>
+
+        <section class="view" data-view="students">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Class Roster</p>
+              <h2>Students Dashboard</h2>
+            </div>
+          </div>
+          <div class="management-grid">
+            <article class="section-panel">
+              <div class="section-heading">
+                <h2>Add Student</h2>
+              </div>
+              <form class="stacked-form" id="pageStudentForm">
+                <div class="form-grid">
+                  <label>
+                    First Name
+                    <input id="pageStudentFirstName" type="text" autocomplete="given-name" required>
+                  </label>
+                  <label>
+                    Last Name
+                    <input id="pageStudentLastName" type="text" autocomplete="family-name" required>
+                  </label>
+                </div>
+                <label>
+                  Email
+                  <input id="pageStudentEmail" type="email" autocomplete="email" required>
+                </label>
+                <div class="form-grid">
+                  <label>
+                    Age
+                    <input id="pageStudentAge" type="number" min="4" max="25" required>
+                  </label>
+                  <label>
+                    Class / Grade
+                    <input id="pageStudentClass" type="text" placeholder="Grade 5, Form 1, etc." required>
+                  </label>
+                </div>
+                <div class="form-grid">
+                  <label>
+                    Parent / Guardian
+                    <input id="pageStudentGuardian" type="text" autocomplete="name">
+                  </label>
+                  <label>
+                    Contact Number
+                    <input id="pageStudentPhone" type="tel" autocomplete="tel">
+                  </label>
+                </div>
+                <button class="primary-action" type="submit">Add Student</button>
+              </form>
+            </article>
+
+            <article class="section-panel">
+              <div class="section-heading">
+                <h2>Give Earnings</h2>
+              </div>
+              <form class="stacked-form" id="pageEarningsForm">
+                <label>
+                  Student
+                  <select id="pageEarningStudent" required></select>
+                </label>
+                <label>
+                  Amount
+                  <input id="pageEarningAmount" type="number" min="1" step="0.25" value="10" required>
+                </label>
+                <label>
+                  Description
+                  <input id="pageEarningDescription" type="text" value="Class participation reward" required>
+                </label>
+                <button class="primary-action" type="submit">Add BZ$ Earnings</button>
+              </form>
+            </article>
+          </div>
+          <article class="section-panel full-width-panel">
+            <div class="section-heading">
+              <h2>Roster</h2>
+            </div>
+            <div class="student-table" id="studentsPageTable"></div>
+          </article>
+        </section>
+
+        <section class="view" data-view="tasks">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Assignments</p>
+              <h2>Tasks Dashboard</h2>
+            </div>
+          </div>
+          <div class="management-grid">
+            <article class="section-panel">
+              <div class="section-heading">
+                <h2>Create Task</h2>
+              </div>
+              <form class="stacked-form" id="pageTaskForm">
+                <label>
+                  Title
+                  <input id="pageTaskTitle" type="text" placeholder="Savings Goal Reflection" required>
+                </label>
+                <label>
+                  Category
+                  <select id="pageTaskCategory">
+                    <option>Financial Literacy</option>
+                    <option>Economics</option>
+                    <option>Budgeting</option>
+                    <option>Saving</option>
+                    <option>Investing</option>
+                    <option>Chores</option>
+                    <option>Custom</option>
+                  </select>
+                </label>
+                <div class="form-grid">
+                  <label>
+                    Reward Amount
+                    <input id="pageTaskReward" type="number" min="1" step="0.25" value="8" required>
+                  </label>
+                  <label>
+                    Due Date
+                    <input id="pageTaskDueDate" type="date" required>
+                  </label>
+                </div>
+                <button class="primary-action" type="submit">Create and Assign</button>
+              </form>
+            </article>
+
+            <article class="section-panel">
+              <div class="section-heading">
+                <h2>Task Summary</h2>
+              </div>
+              <div class="insight-grid" id="tasksPageSummary"></div>
+            </article>
+          </div>
+          <article class="section-panel full-width-panel">
+            <div class="section-heading">
+              <h2>All Tasks</h2>
+            </div>
+            <div class="task-list" id="tasksPageList"></div>
+          </article>
+        </section>
+
+        <section class="view" data-view="rewards">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Class Store</p>
+              <h2>Rewards Dashboard</h2>
+            </div>
+          </div>
+          <div class="management-grid">
+            <article class="section-panel">
+              <div class="section-heading">
+                <h2>Create Reward</h2>
+              </div>
+              <form class="stacked-form" id="pageRewardForm">
+                <label>
+                  Reward Name
+                  <input id="pageRewardTitle" type="text" placeholder="No Homework Pass, Snack, Extra Recess" required>
+                </label>
+                <div class="form-grid">
+                  <label>
+                    Category
+                    <select id="pageRewardCategory">
+                      <option>Financial</option>
+                      <option>No Homework</option>
+                      <option>Snacks</option>
+                      <option>Privilege</option>
+                      <option>Classroom</option>
+                      <option>Recognition</option>
+                      <option>Custom</option>
+                    </select>
+                  </label>
+                  <label>
+                    Type
+                    <select id="pageRewardType">
+                      <option value="classroom">Classroom</option>
+                      <option value="privilege">Privilege</option>
+                      <option value="digital">Digital</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="form-grid">
+                  <label>
+                    Cost
+                    <input id="pageRewardCost" type="number" min="0" step="0.25" value="0" required>
+                  </label>
+                  <label>
+                    Quantity
+                    <input id="pageRewardQuantity" type="number" min="1" step="1" value="1" required>
+                  </label>
+                </div>
+                <label>
+                  Description
+                  <input id="pageRewardDescription" type="text" placeholder="What the student receives">
+                </label>
+                <button class="primary-action" type="submit">Create Reward</button>
+              </form>
+            </article>
+
+            <article class="section-panel">
+              <div class="section-heading">
+                <h2>Assign Reward</h2>
+              </div>
+              <form class="stacked-form" id="pageAssignRewardForm">
+                <label>
+                  Student
+                  <select id="pageRewardStudent" required></select>
+                </label>
+                <label>
+                  Reward
+                  <select id="pageRewardSelect" required></select>
+                </label>
+                <label>
+                  Reason
+                  <input id="pageRewardReason" type="text" placeholder="Great effort, completed challenge, kindness, etc." required>
+                </label>
+                <button class="primary-action" type="submit">Assign Reward</button>
+              </form>
+            </article>
+          </div>
+          <article class="section-panel full-width-panel">
+            <div class="section-heading">
+              <h2>Reward Catalog</h2>
+            </div>
+            <div class="reward-grid" id="rewardCatalog"></div>
+          </article>
+          <article class="section-panel full-width-panel">
+            <div class="section-heading">
+              <h2>Assigned Rewards</h2>
+            </div>
+            <div class="reward-history" id="rewardHistory"></div>
+          </article>
+        </section>
+
+        <section class="view" data-view="leaderboard">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Rankings</p>
+              <h2>Leaderboard Dashboard</h2>
+            </div>
+          </div>
+          <article class="section-panel">
+            <div class="section-heading inline-control">
+              <h2>Class Rankings</h2>
+              <select id="pageLeaderboardRange" aria-label="Leaderboard page range">
+                <option value="week">This Week</option>
+                <option value="month" selected>This Month</option>
+                <option value="all">All Time</option>
+              </select>
+            </div>
+            <ol class="earners-list" id="pageEarnersList"></ol>
+          </article>
+        </section>
+
+        <section class="view" data-view="reports">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Insights</p>
+              <h2>Reports Dashboard</h2>
+            </div>
+          </div>
+          <article class="section-panel">
+            <div class="insight-grid" id="reportsInsightGrid"></div>
+          </article>
+        </section>
+
+        <section class="view" data-view="literacy">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Learning Tools</p>
+              <h2>Financial Literacy Dashboard</h2>
+            </div>
+          </div>
+          <article class="section-panel">
+            <div class="tip-bar inline-tip" id="literacyTipBar" aria-label="Financial literacy tip"></div>
+          </article>
+        </section>
+
+        <section class="view" data-view="settings">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Class Setup</p>
+              <h2>Class Settings Dashboard</h2>
+            </div>
+          </div>
+          <article class="section-panel">
+            <div class="settings-list" id="settingsList"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
