@@ -35,7 +35,6 @@ const state = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("dashboardDate").value = today();
   document.getElementById("pageTaskDueDate").value = addDays(today(), 7);
   bindEvents();
   render();

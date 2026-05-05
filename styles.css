@@ -376,24 +376,6 @@ h1 {
   line-height: 1.1;
 }
 
-.topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.date-select {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 48px;
-  padding: 0 14px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-}
-
-.date-select input,
 select,
 input {
   min-width: 0;
@@ -403,11 +385,6 @@ input {
   border-radius: var(--radius);
 }
 
-.date-select input {
-  border: 0;
-}
-
-.notification-button,
 .icon-button {
   position: relative;
   display: grid;
@@ -418,22 +395,6 @@ input {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-}
-
-.notification-button span {
-  position: absolute;
-  top: -5px;
-  right: -4px;
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  color: #fff;
-  background: var(--red);
-  border: 2px solid #fff;
-  border-radius: 50%;
-  font-size: 11px;
-  font-weight: 800;
 }
 
 .mobile-menu {
@@ -935,6 +896,16 @@ input {
   .content-grid {
     gap: 14px;
   }
+
+  .reward-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .student-row,
+  .student-head {
+    grid-template-columns: minmax(170px, 1.5fr) 86px 64px 86px;
+    gap: 10px;
+  }
 }
 
 @media (max-width: 760px) {
@@ -946,8 +917,10 @@ input {
     position: fixed;
     z-index: 8;
     width: min(320px, 86vw);
+    max-width: 320px;
     transform: translateX(-105%);
     transition: transform 180ms ease;
+    box-shadow: var(--shadow);
   }
 
   .sidebar.open {
@@ -982,16 +955,19 @@ input {
   }
 
   .dashboard {
-    padding: 18px 14px;
+    padding: 14px;
   }
 
   .topbar {
-    align-items: flex-start;
-  }
-
-  .topbar-actions {
-    flex-wrap: wrap;
-    justify-content: flex-end;
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    align-items: center;
+    margin: -14px -14px 18px;
+    padding: 12px 14px;
+    background: rgba(247, 248, 252, 0.94);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(12px);
   }
 
   .stats-grid,
@@ -1014,10 +990,55 @@ input {
   .student-row {
     grid-template-columns: 1fr 1fr;
     gap: 8px 14px;
+    padding: 14px 8px;
   }
 
   .student-person {
     grid-column: 1 / -1;
+  }
+
+  .student-row > .money::before,
+  .student-row > .streak::before,
+  .student-row > span:last-child::before {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .student-row > .money::before {
+    content: "Balance";
+  }
+
+  .student-row > .streak::before {
+    content: "Streak";
+  }
+
+  .student-row > span:last-child::before {
+    content: "Status";
+  }
+
+  .quick-action {
+    min-height: 108px;
+  }
+
+  .task-row {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .completion-count {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .earner-row {
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+
+  .earner-row .money {
+    grid-column: 2;
   }
 
   .form-grid {
@@ -1032,28 +1053,85 @@ input {
 @media (max-width: 500px) {
   .topbar {
     display: grid;
-    grid-template-columns: 48px 1fr;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 10px;
   }
 
-  .topbar-actions {
-    grid-column: 1 / -1;
-    justify-content: stretch;
-  }
-
-  .date-select {
-    flex: 1;
+  .mobile-menu,
+  .icon-button {
+    width: 44px;
+    height: 44px;
   }
 
   h1 {
+    font-size: 21px;
+  }
+
+  .eyebrow {
+    font-size: 12px;
+  }
+
+  .page-heading h2 {
     font-size: 23px;
   }
 
   .stat-card {
-    grid-template-columns: 44px 1fr;
+    grid-template-columns: 42px 1fr;
     padding: 16px;
+    min-height: 118px;
+  }
+
+  .stat-icon,
+  .action-icon,
+  .insight-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .stat-value {
+    font-size: 22px;
   }
 
   .section-panel {
-    padding: 17px;
+    padding: 16px;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .inline-control select {
+    width: 100%;
+  }
+
+  .student-row {
+    grid-template-columns: 1fr;
+  }
+
+  .student-row > span:last-child,
+  .student-row > .money,
+  .student-row > .streak {
+    width: 100%;
+  }
+
+  .status-pill {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .reward-card,
+  .history-row,
+  .insight-card {
+    grid-template-columns: 1fr;
+  }
+
+  .tip-bar {
+    grid-template-columns: 42px minmax(0, 1fr);
+    padding: 16px;
+  }
+
+  .tip-bar > svg {
+    display: none;
   }
 }
