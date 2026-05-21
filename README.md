@@ -1,6 +1,15 @@
 # MoneyTykes Teacher Dashboard
 
-Clean classroom dashboard for a financial literacy reward system.
+React classroom dashboard for a financial literacy reward system and game-based learning concept.
+
+## Run Locally
+
+Install dependencies, then start the Vite dev server:
+
+```bash
+npm install
+npm run dev
+```
 
 ## What It Does
 
@@ -9,21 +18,20 @@ Clean classroom dashboard for a financial literacy reward system.
 - Give student earnings through wallet transactions
 - Track balances, total earned, task progress, streaks, leaderboard ranking, and class insights
 - Persist classroom data locally in the browser with `localStorage`
+- Preview a Money Moves Live game dashboard inspired by `gameidea/gamefrontend.jpeg`
 
 ## Files
 
-- `index.html` - Dashboard structure and modals
-- `styles.css` - Responsive MoneyTykes interface styling
-- `app.js` - Data store, classroom actions, dashboard calculations, and API-ready service layer
-- `Logo.png` - MoneyTykes logo asset
+- `index.html` - Vite mount point for the React app
+- `src/main.jsx` - React app, dashboard views, local data actions, and game view
+- `src/react.css` - React-specific animation and game board styling
+- `styles.css` - Existing responsive MoneyTykes interface styling shared by the React app
+- `public/Logo.png` - MoneyTykes logo asset
+- `public/gamefrontend.jpeg` - Money Moves Live reference image used in the game view
+- `app.js` - Legacy vanilla JavaScript prototype retained for reference
 
 ## Backend Transition Notes
 
-The JavaScript is organized so a backend can replace the local repository later:
+The React app is still local-first. A backend can replace the local `update` actions and dashboard calculations later:
 
-- `repository` handles data reads/writes
-- `classroomActions` handles mutations such as adding students, creating tasks, and giving earnings
-- `dashboardService` handles dashboard calculations
-- `window.moneyTykesApi` exposes endpoint-like methods for future integration
-
-When moving to an API, replace `repository` methods with `fetch` calls and keep the dashboard rendering layer mostly unchanged.
+When moving to an API, replace the localStorage reads/writes with `fetch` calls or a client data library, then keep the React components focused on rendering and interaction.
