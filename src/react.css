@@ -603,6 +603,8 @@
 .team-count-icon {
   display: inline-grid;
   place-items: center;
+  align-items: center;
+  justify-items: center;
   flex: 0 0 auto;
   width: 58px;
   height: 58px;
@@ -616,6 +618,7 @@
   display: block;
   width: 24px;
   height: 24px;
+  margin: auto;
 }
 
 .team-count-row strong,
