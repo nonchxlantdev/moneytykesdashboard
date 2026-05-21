@@ -31,6 +31,7 @@ import "../styles.css";
 import "./react.css";
 
 const STORAGE_KEY = "moneytykes.teacher.dashboard.v3";
+const assetPath = path => `${import.meta.env.BASE_URL}${path}`;
 
 const currency = new Intl.NumberFormat("en-BZ", {
   style: "currency",
@@ -179,7 +180,7 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed }) {
       <div className="sidebar-top">
         {!collapsed && (
           <div className="brand">
-            <img className="brand-logo" src="/Logo.png" alt="MoneyTykes" />
+            <img className="brand-logo" src={assetPath("Logo.png")} alt="MoneyTykes" />
           </div>
         )}
         <button className="sidebar-collapse-button" type="button" aria-label={collapsed ? "Show sidebar" : "Hide sidebar"} onClick={toggleCollapsed}>
@@ -629,9 +630,9 @@ function GameDashboard() {
   if (stage === "select") {
     return (
       <section className="game-select-screen page-swap">
-        <audio ref={audioRef} src="/gamebackgroundaudio.mp3" loop preload="auto" />
+        <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
         <div className="game-hero compact">
-          <img src="/gamefrontend.jpeg" alt="Money Moves Live dashboard concept" />
+          <img src={assetPath("gamefrontend.jpeg")} alt="Money Moves Live dashboard concept" />
           <div>
             <p className="eyebrow">Select Game</p>
             <h2>Game</h2>
@@ -651,8 +652,8 @@ function GameDashboard() {
   if (stage === "loading") {
     return (
       <section className="money-loading-screen page-swap">
-        <audio ref={audioRef} src="/gamebackgroundaudio.mp3" loop preload="auto" />
-        <img src="/Logo.png" alt="MoneyTykes" />
+        <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
+        <img src={assetPath("Logo.png")} alt="MoneyTykes" />
         <p className="eyebrow">Money Moves Live</p>
         <h2>Build Your Net Worth. Win Your Future.</h2>
         <button className="game-start-button" type="button" onClick={startSetup}><Play /> Start Game</button>
@@ -663,7 +664,7 @@ function GameDashboard() {
   if (stage === "teams") {
     return (
       <section className="team-setup-screen page-swap">
-        <audio ref={audioRef} src="/gamebackgroundaudio.mp3" loop preload="auto" />
+        <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
         <div className="team-setup-heading">
           <p className="game-kicker"><BarChart3 /> Money Moves Live</p>
           <h2>Enter Teams</h2>
@@ -698,10 +699,10 @@ function GameDashboard() {
 
   return (
     <section className="money-moves-live page-swap">
-      <audio ref={audioRef} src="/gamebackgroundaudio.mp3" loop preload="auto" />
+      <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
       <header className="money-live-header">
         <div className="money-brand-lockup">
-          <img src="/Logo.png" alt="MoneyTykes" />
+          <img src={assetPath("Logo.png")} alt="MoneyTykes" />
         </div>
         <div className="money-live-title">
           <h2><span>Money Moves</span> <strong>Live</strong></h2>
