@@ -575,6 +575,7 @@
 
 .team-form {
   width: min(880px, 100%);
+  min-width: 0;
   display: grid;
   gap: 0;
   padding: 28px 32px;
@@ -591,7 +592,7 @@
 
 .team-count-row {
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) 230px;
+  grid-template-columns: 58px minmax(0, 1fr) minmax(150px, 230px);
   align-items: center;
   gap: 18px;
   padding-bottom: 22px;
@@ -600,14 +601,21 @@
 }
 
 .team-count-icon {
-  display: grid;
+  display: inline-grid;
   place-items: center;
+  flex: 0 0 auto;
   width: 58px;
   height: 58px;
   color: #65b9ff;
   background: rgba(28, 108, 219, 0.3);
   border: 1px solid rgba(101, 185, 255, 0.24);
   border-radius: 50%;
+}
+
+.team-count-icon svg {
+  display: block;
+  width: 24px;
+  height: 24px;
 }
 
 .team-count-row strong,
@@ -646,9 +654,11 @@
 
 .team-name-row {
   display: grid;
-  grid-template-columns: 46px 38px minmax(0, 1fr);
+  grid-template-columns: 46px 32px minmax(0, 1fr);
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+  min-width: 0;
+  width: 100%;
 }
 
 .team-number {
@@ -665,11 +675,18 @@
 }
 
 .team-name-row > svg {
+  display: block;
+  width: 24px;
+  height: 24px;
   color: var(--yellow);
+  justify-self: center;
 }
 
 .team-name-row input {
+  display: block;
+  width: 100%;
   min-width: 0;
+  box-sizing: border-box;
   height: 54px;
   color: #fff;
   background: rgba(255, 255, 255, 0.06);
@@ -1309,7 +1326,7 @@
   }
 
   .team-form {
-    padding: 18px;
+    padding: 18px 14px;
   }
 
   .team-count-row {
@@ -1327,13 +1344,25 @@
   }
 
   .team-name-row {
-    grid-template-columns: 38px 28px minmax(0, 1fr);
-    gap: 8px;
+    grid-template-columns: 34px 24px minmax(0, 1fr);
+    gap: 7px;
   }
 
   .team-number {
-    width: 38px;
-    height: 38px;
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+  }
+
+  .team-name-row > svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .team-name-row input {
+    height: 48px;
+    padding-inline: 12px;
+    font-size: 16px;
   }
 
   .team-open-board {
