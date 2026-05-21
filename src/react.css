@@ -1094,6 +1094,12 @@
   gap: 14px;
 }
 
+.question-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .question-card h3 {
   margin: 0;
   color: #fff;
@@ -1122,6 +1128,17 @@
 .question-timer.time-up {
   color: #fff;
   background: var(--red);
+}
+
+.question-close-button {
+  display: inline-grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: var(--radius);
 }
 
 .question-body {
@@ -1273,6 +1290,69 @@
 
   .money-live-footer {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1180px) {
+  .money-moves-live {
+    padding: 12px;
+  }
+
+  .money-live-header {
+    grid-template-columns: 150px minmax(0, 1fr) 190px;
+    gap: 10px;
+  }
+
+  .money-brand-lockup img {
+    width: 145px;
+  }
+
+  .money-live-title h2 {
+    font-size: clamp(32px, 4.2vw, 50px);
+  }
+
+  .money-live-title p {
+    margin-top: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .winner-callout {
+    padding: 10px;
+  }
+
+  .winner-callout strong {
+    font-size: 16px;
+  }
+
+  .winner-callout span {
+    font-size: 10px;
+  }
+
+  .money-live-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .game-rules-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .live-board .game-column header {
+    min-height: 82px;
+  }
+
+  .live-board .money-tile {
+    min-height: clamp(54px, 6.2vw, 68px);
+    font-size: clamp(20px, 3vw, 34px);
+  }
+
+  .money-live-footer {
+    grid-template-columns: 1fr minmax(300px, 420px);
+  }
+
+  .reset-game-button {
+    grid-column: 1 / -1;
+    min-height: 44px;
   }
 }
 

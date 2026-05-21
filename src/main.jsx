@@ -6,6 +6,7 @@ import {
   Calculator,
   Check,
   ChevronRight,
+  X,
   ClipboardList,
   Flame,
   Gift,
@@ -525,6 +526,7 @@ function GameDashboard() {
   const [teams, setTeams] = useState([{ id: 1, name: "Team Tykes", score: 0 }]);
   const [teamCount, setTeamCount] = useState(1);
   const [usedTiles, setUsedTiles] = useState([]);
+  const [questionPool, setQuestionPool] = useState([]);
   const [activeQuestion, setActiveQuestion] = useState(null);
   const [selectedTeamId, setSelectedTeamId] = useState(1);
   const [showAnswer, setShowAnswer] = useState(false);
@@ -583,6 +585,7 @@ function GameDashboard() {
     setTeams(readyTeams);
     setSelectedTeamId(readyTeams[0].id);
     setUsedTiles([]);
+    setQuestionPool(shuffleQuestions(moneyMoveQuestions));
     setActiveQuestion(null);
     setShowAnswer(false);
     setStage("play");
@@ -596,10 +599,17 @@ function GameDashboard() {
 
   function chooseTile(category, value) {
     const bankCategory = category.questionCategory || category.title;
-    const options = moneyMoveQuestions.filter(item => item.category === bankCategory && item.value === value);
-    const question = options[Math.floor(Math.random() * options.length)];
-    setActiveQuestion({ ...question, boardTitle: category.title, tileId: tileId(category.title, value), seconds: secondsForValue(value) });
-    setTimeLeft(secondsForValue(value));
+    const source = questionPool.length ? questionPool : shuffleQuestions(moneyMoveQuestions);
+    const questionIndex = source.findIndex(item => item.category === bankCategory && item.value === value);
+    const fallbackOptions = shuffleQuestions(moneyMoveQuestions).filter(item => item.category === bankCategory && item.value === value);
+    const question = questionIndex >= 0 ? source[questionIndex] : fallbackOptions[0];
+    if (!question) return;
+    if (questionIndex >= 0) {
+      setQuestionPool(source.filter((_, index) => index !== questionIndex));
+    }
+    const seconds = secondsForValue(value);
+    setActiveQuestion({ ...question, boardTitle: category.title, tileId: tileId(category.title, value), seconds });
+    setTimeLeft(seconds);
     setTimerRunning(false);
     setShowAnswer(false);
   }
@@ -621,6 +631,7 @@ function GameDashboard() {
   function resetGame() {
     setTeams(current => current.map(team => ({ ...team, score: 0 })));
     setUsedTiles([]);
+    setQuestionPool(shuffleQuestions(moneyMoveQuestions));
     setActiveQuestion(null);
     setShowAnswer(false);
     setTimeLeft(0);
@@ -750,8 +761,8 @@ function GameDashboard() {
             <p>Timer is based on question value.</p>
             <ul>
               <li><span>$100 - $200</span><strong>10 sec</strong></li>
-              <li><span>$300 - $400</span><strong>15 sec</strong></li>
-              <li><span>$500</span><strong>20 sec</strong></li>
+              <li><span>$300</span><strong>10 sec</strong></li>
+              <li><span>$400 - $500</span><strong>15 sec</strong></li>
             </ul>
           </section>
           <section>
@@ -826,10 +837,15 @@ function QuestionModal({ question, timeLeft, timerRunning, startTimer, showAnswe
             <p className="eyebrow">{question.boardTitle} - {money(question.value)}</p>
             <h3>{showAnswer ? "Answer" : "Question"}</h3>
           </div>
-          <div className={`question-timer ${isTimeUp ? "time-up" : ""}`}>
-            <Timer />
-            <strong>{timeLeft}</strong>
-            <span>sec</span>
+          <div className="question-header-actions">
+            <div className={`question-timer ${isTimeUp ? "time-up" : ""}`}>
+              <Timer />
+              <strong>{timeLeft}</strong>
+              <span>sec</span>
+            </div>
+            <button className="question-close-button" type="button" aria-label="Close question without using tile" onClick={() => closeQuestion(false)}>
+              <X />
+            </button>
           </div>
         </header>
         <div className={`question-body ${showAnswer ? "answer-mode" : ""}`}>
@@ -962,13 +978,21 @@ function formatDate(value) {
 }
 
 function secondsForValue(value) {
-  if (value >= 500) return 20;
-  if (value >= 300) return 15;
+  if (value >= 400) return 15;
   return 10;
 }
 
 function tileId(category, value) {
   return `${category}:${value}`;
+}
+
+function shuffleQuestions(questions) {
+  const shuffled = [...questions];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
 }
 
 createRoot(document.getElementById("root")).render(<App />);
