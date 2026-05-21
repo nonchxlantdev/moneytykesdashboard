@@ -24,6 +24,8 @@ import {
   ShieldAlert,
   Timer,
   Trophy,
+  Star,
+  AlertTriangle,
   Users,
   Wallet
 } from "lucide-react";
@@ -767,12 +769,12 @@ function GameDashboard() {
           </section>
           <section>
             <h3>How To Play</h3>
-            <ol>
-              <li>Choose a category.</li>
-              <li>Pick a value.</li>
-              <li>Answer within the time.</li>
-              <li>Award net worth.</li>
-              <li>Highest score wins.</li>
+            <ol className="how-to-list">
+              <li><span>1</span>Choose a category.</li>
+              <li><span>2</span>Pick a value.</li>
+              <li><span>3</span>Answer within the time.</li>
+              <li><span>4</span>Award net worth.</li>
+              <li><span>5</span>Highest score wins.</li>
             </ol>
           </section>
         </aside>
@@ -780,6 +782,7 @@ function GameDashboard() {
 
       <footer className="money-live-footer">
         <div className="goal-card"><strong>Your Goal: Build Your Net Worth!</strong><span>Smart answers. Smart choices. Bigger net worth.</span></div>
+        <NetWorthFactors />
         <TeamScoreboard teams={teams} selectedTeamId={selectedTeamId} setSelectedTeamId={setSelectedTeamId} />
         <button className="reset-game-button" type="button" onClick={resetGame}><RotateCcw /> Reset</button>
       </footer>
@@ -803,8 +806,32 @@ function GameDashboard() {
   );
 }
 
+function NetWorthFactors() {
+  return (
+    <section className="net-worth-card">
+      <strong>What Affects Your Net Worth?</strong>
+      <div className="factor-row">
+        <span className="factor positive"><Wallet /></span>
+        <b>+</b>
+        <span className="factor bonus"><BarChart3 /></span>
+        <b>+</b>
+        <span className="factor vault"><Gift /></span>
+        <b>-</b>
+        <span className="factor risk"><AlertTriangle /></span>
+      </div>
+      <div className="factor-labels">
+        <span>Correct Answers</span>
+        <span>Bonus & Investments</span>
+        <span>Tyke Vault Rewards</span>
+        <span>Penalties & Risk Losses</span>
+      </div>
+    </section>
+  );
+}
+
 function TeamScoreboard({ teams, selectedTeamId, setSelectedTeamId }) {
   const rankedTeams = [...teams].sort((a, b) => b.score - a.score);
+  const topScore = Math.max(0, ...teams.map(team => team.score));
   return (
     <section className="team-scoreboard">
       <div className="scoreboard-heading">
@@ -818,6 +845,7 @@ function TeamScoreboard({ teams, selectedTeamId, setSelectedTeamId }) {
           key={team.id}
           onClick={() => setSelectedTeamId(team.id)}
         >
+          <span className="leader-star-slot">{team.score > 0 && team.score === topScore && <Star className="leader-star" />}</span>
           <span>{team.name}</span>
           <strong>{money(team.score)}</strong>
         </button>
