@@ -742,24 +742,31 @@ function GameDashboard() {
       </div>
 
       <div className="money-live-layout">
-        <div className="game-board live-board" aria-label="Money Moves Live question board">
-          {gameCategories.map(category => {
-            const Icon = category.icon;
-            return (
-              <div className={`game-column ${category.tone}`} key={category.title}>
-                <header><Icon /><strong>{category.title}</strong><span>{category.subtitle}</span></header>
-                {[100, 200, 300, 400, 500].map(value => {
-                  const id = tileId(category.title, value);
-                  const used = usedTiles.includes(id);
-                  return (
-                    <button type="button" key={value} className={`money-tile ${used ? "used" : ""}`} disabled={used} onClick={() => chooseTile(category, value)}>
-                      <span>MT</span><strong className="money-value">{money(value)}</strong>
-                    </button>
-                  );
-                })}
-              </div>
-            );
-          })}
+        <div className="money-board-zone">
+          <div className="game-board live-board" aria-label="Money Moves Live question board">
+            {gameCategories.map(category => {
+              const Icon = category.icon;
+              return (
+                <div className={`game-column ${category.tone}`} key={category.title}>
+                  <header><Icon /><strong>{category.title}</strong><span>{category.subtitle}</span></header>
+                  {[100, 200, 300, 400, 500].map(value => {
+                    const id = tileId(category.title, value);
+                    const used = usedTiles.includes(id);
+                    return (
+                      <button type="button" key={value} className={`money-tile ${used ? "used" : ""}`} disabled={used} onClick={() => chooseTile(category, value)}>
+                        <span>MT</span><strong className="money-value">{money(value)}</strong>
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+          <footer className="money-live-footer">
+            <div className="goal-card"><strong>Your Goal: Build Your Net Worth!</strong><span>Smart answers. Smart choices. Bigger net worth.</span></div>
+            <NetWorthFactors />
+            <TeamScoreboard teams={teams} selectedTeamId={selectedTeamId} setSelectedTeamId={setSelectedTeamId} />
+          </footer>
         </div>
 
         <aside className="game-rules-panel">
@@ -784,12 +791,6 @@ function GameDashboard() {
           </section>
         </aside>
       </div>
-
-      <footer className="money-live-footer">
-        <div className="goal-card"><strong>Your Goal: Build Your Net Worth!</strong><span>Smart answers. Smart choices. Bigger net worth.</span></div>
-        <NetWorthFactors />
-        <TeamScoreboard teams={teams} selectedTeamId={selectedTeamId} setSelectedTeamId={setSelectedTeamId} />
-      </footer>
 
       {activeQuestion && (
         <QuestionModal

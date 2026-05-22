@@ -863,6 +863,12 @@
   overflow: visible;
 }
 
+.money-board-zone {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
 .live-board .game-column {
   min-width: 0;
   gap: clamp(5px, 0.8vw, 8px);
@@ -882,7 +888,7 @@
 
 .live-board .game-column header strong {
   max-width: 100%;
-  font-size: clamp(11px, 1.45vw, 20px);
+  font-size: clamp(15px, 1.75vw, 24px);
   line-height: 1;
   overflow-wrap: anywhere;
   text-wrap: balance;
@@ -890,7 +896,7 @@
 
 .live-board .game-column header span {
   max-width: 100%;
-  font-size: clamp(9px, 0.95vw, 13px);
+  font-size: clamp(11px, 1vw, 15px);
   line-height: 1.15;
   overflow-wrap: anywhere;
   text-wrap: balance;
@@ -904,10 +910,13 @@
   min-height: clamp(48px, 6vw, 76px);
   gap: clamp(4px, 0.8vw, 10px);
   padding: 4px clamp(3px, 0.55vw, 8px);
-  font-size: clamp(14px, 2.45vw, 40px);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(20px, 2.55vw, 38px);
+  font-weight: 950;
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 10px 22px rgba(0, 0, 0, 0.26);
 }
 
@@ -951,7 +960,7 @@
 .game-rules-panel h3 {
   margin: 0 0 10px;
   color: var(--yellow);
-  font-size: 19px;
+  font-size: 24px;
   text-transform: uppercase;
 }
 
@@ -967,12 +976,12 @@
 }
 
 .timer-token strong {
-  font-size: 26px;
+  font-size: 30px;
   line-height: 1;
 }
 
 .timer-token span {
-  font-size: 10px;
+  font-size: 11px;
   text-transform: uppercase;
 }
 
@@ -993,7 +1002,8 @@
   color: #fff;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 6px;
-  font-size: 12px;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
   font-weight: 800;
 }
 
@@ -1021,7 +1031,7 @@
   grid-template-columns: minmax(220px, 0.95fr) minmax(280px, 1.2fr) minmax(320px, 1.15fr);
   align-items: stretch;
   gap: 12px;
-  margin-top: 12px;
+  margin-top: 0;
   width: 100%;
 }
 
@@ -1388,6 +1398,10 @@
     grid-template-columns: 1fr;
   }
 
+  .money-board-zone {
+    width: 100%;
+  }
+
   .live-board {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
@@ -1439,6 +1453,10 @@
 
   .money-live-layout {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .money-board-zone {
+    width: 100%;
   }
 
   .game-rules-panel {
