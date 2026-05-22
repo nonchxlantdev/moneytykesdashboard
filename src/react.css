@@ -720,8 +720,8 @@
   min-height: calc(100vh - 56px);
   padding: 18px;
   overflow: auto;
-  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", "Arial Narrow", sans-serif;
-  filter: saturate(0.86) brightness(0.94);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  filter: saturate(0.78) brightness(0.9);
 }
 
 .money-live-header {
@@ -779,6 +779,7 @@
   flex-wrap: nowrap;
   margin: 0;
   color: #fff;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", "Arial Narrow", sans-serif;
   font-size: clamp(36px, 4.7vw, 76px);
   line-height: 0.85;
   text-transform: uppercase;
@@ -821,8 +822,10 @@
 
 .winner-callout strong {
   color: #fff;
-  font-size: 22px;
+  font-size: 20px;
+  line-height: 1.05;
   text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
 }
 
 .money-live-layout {
@@ -878,7 +881,7 @@
 .live-board .game-column header {
   min-height: clamp(76px, 8vw, 102px);
   padding: clamp(6px, 0.9vw, 12px);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 10px 22px rgba(0, 0, 0, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 8px 18px rgba(0, 0, 0, 0.24);
   overflow: hidden;
 }
 
@@ -889,20 +892,26 @@
 
 .live-board .game-column header strong {
   max-width: 100%;
-  font-size: clamp(15px, 1.75vw, 24px);
-  line-height: 1;
+  color: rgba(255, 255, 255, 0.92);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(17px, 1.9vw, 26px);
+  font-weight: 1000;
+  line-height: 0.98;
   overflow-wrap: anywhere;
   text-wrap: balance;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.62);
 }
 
 .live-board .game-column header span {
   max-width: 100%;
-  font-size: clamp(11px, 1vw, 15px);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: clamp(12px, 1.05vw, 16px);
   line-height: 1.15;
   overflow-wrap: anywhere;
   text-wrap: balance;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  font-weight: 900;
+  font-weight: 850;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.52);
 }
 
 .live-board .money-tile {
@@ -912,13 +921,14 @@
   gap: clamp(4px, 0.8vw, 10px);
   padding: 4px clamp(3px, 0.55vw, 8px);
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(20px, 2.55vw, 38px);
-  font-weight: 950;
+  color: rgba(255, 255, 255, 0.94);
+  font-size: clamp(20px, 2.5vw, 36px);
+  font-weight: 900;
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.42);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09), 0 8px 18px rgba(0, 0, 0, 0.22);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.56);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 7px 16px rgba(0, 0, 0, 0.2);
 }
 
 .money-value {
@@ -961,8 +971,12 @@
 .game-rules-panel h3 {
   margin: 0 0 10px;
   color: var(--yellow);
-  font-size: 24px;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 1000;
+  line-height: 1.05;
   text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.54);
 }
 
 .timer-token {
@@ -1004,8 +1018,9 @@
   background: rgba(255, 255, 255, 0.08);
   border-radius: 6px;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  font-size: 14px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.15;
 }
 
 .how-to-list li {
@@ -1053,14 +1068,18 @@
 
 .goal-card strong {
   color: var(--yellow);
-  font-size: 28px;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(20px, 1.7vw, 26px);
+  font-weight: 1000;
   line-height: 1;
   text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.52);
 }
 
 .goal-card span {
   color: rgba(255, 255, 255, 0.82);
-  font-weight: 800;
+  font-size: clamp(13px, 1.05vw, 16px);
+  font-weight: 850;
 }
 
 .net-worth-card {
@@ -1073,7 +1092,10 @@
 }
 
 .net-worth-card > strong {
-  font-size: 18px;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(15px, 1.25vw, 20px);
+  font-weight: 1000;
+  line-height: 1.05;
   text-transform: uppercase;
 }
 
@@ -1111,8 +1133,10 @@
 }
 
 .factor-labels span {
-  font-size: 11px;
-  font-weight: 1000;
+  color: rgba(255, 255, 255, 0.78);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(9px, 0.8vw, 11px);
+  font-weight: 850;
   line-height: 1.1;
   text-transform: uppercase;
 }
@@ -1128,6 +1152,8 @@
 .scoreboard-heading {
   margin-bottom: 8px;
   color: #fff;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-weight: 1000;
   text-transform: uppercase;
 }
 
@@ -1149,7 +1175,8 @@
   border: 1px solid transparent;
   border-radius: 5px;
   text-align: left;
-  font-weight: 1000;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-weight: 950;
   text-transform: uppercase;
 }
 
@@ -1191,6 +1218,7 @@
   place-items: center;
   padding: clamp(14px, 4vw, 42px);
   background:
+    linear-gradient(90deg, rgba(81, 58, 202, 0.16), transparent 12%, transparent 88%, rgba(81, 58, 202, 0.16)),
     radial-gradient(circle at 10% 50%, rgba(124, 53, 201, 0.28), transparent 18%),
     radial-gradient(circle at 92% 48%, rgba(21, 120, 211, 0.26), transparent 18%),
     rgba(1, 5, 20, 0.9);
@@ -1226,19 +1254,21 @@
 
 .question-card h3 {
   margin: 0;
-  color: #fff;
+  color: rgba(255, 255, 255, 0.94);
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", "Arial Narrow", sans-serif;
   font-size: clamp(54px, 7vw, 98px);
   line-height: 0.85;
   text-transform: uppercase;
-  text-shadow: 0 5px 0 rgba(0, 0, 0, 0.45);
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.42), 0 0 18px rgba(255, 255, 255, 0.08);
 }
 
 .question-card .eyebrow {
   color: var(--yellow);
-  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", "Arial Narrow", sans-serif;
-  font-size: clamp(22px, 2vw, 32px);
-  font-weight: 900;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(20px, 1.8vw, 28px);
+  font-weight: 1000;
   text-transform: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.54);
 }
 
 .question-timer {
@@ -1249,7 +1279,9 @@
   justify-content: center;
   padding: 14px 18px;
   color: #07102f;
-  background: linear-gradient(135deg, #ffd041, #f1a915);
+  background:
+    radial-gradient(circle at 82% 24%, rgba(255, 255, 255, 0.22), transparent 22%),
+    linear-gradient(135deg, #f7cc35, #d99a15);
   border: 2px solid rgba(255, 230, 115, 0.9);
   border-radius: 18px;
   font-weight: 1000;
@@ -1260,6 +1292,13 @@
 .question-timer strong {
   font-size: clamp(54px, 6vw, 92px);
   line-height: 0.82;
+}
+
+.question-timer span {
+  color: #fff;
+  font-size: clamp(20px, 2vw, 34px);
+  line-height: 0.9;
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.5);
 }
 
 .question-timer svg {
@@ -1278,9 +1317,10 @@
   width: clamp(64px, 7vw, 86px);
   height: clamp(64px, 7vw, 86px);
   color: #fff;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(10, 9, 45, 0.86);
   border: 2px solid rgba(168, 94, 215, 0.9);
   border-radius: 18px;
+  box-shadow: 0 0 14px rgba(168, 94, 215, 0.22);
 }
 
 .question-body {
@@ -1294,17 +1334,18 @@
     rgba(6, 16, 58, 0.82);
   border: 2px solid rgba(168, 94, 215, 0.82);
   border-radius: 18px;
+  box-shadow: inset 0 0 24px rgba(168, 94, 215, 0.14), 0 0 18px rgba(168, 94, 215, 0.2);
 }
 
 .question-body p {
   max-width: 1080px;
   margin: 0;
-  color: #fff;
+  color: rgba(255, 255, 255, 0.94);
   font-family: Impact, Haettenschweiler, "Arial Narrow Bold", "Arial Narrow", sans-serif;
   font-size: clamp(44px, 6.2vw, 92px);
   line-height: 1.05;
   font-weight: 900;
-  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.45);
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.48), 0 0 14px rgba(255, 255, 255, 0.06);
 }
 
 .question-body.answer-mode p {
@@ -1328,6 +1369,7 @@
   color: #fff;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   font-weight: 900;
+  font-size: 16px;
 }
 
 .controller-row select {
@@ -1345,21 +1387,22 @@
   min-width: 0;
   min-height: 64px;
   border-radius: 12px;
-  font-size: 22px;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(17px, 1.6vw, 22px);
   font-weight: 1000;
 }
 
 .controller-row .secondary-action {
-  color: #fff;
+  color: rgba(255, 255, 255, 0.9);
   background: rgba(9, 9, 50, 0.82);
   border: 2px solid rgba(168, 94, 215, 0.76);
 }
 
 .controller-row .primary-action {
-  color: #fff;
-  background: linear-gradient(135deg, #7d30d6, #5820ad);
+  color: rgba(255, 255, 255, 0.92);
+  background: linear-gradient(135deg, #7730c5, #4f1c9e);
   border: 2px solid rgba(191, 113, 255, 0.86);
-  box-shadow: 0 0 18px rgba(126, 48, 214, 0.28);
+  box-shadow: 0 0 18px rgba(126, 48, 214, 0.22);
 }
 
 .controller-row .wide-button {
@@ -1380,7 +1423,7 @@
   min-height: 64px;
   padding: 0 16px;
   color: #07102f;
-  background: linear-gradient(135deg, #ffd041, #f1a915);
+  background: linear-gradient(135deg, #f2c23b, #d99a15);
   border: 2px solid rgba(255, 238, 147, 0.9);
   border-radius: 12px;
   font-weight: 1000;
