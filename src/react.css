@@ -402,27 +402,27 @@
 
 .game-column.blue header,
 .game-column.blue .money-tile {
-  background: linear-gradient(135deg, #0b72c9, #052f77);
+  background: linear-gradient(135deg, #0e61aa, #083268);
 }
 
 .game-column.green header,
 .game-column.green .money-tile {
-  background: linear-gradient(135deg, #12a927, #075f14);
+  background: linear-gradient(135deg, #1d9a45, #0c5e24);
 }
 
 .game-column.purple header,
 .game-column.purple .money-tile {
-  background: linear-gradient(135deg, #8b28c8, #4b0b76);
+  background: linear-gradient(135deg, #7c35c9, #3e136f);
 }
 
 .game-column.orange header,
 .game-column.orange .money-tile {
-  background: linear-gradient(135deg, #f47a10, #a63a05);
+  background: linear-gradient(135deg, #f06d16, #8e2e06);
 }
 
 .game-column.teal header,
 .game-column.teal .money-tile {
-  background: linear-gradient(135deg, #0aa992, #075761);
+  background: linear-gradient(135deg, #0b9c91, #074d58);
 }
 
 .game-select-screen {
@@ -725,10 +725,27 @@
 
 .money-live-header {
   display: grid;
-  grid-template-columns: minmax(160px, 260px) minmax(280px, 1fr) minmax(210px, 300px);
+  grid-template-columns: 118px minmax(140px, 240px) minmax(280px, 1fr) minmax(210px, 300px);
   align-items: center;
   gap: 18px;
   margin-bottom: 12px;
+}
+
+.new-game-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 0 12px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: var(--radius);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .money-brand-lockup {
@@ -760,13 +777,12 @@
   gap: clamp(8px, 1vw, 16px);
   flex-wrap: nowrap;
   margin: 0;
-  color: #f7f7f2;
+  color: #fff;
   font-size: clamp(36px, 4.7vw, 76px);
   line-height: 0.85;
-  letter-spacing: 0.04em;
   text-transform: uppercase;
   white-space: nowrap;
-  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.48), 0 0 18px rgba(255, 255, 255, 0.16);
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
 }
 
 .money-live-title h2 span,
@@ -775,9 +791,8 @@
 }
 
 .money-live-title h2 strong {
-  color: #ff9f16;
+  color: var(--yellow);
   font-style: italic;
-  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.44), 0 0 18px rgba(255, 159, 22, 0.38);
 }
 
 .money-live-title p {
@@ -785,12 +800,11 @@
   margin: 12px 0 0;
   padding: 8px 18px;
   color: #fff;
-  border: 2px solid #ffd84d;
+  border: 2px solid var(--yellow);
   border-radius: var(--radius);
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   font-style: italic;
-  font-weight: 1000;
-  letter-spacing: 0.06em;
+  font-weight: 900;
 }
 
 .winner-callout {
@@ -870,7 +884,6 @@
   max-width: 100%;
   font-size: clamp(11px, 1.45vw, 20px);
   line-height: 1;
-  letter-spacing: 0.02em;
   overflow-wrap: anywhere;
   text-wrap: balance;
 }
@@ -997,7 +1010,7 @@
   width: 20px;
   height: 20px;
   color: #07102f;
-  background: #38d96d;
+  background: #2dbf73;
   border-radius: 50%;
   font-size: 12px;
   font-weight: 1000;
@@ -1005,10 +1018,11 @@
 
 .money-live-footer {
   display: grid;
-  grid-template-columns: minmax(220px, 0.9fr) minmax(300px, 1.25fr) minmax(320px, 1.1fr) auto;
+  grid-template-columns: minmax(220px, 0.95fr) minmax(280px, 1.2fr) minmax(320px, 1.15fr);
   align-items: stretch;
   gap: 12px;
   margin-top: 12px;
+  width: 100%;
 }
 
 .goal-card,
@@ -1073,10 +1087,10 @@
   border-radius: 50%;
 }
 
-.factor.positive { color: #74df54; }
-.factor.bonus { color: #ffd43b; }
-.factor.vault { color: #cc46ff; }
-.factor.risk { color: #ff5a45; }
+.factor.positive { color: #52c96e; }
+.factor.bonus { color: #e8c332; }
+.factor.vault { color: #a85ed7; }
+.factor.risk { color: #e85f4f; }
 
 .factor-labels {
   display: grid;
@@ -1157,19 +1171,6 @@
 .team-3 { background: #e85d0c; }
 .team-4 { background: #0b9c91; }
 .team-5 { background: #1468b5; }
-
-.reset-game-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-width: 104px;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: var(--radius);
-  font-weight: 900;
-}
 
 .question-overlay {
   position: fixed;
@@ -1369,7 +1370,7 @@
   }
 
   .money-live-header {
-    grid-template-columns: 180px 1fr;
+    grid-template-columns: 110px 180px 1fr;
   }
 
   .winner-callout {
@@ -1406,7 +1407,7 @@
   }
 
   .money-live-header {
-    grid-template-columns: 150px minmax(0, 1fr) 190px;
+    grid-template-columns: 104px 138px minmax(0, 1fr) 176px;
     gap: 10px;
   }
 
@@ -1454,12 +1455,7 @@
   }
 
   .money-live-footer {
-    grid-template-columns: 1fr minmax(300px, 420px);
-  }
-
-  .reset-game-button {
-    grid-column: 1 / -1;
-    min-height: 44px;
+    grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.1fr);
   }
 }
 

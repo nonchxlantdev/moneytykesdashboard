@@ -640,6 +640,11 @@ function GameDashboard() {
     setTimerRunning(false);
   }
 
+  function startNewGame() {
+    resetGame();
+    setStage("teams");
+  }
+
   if (stage === "select") {
     return (
       <section className="game-select-screen page-swap">
@@ -714,6 +719,7 @@ function GameDashboard() {
     <section className="money-moves-live page-swap">
       <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
       <header className="money-live-header">
+        <button className="new-game-button" type="button" onClick={startNewGame}><RotateCcw /> New Game</button>
         <div className="money-brand-lockup">
           <img src={assetPath("Logo.png")} alt="MoneyTykes" />
         </div>
@@ -762,8 +768,7 @@ function GameDashboard() {
             <div className="timer-token"><strong>10</strong><span>sec</span></div>
             <p>Timer is based on question value.</p>
             <ul>
-              <li><span>$100 - $200</span><strong>10 sec</strong></li>
-              <li><span>$300</span><strong>10 sec</strong></li>
+              <li><span>$100 - $300</span><strong>10 sec</strong></li>
               <li><span>$400 - $500</span><strong>15 sec</strong></li>
             </ul>
           </section>
@@ -784,7 +789,6 @@ function GameDashboard() {
         <div className="goal-card"><strong>Your Goal: Build Your Net Worth!</strong><span>Smart answers. Smart choices. Bigger net worth.</span></div>
         <NetWorthFactors />
         <TeamScoreboard teams={teams} selectedTeamId={selectedTeamId} setSelectedTeamId={setSelectedTeamId} />
-        <button className="reset-game-button" type="button" onClick={resetGame}><RotateCcw /> Reset</button>
       </footer>
 
       {activeQuestion && (
