@@ -717,18 +717,25 @@
 }
 
 .money-moves-live {
+  position: relative;
   min-height: calc(100vh - 56px);
   padding: 18px;
   overflow: auto;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   filter: saturate(0.78) brightness(0.9);
+  background-image:
+    linear-gradient(rgba(3, 8, 30, 0.08), rgba(3, 8, 30, 0.14)),
+    var(--game-bg);
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
 }
 
 .money-live-header {
   display: grid;
-  grid-template-columns: 118px minmax(140px, 240px) minmax(280px, 1fr) minmax(210px, 300px);
+  grid-template-columns: minmax(150px, 21vw) minmax(360px, 1fr) minmax(180px, 21vw);
   align-items: center;
-  gap: 18px;
+  gap: clamp(12px, 2vw, 24px);
   margin-bottom: 12px;
 }
 
@@ -756,8 +763,10 @@
 }
 
 .money-brand-lockup img {
-  width: 230px;
+  width: clamp(150px, 19vw, 300px);
   max-width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 .money-live-title p,
@@ -769,6 +778,15 @@
 
 .money-live-title {
   text-align: center;
+}
+
+.money-live-title img {
+  display: block;
+  width: min(100%, clamp(360px, 52vw, 860px));
+  height: auto;
+  margin: 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.42));
 }
 
 .money-live-title h2 {
@@ -813,11 +831,18 @@
   display: grid;
   justify-items: center;
   gap: 6px;
-  padding: 14px;
+  padding: 0;
   color: var(--yellow);
-  border: 2px solid rgba(255, 201, 40, 0.72);
-  border-radius: var(--radius);
+  border: 0;
+  border-radius: 0;
   text-align: center;
+}
+
+.winner-callout img {
+  width: min(100%, clamp(150px, 19vw, 290px));
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.34));
 }
 
 .winner-callout strong {
@@ -880,9 +905,21 @@
 
 .live-board .game-column header {
   min-height: clamp(76px, 8vw, 102px);
-  padding: clamp(6px, 0.9vw, 12px);
+  padding: 0;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 8px 18px rgba(0, 0, 0, 0.24);
   overflow: hidden;
+}
+
+.category-tab-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: clamp(76px, 8vw, 102px);
+  object-fit: fill;
+}
+
+.category-fallback {
+  display: none;
 }
 
 .live-board .game-column header svg {
@@ -942,11 +979,12 @@
   text-overflow: clip;
 }
 
-.live-board .money-tile span {
+.live-board .money-tile-coin {
   width: clamp(20px, 2.6vw, 34px);
   height: clamp(20px, 2.6vw, 34px);
-  font-size: clamp(8px, 1vw, 13px);
+  object-fit: contain;
   flex: 0 0 auto;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.38));
 }
 
 .money-tile.used {
@@ -1058,6 +1096,25 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius);
   background: rgba(3, 9, 31, 0.82);
+}
+
+.team-scoreboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(130px, 0.58fr);
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+
+.scoreboard-list {
+  min-width: 0;
+}
+
+.scoreboard-win-art {
+  width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.34));
 }
 
 .goal-card {
@@ -1483,18 +1540,20 @@
   }
 
   .money-live-header {
-    grid-template-columns: 110px 180px 1fr;
+    grid-template-columns: minmax(120px, 0.7fr) minmax(320px, 1.7fr) minmax(140px, 0.7fr);
+    gap: 10px;
   }
 
   .winner-callout {
-    grid-column: 1 / -1;
-    grid-template-columns: auto 1fr;
-    justify-items: start;
-    text-align: left;
+    grid-column: auto;
   }
 
   .money-brand-lockup img {
-    width: 170px;
+    width: clamp(120px, 18vw, 180px);
+  }
+
+  .money-live-title img {
+    width: min(100%, clamp(320px, 52vw, 560px));
   }
 
   .money-live-layout {
@@ -1524,16 +1583,16 @@
   }
 
   .money-live-header {
-    grid-template-columns: 104px 138px minmax(0, 1fr) 176px;
+    grid-template-columns: minmax(110px, 0.7fr) minmax(320px, 1.8fr) minmax(130px, 0.7fr);
     gap: 10px;
   }
 
   .money-brand-lockup img {
-    width: 145px;
+    width: clamp(110px, 17vw, 175px);
   }
 
-  .money-live-title h2 {
-    font-size: clamp(32px, 4.2vw, 50px);
+  .money-live-title img {
+    width: min(100%, clamp(320px, 50vw, 620px));
   }
 
   .money-live-title p {
@@ -1543,7 +1602,7 @@
   }
 
   .winner-callout {
-    padding: 10px;
+    padding: 0;
   }
 
   .winner-callout strong {
@@ -1567,6 +1626,10 @@
   }
 
   .live-board .game-column header {
+    min-height: 82px;
+  }
+
+  .category-tab-image {
     min-height: 82px;
   }
 
@@ -1702,8 +1765,17 @@
     grid-template-columns: 1fr;
   }
 
-  .money-live-title h2 {
-    font-size: clamp(28px, 8.2vw, 38px);
+  .money-brand-lockup img {
+    width: min(82vw, 250px);
+    justify-self: center;
+  }
+
+  .money-live-title img {
+    width: min(94vw, 560px);
+  }
+
+  .winner-callout img {
+    width: min(72vw, 260px);
   }
 
   .live-board {
@@ -1715,8 +1787,21 @@
     font-size: clamp(13px, 4vw, 22px);
   }
 
-  .live-board .money-tile span {
-    display: none;
+  .live-board .money-tile-coin {
+    width: clamp(14px, 4vw, 22px);
+    height: clamp(14px, 4vw, 22px);
+  }
+
+  .category-tab-image {
+    min-height: 58px;
+  }
+
+  .team-scoreboard {
+    grid-template-columns: 1fr;
+  }
+
+  .scoreboard-win-art {
+    max-height: 120px;
   }
 
   .game-rules-panel {

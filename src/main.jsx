@@ -19,7 +19,6 @@ import {
   PiggyBank,
   Play,
   Plus,
-  RotateCcw,
   Settings,
   ShieldAlert,
   Timer,
@@ -57,11 +56,11 @@ const navItems = [
 ];
 
 const gameCategories = [
-  { title: "Money Math", subtitle: "Crunch it. Solve it.", icon: Calculator, tone: "blue" },
-  { title: "Save Smart", subtitle: "Spend less. Save more.", icon: PiggyBank, tone: "green" },
-  { title: "Hustle Mode", subtitle: "Work. Create. Earn.", icon: Lightbulb, tone: "purple" },
-  { title: "Real Life", subtitle: "Smart choices. Real impact.", icon: Home, tone: "orange" },
-  { title: "Money Moves", subtitle: "Big risks. Bigger rewards.", icon: ShieldAlert, tone: "teal" }
+  { title: "Money Math", subtitle: "Crunch it. Solve it.", icon: Calculator, tone: "blue", image: "moneymath.png" },
+  { title: "Save Smart", subtitle: "Spend less. Save more.", icon: PiggyBank, tone: "green", image: "savesmart.png" },
+  { title: "Hustle Mode", subtitle: "Work. Create. Earn.", icon: Lightbulb, tone: "purple", image: "hustlemode.png" },
+  { title: "Real Life", subtitle: "Smart choices. Real impact.", icon: Home, tone: "orange", image: "reallife.png" },
+  { title: "Money Moves", subtitle: "Big risks. Bigger rewards.", icon: ShieldAlert, tone: "teal", image: "moneymoves.png" }
 ];
 
 function createDatabase() {
@@ -716,21 +715,18 @@ function GameDashboard() {
   }
 
   return (
-    <section className="money-moves-live page-swap">
+    <section className="money-moves-live page-swap" style={{ "--game-bg": `url("${assetPath("gamebackground.png")}")` }}>
       <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
       <header className="money-live-header">
-        <button className="new-game-button" type="button" onClick={startNewGame}><RotateCcw /> New Game</button>
         <div className="money-brand-lockup">
           <img src={assetPath("Logo.png")} alt="MoneyTykes" />
         </div>
         <div className="money-live-title">
-          <h2><span>Money Moves</span> <strong>Live</strong></h2>
+          <img src={assetPath("moneymoveslive.png")} alt="Money Moves Live" />
           <p>Build your net worth. Win your future.</p>
         </div>
         <aside className="winner-callout">
-          <Trophy />
-          <strong>Highest Net Worth Wins!</strong>
-          <span>Every smart move builds your future.</span>
+          <img src={assetPath("highestnetworthwins.png")} alt="Highest net worth wins" />
         </aside>
       </header>
 
@@ -748,13 +744,17 @@ function GameDashboard() {
               const Icon = category.icon;
               return (
                 <div className={`game-column ${category.tone}`} key={category.title}>
-                  <header><Icon /><strong>{category.title}</strong><span>{category.subtitle}</span></header>
+                  <header>
+                    <img className="category-tab-image" src={assetPath(category.image)} alt={`${category.title}. ${category.subtitle}`} />
+                    <span className="category-fallback"><Icon /><strong>{category.title}</strong><span>{category.subtitle}</span></span>
+                  </header>
                   {[100, 200, 300, 400, 500].map(value => {
                     const id = tileId(category.title, value);
                     const used = usedTiles.includes(id);
                     return (
                       <button type="button" key={value} className={`money-tile ${used ? "used" : ""}`} disabled={used} onClick={() => chooseTile(category, value)}>
-                        <span>MT</span><strong className="money-value">{money(value)}</strong>
+                        <img className="money-tile-coin" src={assetPath("mtcoinpng.png")} alt="" aria-hidden="true" />
+                        <strong className="money-value">{money(value)}</strong>
                       </button>
                     );
                   })}
@@ -839,22 +839,25 @@ function TeamScoreboard({ teams, selectedTeamId, setSelectedTeamId }) {
   const topScore = Math.max(0, ...teams.map(team => team.score));
   return (
     <section className="team-scoreboard">
-      <div className="scoreboard-heading">
-        <strong>Scoreboard</strong>
-        <span>Net Worth</span>
+      <div className="scoreboard-list">
+        <div className="scoreboard-heading">
+          <strong>Scoreboard</strong>
+          <span>Net Worth</span>
+        </div>
+        {rankedTeams.map((team, index) => (
+          <button
+            className={`team-score-row team-${index + 1} ${selectedTeamId === team.id ? "selected" : ""}`}
+            type="button"
+            key={team.id}
+            onClick={() => setSelectedTeamId(team.id)}
+          >
+            <span className="leader-star-slot">{team.score > 0 && team.score === topScore && <Star className="leader-star" />}</span>
+            <span>{team.name}</span>
+            <strong>{money(team.score)}</strong>
+          </button>
+        ))}
       </div>
-      {rankedTeams.map((team, index) => (
-        <button
-          className={`team-score-row team-${index + 1} ${selectedTeamId === team.id ? "selected" : ""}`}
-          type="button"
-          key={team.id}
-          onClick={() => setSelectedTeamId(team.id)}
-        >
-          <span className="leader-star-slot">{team.score > 0 && team.score === topScore && <Star className="leader-star" />}</span>
-          <span>{team.name}</span>
-          <strong>{money(team.score)}</strong>
-        </button>
-      ))}
+      <img className="scoreboard-win-art" src={assetPath("highestnetworthwins.png")} alt="Highest net worth wins" />
     </section>
   );
 }
