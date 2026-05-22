@@ -722,11 +722,18 @@ function GameDashboard() {
           <img src={assetPath("Logo.png")} alt="MoneyTykes" />
         </div>
         <div className="money-live-title">
-          <img src={assetPath("moneymoveslive.png")} alt="Money Moves Live" />
+          <div className="money-live-title-row">
+            <h2><span>Money Moves</span> <strong>Live</strong></h2>
+            <img src={assetPath("moneymoveslive.png")} alt="" aria-hidden="true" />
+          </div>
           <p>Build your net worth. Win your future.</p>
         </div>
         <aside className="winner-callout">
-          <img src={assetPath("highestnetworthwins.png")} alt="Highest net worth wins" />
+          <img src={assetPath("highestnetworthwins.png")} alt="" aria-hidden="true" />
+          <div>
+            <strong>Highest Net Worth Wins!</strong>
+            <span>Every smart move builds your future.</span>
+          </div>
         </aside>
       </header>
 
@@ -745,8 +752,8 @@ function GameDashboard() {
               return (
                 <div className={`game-column ${category.tone}`} key={category.title}>
                   <header>
-                    <img className="category-tab-image" src={assetPath(category.image)} alt={`${category.title}. ${category.subtitle}`} />
-                    <span className="category-fallback"><Icon /><strong>{category.title}</strong><span>{category.subtitle}</span></span>
+                    <img className="category-tab-image" src={assetPath(category.image)} alt="" aria-hidden="true" />
+                    <span className="category-copy"><strong>{category.title}</strong><span>{category.subtitle}</span></span>
                   </header>
                   {[100, 200, 300, 400, 500].map(value => {
                     const id = tileId(category.title, value);
@@ -857,7 +864,10 @@ function TeamScoreboard({ teams, selectedTeamId, setSelectedTeamId }) {
           </button>
         ))}
       </div>
-      <img className="scoreboard-win-art" src={assetPath("highestnetworthwins.png")} alt="Highest net worth wins" />
+      <div className="scoreboard-win-art">
+        <img src={assetPath("highestnetworthwins.png")} alt="" aria-hidden="true" />
+        <strong>Highest Net Worth Wins!</strong>
+      </div>
     </section>
   );
 }
