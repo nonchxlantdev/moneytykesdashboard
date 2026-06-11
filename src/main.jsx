@@ -13,7 +13,11 @@ import {
   GraduationCap,
   Home,
   Lightbulb,
+  LogOut,
+  Mail,
   Menu,
+  Pencil,
+  Phone,
   Volume2,
   VolumeX,
   PiggyBank,
@@ -21,14 +25,18 @@ import {
   Plus,
   Settings,
   ShieldAlert,
+  School,
   Timer,
   Trophy,
   Star,
   AlertTriangle,
+  User,
+  UserPlus,
   Users,
   Wallet
 } from "lucide-react";
 import { moneyMoveQuestions } from "./moneyMoveQuestions";
+import LoginPage from "./pages/LoginPage";
 import "../styles.css";
 import "./react.css";
 
@@ -44,6 +52,7 @@ const currency = new Intl.NumberFormat("en-BZ", {
 });
 
 const navItems = [
+  { label: "Admin", view: "admin", icon: ShieldAlert },
   { label: "Dashboard", view: "dashboard", icon: Home },
   { label: "Students", view: "students", icon: Users },
   { label: "Assign & Tasks", view: "tasks", icon: ClipboardList },
@@ -63,12 +72,52 @@ const gameCategories = [
   { title: "Money Moves", subtitle: "Big risks. Bigger rewards.", icon: ShieldAlert, tone: "teal", image: "moneymoves.png" }
 ];
 
+const financialTips = [
+  "Set a savings goal before spending your money.",
+  "Small savings today can grow into big rewards tomorrow.",
+  "Track what you earn, save, and spend each week.",
+  "Needs come before wants when making smart money choices.",
+  "Saving a little from every reward helps build strong habits.",
+  "Before buying something, ask yourself if it helps your goal.",
+  "A budget is a simple plan for your money.",
+  "Earning money takes effort, planning, and responsibility.",
+  "Smart savers think before they spend.",
+  "Good money habits start with small daily choices.",
+  "Compare prices before spending your money.",
+  "Rewards feel better when you earn them through effort.",
+  "Saving for a goal teaches patience and discipline.",
+  "Track your progress to stay motivated.",
+  "Sharing, saving, and spending are all parts of money management.",
+  "Every coin has a job when you make a money plan.",
+  "Learning about money now helps you make better choices later.",
+  "Celebrate progress, even when the goal is not finished yet.",
+  "A smart spender knows the difference between need and want.",
+  "Confidence with money grows through practice."
+];
+
+const emptySchoolForm = { name: "", contactPerson: "", email: "", phone: "", address: "", status: "active" };
+const emptyTeacherForm = { firstName: "", lastName: "", email: "", temporaryPassword: "", schoolId: "", role: "Teacher", status: "active" };
+const emptyStudentForm = { first: "", last: "", email: "", age: "", classLabel: "", schoolId: "", teacherId: "", guardian: "", phone: "", photo: "" };
+const studentAvatars = [
+  "bullbasaur.png",
+  "charmander.png",
+  "ditto.png",
+  "eevee.png",
+  "gastly.png",
+  "jigglypuff.png",
+  "pikachu.png",
+  "snorlax.png",
+  "voltorb.png"
+];
+
 function createDatabase() {
   return {
     teacher: { first: "Teacher", last: "Advisor", email: "teacher@moneytykes.local" },
     school: "MoneyTykes Classroom",
     className: "Financial Literacy Class",
     students: [],
+    schools: [],
+    teachers: [],
     tasks: [],
     rewards: [],
     redemptions: [],
@@ -83,21 +132,43 @@ function createDatabase() {
 
 function loadDatabase() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || createDatabase();
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || createDatabase();
+    return normalizeDatabase(saved);
   } catch {
     return createDatabase();
   }
 }
 
+function normalizeDatabase(saved) {
+  const defaults = createDatabase();
+  return {
+    ...defaults,
+    ...saved,
+    teacher: { ...defaults.teacher, ...(saved.teacher || {}) },
+    students: saved.students || [],
+    schools: saved.schools || [],
+    teachers: saved.teachers || [],
+    tasks: saved.tasks || [],
+    rewards: saved.rewards || [],
+    redemptions: saved.redemptions || [],
+    transactions: saved.transactions || [],
+    tips: saved.tips || defaults.tips
+  };
+}
+
 function App() {
+  const isLoginRoute = window.location.pathname.replace(/\/$/, "").endsWith("/login");
   const [db, setDb] = useState(loadDatabase);
   const [view, setView] = useState("dashboard");
+  const [currentTip, setCurrentTip] = useState(() => randomFinancialTip());
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [range, setRange] = useState("month");
   const [toast, setToast] = useState("");
   const [sidebarHidden, setSidebarHidden] = useState(false);
+  const [studentFocus, setStudentFocus] = useState(null);
+  const mainContentRef = useRef(null);
 
   useEffect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(db)), [db]);
   useEffect(() => {
@@ -119,7 +190,16 @@ function App() {
 
   function navigate(nextView) {
     setView(nextView);
+    setCurrentTip(current => randomFinancialTip(current));
     setMenuOpen(false);
+    requestAnimationFrame(() => {
+      mainContentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
+  function logout() {
+    window.location.href = `${import.meta.env.BASE_URL}login`;
   }
 
   const pageProps = {
@@ -131,9 +211,14 @@ function App() {
     setStatus,
     range,
     setRange,
+    currentTip,
+    studentFocus,
+    setStudentFocus,
     update,
     navigate
   };
+
+  if (isLoginRoute) return <LoginPage />;
 
   return (
     <div className={`app-shell react-app ${sidebarHidden ? "sidebar-collapsed" : ""}`}>
@@ -144,7 +229,7 @@ function App() {
         collapsed={sidebarHidden}
         toggleCollapsed={() => setSidebarHidden(!sidebarHidden)}
       />
-      <main className="dashboard">
+      <main className="dashboard" ref={mainContentRef}>
         <header className="topbar app-entrance">
           <button className="icon-button mobile-menu" type="button" aria-label="Open menu" onClick={() => setMenuOpen(!menuOpen)}>
             <Menu />
@@ -153,16 +238,21 @@ function App() {
             <p className="eyebrow">{db.school} - {db.className}</p>
             <h1>Welcome back, {db.teacher.first}</h1>
           </div>
+          <button className="logout-button" type="button" onClick={logout}>
+            <LogOut />
+            <span>Log Out</span>
+          </button>
         </header>
 
-        <div className="view active page-swap" key={view}>
+          <div className="view active page-swap" key={view}>
+          {view === "admin" && <AdminDashboard db={db} update={update} />}
           {view === "dashboard" && <Dashboard {...pageProps} />}
           {view === "students" && <Students {...pageProps} />}
           {view === "tasks" && <Tasks {...pageProps} />}
           {view === "rewards" && <Rewards {...pageProps} />}
           {view === "leaderboard" && <Leaderboard {...pageProps} />}
           {view === "reports" && <Reports dashboard={dashboard} />}
-          {view === "literacy" && <Literacy db={db} />}
+          {view === "literacy" && <Literacy tip={currentTip} />}
           {view === "game" && <GameDashboard />}
           {view === "settings" && <SettingsPage db={db} />}
         </div>
@@ -190,20 +280,24 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed }) {
         </button>
       </div>
       {!collapsed && (
-        <div className="sidebar-scroll">
+        <div className="sidebar-scroll mt-sidebar-scroll">
           <nav className="nav-list">
             {navItems.map(item => <NavButton key={item.view} item={item} active={currentView === item.view} navigate={navigate} />)}
           </nav>
-          <section className="challenge-card">
-            <div className="challenge-badge" aria-hidden="true"><Trophy /></div>
-            <h2>Run a Challenge</h2>
-            <p>Boost engagement with class competitions.</p>
-            <button className="secondary-action" type="button" onClick={() => navigate("game")}>Create Game</button>
+          <section className="challenge-card mt-sidebar-action-card">
+            <div className="challenge-badge mt-sidebar-action-icon" aria-hidden="true"><Trophy /></div>
+            <h2 className="mt-sidebar-action-title">Run a Challenge</h2>
+            <p className="mt-sidebar-action-text">Motivate students with fun class goals.</p>
+            <button className="secondary-action mt-sidebar-action-button" type="button" onClick={() => navigate("game")}>Start Challenge</button>
           </section>
-          <button className="teacher-chip" type="button">
-            <span className="avatar initials">TA</span>
-            <span><strong>Teacher Advisor</strong><span>Class owner</span></span>
-            <ChevronRight />
+          {/* TODO: Connect this card to teacher account settings when that route exists. */}
+          <button className="teacher-chip mt-sidebar-profile-card" type="button">
+            <span className="avatar initials mt-sidebar-profile-avatar">T</span>
+            <span className="mt-sidebar-profile-info">
+              <strong className="mt-sidebar-profile-name">Teacher</strong>
+              <span className="mt-sidebar-profile-role">Class owner</span>
+            </span>
+            <ChevronRight className="mt-sidebar-profile-arrow" />
           </button>
         </div>
       )}
@@ -221,8 +315,288 @@ function NavButton({ item, active, navigate, compact = false }) {
   );
 }
 
+function AdminDashboard({ db, update }) {
+  const schools = db.schools || [];
+  const teachers = db.teachers || [];
+  const [schoolFormOpen, setSchoolFormOpen] = useState(false);
+  const [teacherFormOpen, setTeacherFormOpen] = useState(false);
+  const [editingSchoolId, setEditingSchoolId] = useState(null);
+  const [editingTeacherId, setEditingTeacherId] = useState(null);
+  const [schoolForm, setSchoolForm] = useState(emptySchoolForm);
+  const [teacherForm, setTeacherForm] = useState(emptyTeacherForm);
+  const [schoolError, setSchoolError] = useState("");
+  const [teacherError, setTeacherError] = useState("");
+
+  // TODO: connect total students count from Supabase or student records later if records move outside local dashboard state.
+  const totalStudents = db.students.length;
+  const activeTeachers = teachers.filter(teacher => teacher.status === "active").length;
+
+  const stats = [
+    { title: "Schools", value: schools.length, subtext: "Registered schools", icon: School },
+    { title: "Teachers", value: teachers.length, subtext: "Teacher accounts", icon: Users },
+    { title: "Students", value: totalStudents, subtext: "Across all schools", icon: GraduationCap },
+    { title: "Active Accounts", value: activeTeachers, subtext: "Able to log in", icon: Check }
+  ];
+
+  function openSchoolForm(school) {
+    setSchoolError("");
+    if (school) {
+      setEditingSchoolId(school.id);
+      setSchoolForm({ name: school.name, contactPerson: school.contactPerson, email: school.email, phone: school.phone, address: school.address, status: school.status });
+    } else {
+      setEditingSchoolId(null);
+      setSchoolForm(emptySchoolForm);
+    }
+    setSchoolFormOpen(true);
+  }
+
+  function saveSchool(event) {
+    event.preventDefault();
+    if (!schoolForm.name.trim() || !schoolForm.contactPerson.trim() || !schoolForm.email.trim() || !schoolForm.phone.trim() || !schoolForm.address.trim()) {
+      setSchoolError("All school fields are required.");
+      return;
+    }
+    if (!isValidEmail(schoolForm.email)) {
+      setSchoolError("Please enter a valid school email.");
+      return;
+    }
+    update(next => {
+      if (editingSchoolId) {
+        next.schools = next.schools.map(school => school.id === editingSchoolId ? { ...school, ...schoolForm, name: schoolForm.name.trim() } : school);
+        next.teachers = next.teachers.map(teacher => teacher.schoolId === editingSchoolId ? { ...teacher, schoolName: schoolForm.name.trim() } : teacher);
+        return;
+      }
+      next.schools.push({ id: Date.now(), ...schoolForm, name: schoolForm.name.trim(), createdAt: today() });
+    }, editingSchoolId ? "School updated" : "School added");
+    setSchoolFormOpen(false);
+    setEditingSchoolId(null);
+    setSchoolForm(emptySchoolForm);
+  }
+
+  function openTeacherForm(teacher) {
+    setTeacherError("");
+    if (!schools.length) {
+      setTeacherError("Create a school before adding a teacher.");
+      return;
+    }
+    if (teacher) {
+      setEditingTeacherId(teacher.id);
+      setTeacherForm({ firstName: teacher.firstName, lastName: teacher.lastName, email: teacher.email, temporaryPassword: "********", schoolId: String(teacher.schoolId), role: teacher.role, status: teacher.status });
+    } else {
+      setEditingTeacherId(null);
+      setTeacherForm(emptyTeacherForm);
+    }
+    setTeacherFormOpen(true);
+  }
+
+  function createTeacherAccount(nextTeacher) {
+    // TODO: create teacher auth user in Supabase.
+    // TODO: save teacher profile to Supabase.
+    // TODO: link teacher auth user to assigned school.
+    update(next => {
+      if (editingTeacherId) {
+        next.teachers = next.teachers.map(teacher => teacher.id === editingTeacherId ? { ...teacher, ...nextTeacher } : teacher);
+        return;
+      }
+      next.teachers.push({ id: Date.now(), ...nextTeacher, createdAt: today() });
+    }, editingTeacherId ? "Teacher updated" : "Teacher added");
+  }
+
+  function saveTeacher(event) {
+    event.preventDefault();
+    if (!teacherForm.firstName.trim() || !teacherForm.lastName.trim()) {
+      setTeacherError("First and last name are required.");
+      return;
+    }
+    if (!teacherForm.email.trim() || !isValidEmail(teacherForm.email)) {
+      setTeacherError("Please enter a valid teacher email.");
+      return;
+    }
+    if (!teacherForm.temporaryPassword.trim()) {
+      setTeacherError("Temporary password is required for new teachers.");
+      return;
+    }
+    const school = schools.find(item => item.id === Number(teacherForm.schoolId));
+    if (!school) {
+      setTeacherError("Please assign a school.");
+      return;
+    }
+    createTeacherAccount({
+      firstName: teacherForm.firstName.trim(),
+      lastName: teacherForm.lastName.trim(),
+      email: teacherForm.email.trim(),
+      schoolId: school.id,
+      schoolName: school.name,
+      role: teacherForm.role,
+      status: teacherForm.status
+    });
+    setTeacherFormOpen(false);
+    setEditingTeacherId(null);
+    setTeacherForm(emptyTeacherForm);
+  }
+
+  function toggleSchoolStatus(id) {
+    update(next => {
+      next.schools = next.schools.map(school => school.id === id ? { ...school, status: school.status === "active" ? "inactive" : "active" } : school);
+    }, "School status updated");
+  }
+
+  function toggleTeacherStatus(id) {
+    update(next => {
+      next.teachers = next.teachers.map(teacher => teacher.id === id ? { ...teacher, status: teacher.status === "active" ? "inactive" : "active" } : teacher);
+    }, "Teacher status updated");
+  }
+
+  function deleteSchool(id) {
+    if (!window.confirm("Delete this school? Assigned local teacher records will also be removed.")) return;
+    update(next => {
+      next.schools = next.schools.filter(school => school.id !== id);
+      next.teachers = next.teachers.filter(teacher => teacher.schoolId !== id);
+    }, "School deleted");
+    if (editingSchoolId === id) {
+      setSchoolFormOpen(false);
+      setEditingSchoolId(null);
+      setSchoolForm(emptySchoolForm);
+    }
+  }
+
+  function deleteTeacher(id) {
+    if (!window.confirm("Delete this teacher account from local admin records?")) return;
+    update(next => {
+      next.teachers = next.teachers.filter(teacher => teacher.id !== id);
+    }, "Teacher deleted");
+    if (editingTeacherId === id) {
+      setTeacherFormOpen(false);
+      setEditingTeacherId(null);
+      setTeacherForm(emptyTeacherForm);
+    }
+  }
+
+  return (
+    <div className="mt-admin-page">
+      <PageHeading eyebrow="Admin" title="Admin Dashboard" />
+      <p className="mt-admin-subtitle">Manage schools and teacher accounts.</p>
+
+      <section className="mt-admin-stats" aria-label="Admin statistics">
+        {stats.map(stat => {
+          const Icon = stat.icon;
+          return (
+            <article className="mt-admin-stat-card" key={stat.title}>
+              <span><Icon /></span>
+              <div>
+                <strong>{stat.value}</strong>
+                <p>{stat.title}</p>
+                <small>{stat.subtext}</small>
+              </div>
+            </article>
+          );
+        })}
+      </section>
+
+      <section className="mt-admin-grid">
+        <article className="mt-admin-card">
+          <div className="mt-admin-card-header">
+            <div><h2>Schools</h2><p>Add and manage participating schools.</p></div>
+            <button className="primary-action mt-admin-primary" type="button" onClick={() => openSchoolForm()}>Add School</button>
+          </div>
+          {schoolFormOpen && (
+            <form className="mt-admin-form" onSubmit={saveSchool}>
+              {schoolError && <p className="mt-admin-error">{schoolError}</p>}
+              <div className="form-grid">
+                <Field label="School Name" value={schoolForm.name} onChange={name => setSchoolForm({ ...schoolForm, name })} required />
+                <Field label="Contact Person" value={schoolForm.contactPerson} onChange={contactPerson => setSchoolForm({ ...schoolForm, contactPerson })} required />
+              </div>
+              <div className="form-grid">
+                <Field label="Email" type="email" value={schoolForm.email} onChange={email => setSchoolForm({ ...schoolForm, email })} required />
+                <Field label="Phone Number" type="tel" value={schoolForm.phone} onChange={phone => setSchoolForm({ ...schoolForm, phone })} required />
+              </div>
+              <Field label="Address" value={schoolForm.address} onChange={address => setSchoolForm({ ...schoolForm, address })} required />
+              <label className="field-label">Status<span className="input-without-icon"><select value={schoolForm.status} onChange={event => setSchoolForm({ ...schoolForm, status: event.target.value })} required><option value="active">Active</option><option value="inactive">Inactive</option></select></span></label>
+              <div className="mt-admin-form-actions">
+                <button className="primary-action" type="submit">Save School</button>
+                <button className="secondary-action" type="button" onClick={() => setSchoolFormOpen(false)}>Cancel</button>
+                {editingSchoolId && <button className="secondary-action mt-admin-danger" type="button" onClick={() => deleteSchool(editingSchoolId)}>Delete School</button>}
+              </div>
+            </form>
+          )}
+          <AdminSchoolTable schools={schools} editSchool={openSchoolForm} deleteSchool={deleteSchool} />
+        </article>
+
+        <article className="mt-admin-card">
+          <div className="mt-admin-card-header">
+            <div><h2>Teachers</h2><p>Create teacher accounts and assign them to a school.</p></div>
+            <button className="primary-action mt-admin-primary" type="button" onClick={() => openTeacherForm()} disabled={!schools.length} title={!schools.length ? "Create a school before adding a teacher" : "Add Teacher"}>Add Teacher</button>
+          </div>
+          {!schools.length && <p className="mt-admin-note">Create a school first so each teacher can be assigned during setup.</p>}
+          {teacherError && !teacherFormOpen && <p className="mt-admin-error">{teacherError}</p>}
+          {teacherFormOpen && (
+            <form className="mt-admin-form" onSubmit={saveTeacher}>
+              {teacherError && <p className="mt-admin-error">{teacherError}</p>}
+              <div className="form-grid">
+                <Field label="First Name" value={teacherForm.firstName} onChange={firstName => setTeacherForm({ ...teacherForm, firstName })} required />
+                <Field label="Last Name" value={teacherForm.lastName} onChange={lastName => setTeacherForm({ ...teacherForm, lastName })} required />
+              </div>
+              <Field label="Email Address" type="email" value={teacherForm.email} onChange={email => setTeacherForm({ ...teacherForm, email })} required />
+              <Field label="Temporary Password" type="password" value={teacherForm.temporaryPassword} onChange={temporaryPassword => setTeacherForm({ ...teacherForm, temporaryPassword })} required />
+              <div className="form-grid">
+                <label className="field-label">Assign School<span className="input-without-icon"><select value={teacherForm.schoolId} onChange={event => setTeacherForm({ ...teacherForm, schoolId: event.target.value })} required><option value="">Select school</option>{schools.map(school => <option key={school.id} value={school.id}>{school.name}</option>)}</select></span></label>
+                <label className="field-label">Role<span className="input-without-icon"><select value={teacherForm.role} onChange={event => setTeacherForm({ ...teacherForm, role: event.target.value })} required><option>Teacher</option><option>School Admin</option></select></span></label>
+              </div>
+              <label className="field-label">Status<span className="input-without-icon"><select value={teacherForm.status} onChange={event => setTeacherForm({ ...teacherForm, status: event.target.value })} required><option value="active">Active</option><option value="inactive">Inactive</option></select></span></label>
+              <div className="mt-admin-form-actions">
+                <button className="primary-action" type="submit">Save Teacher</button>
+                <button className="secondary-action" type="button" onClick={() => setTeacherFormOpen(false)}>Cancel</button>
+                {editingTeacherId && <button className="secondary-action mt-admin-danger" type="button" onClick={() => deleteTeacher(editingTeacherId)}>Delete Teacher</button>}
+              </div>
+            </form>
+          )}
+          <AdminTeacherTable teachers={teachers} editTeacher={openTeacherForm} deleteTeacher={deleteTeacher} />
+        </article>
+      </section>
+    </div>
+  );
+}
+
+function AdminSchoolTable({ schools, editSchool, deleteSchool }) {
+  if (!schools.length) return <EmptyState title="No schools yet" text="Add a school when you are ready to start onboarding." />;
+  return (
+    <div className="mt-admin-table-wrap">
+      <div className="mt-admin-table mt-admin-schools-table">
+        <div className="mt-admin-table-head"><span>School Name</span><span>Contact Person</span><span>Phone</span><span>Status</span><span>Actions</span></div>
+        {schools.map(school => (
+          <div className="mt-admin-table-row" key={school.id}>
+            <strong>{school.name}</strong><span>{school.contactPerson || "Not set"}</span><span>{school.phone || "Optional"}</span><StatusBadge status={school.status} />
+            <div className="mt-admin-actions"><button type="button" onClick={() => editSchool(school)}>Edit</button><button className="mt-admin-danger" type="button" onClick={() => deleteSchool(school.id)}>Delete</button></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AdminTeacherTable({ teachers, editTeacher, deleteTeacher }) {
+  if (!teachers.length) return <EmptyState title="No teachers yet" text="Create teacher accounts after schools are added." />;
+  return (
+    <div className="mt-admin-table-wrap">
+      <div className="mt-admin-table mt-admin-teachers-table">
+        <div className="mt-admin-table-head"><span>Teacher Name</span><span>School</span><span>Role</span><span>Status</span><span>Actions</span></div>
+        {teachers.map(teacher => (
+          <div className="mt-admin-table-row" key={teacher.id}>
+            <strong>{teacher.firstName} {teacher.lastName}</strong><span>{teacher.schoolName}</span><span>{teacher.role}</span><StatusBadge status={teacher.status} />
+            <div className="mt-admin-actions"><button type="button" onClick={() => editTeacher(teacher)}>Edit</button><button className="mt-admin-danger" type="button" onClick={() => deleteTeacher(teacher.id)}>Delete</button></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StatusBadge({ status }) {
+  return <span className={`mt-status-badge mt-status-${status}`}>{status === "active" ? "Active" : "Inactive"}</span>;
+}
+
 function Dashboard(props) {
-  const { dashboard, db, search, setSearch, status, setStatus, range, setRange, navigate } = props;
+  const { dashboard, db, search, setSearch, status, setStatus, range, setRange, currentTip, navigate, setStudentFocus } = props;
   return (
     <>
       <StatsGrid dashboard={dashboard} />
@@ -236,12 +610,12 @@ function Dashboard(props) {
         </div>
       </section>
       <section className="content-grid">
-        <StudentOverview db={db} search={search} setSearch={setSearch} status={status} setStatus={setStatus} />
+        <StudentOverview db={db} search={search} setSearch={setSearch} status={status} setStatus={setStatus} navigate={navigate} setStudentFocus={setStudentFocus} />
         <TopEarners earners={dashboard.leaderboard.slice(0, 5)} range={range} setRange={setRange} navigate={navigate} />
         <RecentTasks tasks={db.tasks.slice(-4).reverse()} navigate={navigate} />
         <Insights dashboard={dashboard} />
       </section>
-      <TipBanner tip={dailyTip(db)} />
+      <MoneyTykesTipBanner tip={currentTip} />
     </>
   );
 }
@@ -276,8 +650,12 @@ function ActionCard({ icon: Icon, title, text, onClick }) {
   );
 }
 
-function StudentOverview({ db, search, setSearch, status, setStatus }) {
+function StudentOverview({ db, search, setSearch, status, setStatus, navigate, setStudentFocus }) {
   const students = filterStudents(db.students, search, status).slice(0, 5);
+  function openStudent(student, mode) {
+    setStudentFocus({ id: student.id, mode });
+    navigate("students");
+  }
   return (
     <article className="section-panel student-overview">
       <div className="section-heading"><h2>Student Overview</h2></div>
@@ -292,7 +670,7 @@ function StudentOverview({ db, search, setSearch, status, setStatus }) {
           <option value="inactive">Inactive</option>
         </select>
       </div>
-      <StudentTable students={students} />
+      <StudentTable students={students} onView={student => openStudent(student, "view")} onEdit={student => openStudent(student, "edit")} />
     </article>
   );
 }
@@ -342,49 +720,174 @@ function Insights({ dashboard }) {
   );
 }
 
-function Students({ db, dashboard, update }) {
+function Students({ db, dashboard, update, studentFocus, setStudentFocus }) {
+  const [editingStudent, setEditingStudent] = useState(null);
+  const [viewingStudent, setViewingStudent] = useState(null);
+
+  useEffect(() => {
+    if (!studentFocus) return;
+    const student = db.students.find(item => item.id === studentFocus.id);
+    if (!student) {
+      setStudentFocus(null);
+      return;
+    }
+    if (studentFocus.mode === "edit") {
+      setEditingStudent(student);
+      setViewingStudent(null);
+    } else {
+      setViewingStudent(student);
+      setEditingStudent(null);
+    }
+    setStudentFocus(null);
+  }, [db.students, setStudentFocus, studentFocus]);
+
+  function closeEdit() {
+    setEditingStudent(null);
+  }
+
+  function deleteStudent(student) {
+    if (!window.confirm(`Delete ${student.first} ${student.last}? This cannot be undone.`)) return;
+    update(db => {
+      db.students = db.students.filter(item => item.id !== student.id);
+      db.transactions = db.transactions.filter(item => item.studentId !== student.id);
+    }, "Student deleted");
+    if (editingStudent?.id === student.id) setEditingStudent(null);
+    if (viewingStudent?.id === student.id) setViewingStudent(null);
+  }
+
   return (
-    <>
+    <div className="students-dashboard-screen">
       <PageHeading eyebrow="Class Roster" title="Students Dashboard" />
       <div className="management-grid">
-        <StudentForm update={update} />
+        <StudentForm db={db} update={update} editingStudent={editingStudent} onCancelEdit={closeEdit} />
         <EarningsForm students={db.students} update={update} />
       </div>
-      <article className="section-panel full-width-panel">
-        <div className="section-heading"><h2>Roster</h2></div>
-        <StudentTable students={dashboard.students} detailed />
+      {viewingStudent && <StudentProfile student={viewingStudent} onClose={() => setViewingStudent(null)} onEdit={() => { setEditingStudent(viewingStudent); setViewingStudent(null); }} onDelete={deleteStudent} />}
+      <article className="section-panel full-width-panel students-roster-card">
+        <div className="section-heading students-card-heading">
+          <span className="card-heading-icon"><Users /></span>
+          <h2>Students</h2>
+        </div>
+        <StudentTable students={dashboard.students} detailed onView={setViewingStudent} onEdit={setEditingStudent} onDelete={deleteStudent} />
       </article>
-    </>
+    </div>
   );
 }
 
-function StudentForm({ update }) {
-  const [form, setForm] = useState({ first: "", last: "", email: "", age: "", classLabel: "", guardian: "", phone: "" });
+function StudentForm({ db, update, editingStudent, onCancelEdit }) {
+  const [form, setForm] = useState(emptyStudentForm);
+  const assignedTeachers = db.teachers.filter(teacher => teacher.schoolId === Number(form.schoolId));
+
+  useEffect(() => {
+    if (!editingStudent) {
+      setForm(emptyStudentForm);
+      return;
+    }
+    setForm({
+      first: editingStudent.first || "",
+      last: editingStudent.last || "",
+      email: editingStudent.email || "",
+      age: String(editingStudent.age || ""),
+      classLabel: editingStudent.classLabel || "",
+      schoolId: editingStudent.schoolId ? String(editingStudent.schoolId) : "",
+      teacherId: editingStudent.teacherId ? String(editingStudent.teacherId) : "",
+      guardian: editingStudent.guardian || "",
+      phone: editingStudent.phone || "",
+      photo: editingStudent.photo || ""
+    });
+  }, [editingStudent]);
+
   function submit(event) {
     event.preventDefault();
+    const school = db.schools.find(item => item.id === Number(form.schoolId));
+    const teacher = db.teachers.find(item => item.id === Number(form.teacherId));
+    if (!school || !teacher) return;
+    const studentPayload = {
+      ...form,
+      age: Number(form.age),
+      schoolId: school.id,
+      schoolName: school.name,
+      teacherId: teacher.id,
+      teacherName: `${teacher.firstName} ${teacher.lastName}`
+    };
     update(db => {
-      db.students.push({ id: Date.now(), balance: 0, totalEarned: 0, streak: 0, status: "inactive", ...form, age: Number(form.age) });
-    }, "Student added");
-    setForm({ first: "", last: "", email: "", age: "", classLabel: "", guardian: "", phone: "" });
+      if (editingStudent) {
+        const student = db.students.find(item => item.id === editingStudent.id);
+        if (!student) return;
+        Object.assign(student, studentPayload);
+        return;
+      }
+      db.students.push({ id: Date.now(), balance: 0, totalEarned: 0, streak: 0, status: "inactive", ...studentPayload });
+    }, editingStudent ? "Student updated" : "Student added");
+    setForm(emptyStudentForm);
+    if (editingStudent) onCancelEdit();
   }
+
+  function updatePhoto(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setForm(current => ({ ...current, photo: String(reader.result || "") }));
+    reader.readAsDataURL(file);
+  }
+
+  function chooseAvatar(fileName) {
+    setForm(current => ({ ...current, photo: assetPath(`avatars/${fileName}`) }));
+  }
+
+  function updateSchool(schoolId) {
+    setForm(current => ({ ...current, schoolId, teacherId: "" }));
+  }
+
   return (
-    <article className="section-panel">
-      <div className="section-heading"><h2>Add Student</h2></div>
+    <article className="section-panel students-form-card">
+      <div className="section-heading students-card-heading">
+        <span className="card-heading-icon"><UserPlus /></span>
+        <h2>{editingStudent ? "Update Student" : "Add Student"}</h2>
+      </div>
       <form className="stacked-form" onSubmit={submit}>
-        <div className="form-grid">
-          <Field label="First Name" value={form.first} onChange={first => setForm({ ...form, first })} required />
-          <Field label="Last Name" value={form.last} onChange={last => setForm({ ...form, last })} required />
+        <label className="field-label">
+          Student Photo
+          <span className="mt-student-photo-field">
+            <span className="mt-student-photo-preview">{form.photo ? <img src={form.photo} alt="" /> : initials(form)}</span>
+            <span className="mt-student-photo-controls">
+              <span className="mt-student-photo-help">Upload a photo or choose an avatar.</span>
+              <input type="file" accept="image/*" onChange={updatePhoto} />
+            </span>
+          </span>
+        </label>
+        <div className="mt-student-avatar-grid" aria-label="Choose a student avatar">
+          {studentAvatars.map(fileName => {
+            const src = assetPath(`avatars/${fileName}`);
+            return (
+              <button className={`mt-student-avatar-choice ${form.photo === src ? "selected" : ""}`} type="button" key={fileName} onClick={() => chooseAvatar(fileName)} aria-label={`Choose ${fileName.replace(".png", "")} avatar`}>
+                <img src={src} alt="" />
+              </button>
+            );
+          })}
         </div>
-        <Field label="Email" type="email" value={form.email} onChange={email => setForm({ ...form, email })} required />
         <div className="form-grid">
-          <Field label="Age" type="number" value={form.age} onChange={age => setForm({ ...form, age })} required />
-          <Field label="Class / Grade" value={form.classLabel} onChange={classLabel => setForm({ ...form, classLabel })} required />
+          <Field label="First Name" placeholder="First name" icon={User} value={form.first} onChange={first => setForm({ ...form, first })} required />
+          <Field label="Last Name" placeholder="Last name" icon={User} value={form.last} onChange={last => setForm({ ...form, last })} required />
+        </div>
+        <Field label="Email" placeholder="Email address" icon={Mail} type="email" value={form.email} onChange={email => setForm({ ...form, email })} required />
+        <div className="form-grid">
+          <Field label="Age" placeholder="Age" icon={Users} type="number" value={form.age} onChange={age => setForm({ ...form, age })} required />
+          <Field label="Standard / Form" placeholder="Standard / Form" icon={School} value={form.classLabel} onChange={classLabel => setForm({ ...form, classLabel })} required />
         </div>
         <div className="form-grid">
-          <Field label="Parent / Guardian" value={form.guardian} onChange={guardian => setForm({ ...form, guardian })} />
-          <Field label="Contact Number" type="tel" value={form.phone} onChange={phone => setForm({ ...form, phone })} />
+          <label className="field-label">School<span className="input-with-icon"><School /><select value={form.schoolId} onChange={event => updateSchool(event.target.value)} required><option value="">Select school</option>{db.schools.map(school => <option key={school.id} value={school.id}>{school.name}</option>)}</select></span></label>
+          <label className="field-label">Teacher<span className="input-with-icon"><Users /><select value={form.teacherId} onChange={event => setForm({ ...form, teacherId: event.target.value })} required disabled={!form.schoolId}><option value="">Select teacher</option>{assignedTeachers.map(teacher => <option key={teacher.id} value={teacher.id}>{teacher.firstName} {teacher.lastName}</option>)}</select></span></label>
         </div>
-        <button className="primary-action" type="submit">Add Student</button>
+        {(!db.schools.length || !db.teachers.length) && <p className="mt-student-form-note">Create a school and teacher in Admin before assigning students.</p>}
+        <div className="form-grid">
+          <Field label="Parent / Guardian" placeholder="Parent / Guardian" icon={User} value={form.guardian} onChange={guardian => setForm({ ...form, guardian })} />
+          <Field label="Contact Number" placeholder="Contact number" icon={Phone} type="tel" value={form.phone} onChange={phone => setForm({ ...form, phone })} />
+        </div>
+        <div className="mt-student-form-actions">
+          <button className="primary-action teal-action" type="submit"><UserPlus /> {editingStudent ? "Update Student" : "Add Student"}</button>
+          {editingStudent && <button className="secondary-action" type="button" onClick={onCancelEdit}>Cancel Edit</button>}
+        </div>
       </form>
     </article>
   );
@@ -407,13 +910,16 @@ function EarningsForm({ students, update }) {
     }, "Earnings added");
   }
   return (
-    <article className="section-panel">
-      <div className="section-heading"><h2>Give Earnings</h2></div>
+    <article className="section-panel students-form-card earnings-form-card">
+      <div className="section-heading students-card-heading">
+        <span className="card-heading-icon"><Wallet /></span>
+        <h2>Give Earnings</h2>
+      </div>
       <form className="stacked-form" onSubmit={submit}>
-        <label>Student<select value={studentId} onChange={event => setStudentId(event.target.value)} required><option value="">Select student</option>{students.map(student => <option key={student.id} value={student.id}>{student.first} {student.last}</option>)}</select></label>
-        <Field label="Amount" type="number" value={amount} onChange={setAmount} required />
-        <Field label="Description" value={description} onChange={setDescription} required />
-        <button className="primary-action" type="submit">Add BZ$ Earnings</button>
+        <label className="field-label">Student<span className="input-with-icon"><Users /><select value={studentId} onChange={event => setStudentId(event.target.value)} required><option value="">Select student</option>{students.map(student => <option key={student.id} value={student.id}>{student.first} {student.last}</option>)}</select></span></label>
+        <Field label="Amount" icon={Wallet} type="number" value={amount} onChange={setAmount} required />
+        <Field label="Description" icon={ClipboardList} value={description} onChange={setDescription} required />
+        <button className="primary-action teal-action" type="submit"><Wallet /> Add BZ$ Earnings</button>
       </form>
     </article>
   );
@@ -504,19 +1010,21 @@ function Reports({ dashboard }) {
   return <><PageHeading eyebrow="Class Analytics" title="Reports" /><article className="section-panel full-width-panel"><div className="insight-grid"><Insight title="Total Earned" value={money(dashboard.totalEarned)} /><Insight title="Average Balance" value={money(dashboard.averageBalance)} /><Insight title="Completion" value={`${dashboard.completionRate}%`} /><Insight title="Top Category" value={dashboard.topCategory} /></div></article></>;
 }
 
-function Literacy({ db }) {
-  return <><PageHeading eyebrow="Learning Content" title="Financial Literacy" /><TipBanner tip={dailyTip(db)} inline /><article className="section-panel full-width-panel"><div className="section-heading"><h2>Lesson Ideas</h2></div><div className="insight-grid"><Insight title="Needs vs Wants" value="Budgeting" /><Insight title="Savings Goals" value="Saving" /><Insight title="Income Choices" value="Earning" /></div></article></>;
+function Literacy({ tip }) {
+  return <><PageHeading eyebrow="Learning Content" title="Financial Literacy" /><MoneyTykesTipBanner tip={tip} inline /><article className="section-panel full-width-panel"><div className="section-heading"><h2>Lesson Ideas</h2></div><div className="insight-grid"><Insight title="Needs vs Wants" value="Budgeting" /><Insight title="Savings Goals" value="Saving" /><Insight title="Income Choices" value="Earning" /></div></article></>;
 }
 
-function TipBanner({ tip, inline = false }) {
+function MoneyTykesTipBanner({ tip, inline = false }) {
   return (
-    <section className={`tip-bar tip-banner ${inline ? "inline-tip" : ""}`} aria-label="Financial literacy tip">
-      <span className="tip-icon"><Lightbulb /></span>
-      <div>
-        <strong>MoneyTykes Tip</strong>
-        <p>{tip}</p>
+    <section className={`tip-bar tip-banner mt-tip-banner ${inline ? "inline-tip" : ""}`} aria-label="Financial literacy tip">
+      <div className="mt-tip-banner-logo-wrap">
+        <img className="mt-tip-banner-logo" src={assetPath("assets/boss-tyker.png")} alt="MoneyTykes Boss and Tyker" />
       </div>
-      <span className="tip-spark" aria-hidden="true">MT</span>
+      <span className="tip-icon mt-tip-banner-icon"><Lightbulb /></span>
+      <div className="mt-tip-banner-content">
+        <strong className="mt-tip-banner-label">MoneyTykes Tip</strong>
+        <p className="mt-tip-banner-text">{tip}</p>
+      </div>
     </section>
   );
 }
@@ -923,27 +1431,71 @@ function SettingsPage({ db }) {
   return <><PageHeading eyebrow="Configuration" title="Class Settings" /><article className="section-panel full-width-panel"><div className="settings-list"><p><strong>School</strong><span>{db.school}</span></p><p><strong>Class</strong><span>{db.className}</span></p><p><strong>Storage</strong><span>Browser localStorage</span></p></div></article></>;
 }
 
-function Field({ label, value, onChange, type = "text", required = false }) {
-  return <label>{label}<input type={type} value={value} onChange={event => onChange(event.target.value)} required={required} /></label>;
+function Field({ label, value, onChange, type = "text", required = false, placeholder = "", icon: Icon }) {
+  return (
+    <label className="field-label">
+      {label}
+      <span className={Icon ? "input-with-icon" : "input-without-icon"}>
+        {Icon && <Icon />}
+        <input type={type} value={value} placeholder={placeholder} onChange={event => onChange(event.target.value)} required={required} />
+      </span>
+    </label>
+  );
 }
 
 function PageHeading({ eyebrow, title }) {
   return <div className="page-heading"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2></div></div>;
 }
 
-function StudentTable({ students, detailed = false }) {
+function StudentTable({ students, detailed = false, onView, onEdit, onDelete }) {
   if (!students.length) return <EmptyState title="No students yet" text="Add students to begin tracking progress." />;
   return (
     <div className="student-table">
       {students.map(student => (
         <div className="student-row" key={student.id}>
-          <span className="avatar initials">{initials(student)}</span>
-          <div><strong>{student.first} {student.last}</strong><span>{detailed ? student.email : student.classLabel || "Class member"}</span></div>
-          <span className={`status ${student.status}`}>{labelStatus(student.status)}</span>
-          <strong>{money(student.balance || 0)}</strong>
+          <div className="student-person">
+            <span className="avatar initials">{student.photo ? <img src={student.photo} alt="" /> : initials(student)}</span>
+            <div><strong>{student.first} {student.last}</strong><span>{student.schoolName || student.teacherName || student.classLabel || "Student profile"}</span></div>
+          </div>
+          <span className="student-class">{student.classLabel || "Standard / Form"}</span>
+          <strong className="money student-balance">{money(student.balance || 0)}</strong>
+          <div className="student-actions">
+            <button className="student-action-button profile" type="button" onClick={() => onView?.(student)}>View Profile</button>
+            <button className="student-action-button edit" type="button" onClick={() => onEdit?.(student)}><Pencil /> Edit</button>
+            {detailed && <button className="student-action-button delete" type="button" onClick={() => onDelete?.(student)}>Delete</button>}
+          </div>
         </div>
       ))}
     </div>
+  );
+}
+
+function StudentProfile({ student, onClose, onEdit, onDelete }) {
+  return (
+    <article className="section-panel mt-student-profile-card">
+      <div className="mt-student-profile-main">
+        <span className="mt-student-profile-photo">{student.photo ? <img src={student.photo} alt="" /> : initials(student)}</span>
+        <div>
+          <p className="eyebrow">Student Profile</p>
+          <h2>{student.first} {student.last}</h2>
+          <div className="mt-student-profile-grid">
+            <p><strong>Standard / Form</strong><span>{student.classLabel || "Not set"}</span></p>
+            <p><strong>School</strong><span>{student.schoolName || "Not set"}</span></p>
+            <p><strong>Teacher</strong><span>{student.teacherName || "Not set"}</span></p>
+            <p><strong>Age</strong><span>{student.age || "Not set"}</span></p>
+            <p><strong>Parent / Guardian</strong><span>{student.guardian || "Not set"}</span></p>
+            <p><strong>Contact Number</strong><span>{student.phone || "Not set"}</span></p>
+            <p><strong>Balance</strong><span>{money(student.balance || 0)}</span></p>
+            <p><strong>Status</strong><span>{labelStatus(student.status)}</span></p>
+          </div>
+        </div>
+      </div>
+      <div className="mt-student-profile-actions">
+        <button className="primary-action" type="button" onClick={onEdit}>Edit Student</button>
+        <button className="secondary-action mt-student-danger-action" type="button" onClick={() => onDelete?.(student)}>Delete Student</button>
+        <button className="secondary-action" type="button" onClick={onClose}>Close</button>
+      </div>
+    </article>
   );
 }
 
@@ -993,8 +1545,17 @@ function filterStudents(students, search, status) {
   });
 }
 
-function dailyTip(db) {
-  return db.tips[new Date().getDate() % db.tips.length];
+function randomFinancialTip(currentTip = "") {
+  if (financialTips.length < 2) return financialTips[0] || "";
+  let nextTip = currentTip;
+  while (nextTip === currentTip) {
+    nextTip = financialTips[Math.floor(Math.random() * financialTips.length)];
+  }
+  return nextTip;
+}
+
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
 function initials(student) {
