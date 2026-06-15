@@ -244,7 +244,7 @@ function App() {
         closeMenu={() => setMenuOpen(false)}
       />
       {menuOpen && <button className="sidebar-backdrop" type="button" aria-label="Close navigation menu" onClick={() => setMenuOpen(false)} />}
-      <main className="dashboard" ref={mainContentRef}>
+      <main className={`dashboard ${view === "game" ? "game-view" : ""}`} ref={mainContentRef}>
         <header className="topbar app-entrance">
           <button className="icon-button mobile-menu" type="button" aria-label="Open menu" onClick={() => {
             setSidebarHidden(false);
