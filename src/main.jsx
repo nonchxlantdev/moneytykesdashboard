@@ -1341,20 +1341,10 @@ function GameDashboard({ setToast }) {
     setToast("Game has been reset.");
   }
 
-  const resetControls = (
-    <GameResetControls
-      open={resetConfirmationOpen}
-      requestReset={() => setResetConfirmationOpen(true)}
-      cancelReset={() => setResetConfirmationOpen(false)}
-      confirmReset={resetGame}
-    />
-  );
-
   if (stage === "select") {
     return (
       <section className="game-select-screen page-swap">
         <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
-        {resetControls}
         <div className="game-hero compact">
           <img src={assetPath("gamefrontend.jpeg")} alt="Money Moves Live dashboard concept" />
           <div>
@@ -1377,7 +1367,6 @@ function GameDashboard({ setToast }) {
     return (
       <section className="money-loading-screen page-swap">
         <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
-        {resetControls}
         <img src={assetPath("Logo.png")} alt="MoneyTykes" />
         <p className="eyebrow">Money Moves Live</p>
         <h2>Build Your Net Worth. Win Your Future.</h2>
@@ -1390,7 +1379,6 @@ function GameDashboard({ setToast }) {
     return (
       <section className="team-setup-screen page-swap">
         <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
-        {resetControls}
         <div className="team-setup-heading">
           <p className="game-kicker"><BarChart3 /> Money Moves Live</p>
           <h2>Enter Teams</h2>
@@ -1433,12 +1421,10 @@ function GameDashboard({ setToast }) {
         <div className="money-live-title">
           <div className="money-live-title-row">
             <h2><span>Money Moves</span> <strong>Live</strong></h2>
-            <img src={assetPath("moneymoveslive.png")} alt="" aria-hidden="true" />
           </div>
           <p>Build your net worth. Win your future.</p>
         </div>
         <aside className="winner-callout">
-          <img src={assetPath("highestnetworthwins.png")} alt="" aria-hidden="true" />
           <div>
             <strong>Highest Net Worth Wins!</strong>
             <span>Every smart move builds your future.</span>
@@ -1533,17 +1519,6 @@ function GameDashboard({ setToast }) {
   );
 }
 
-function GameResetControls({ open, requestReset, cancelReset, confirmReset }) {
-  return (
-    <>
-      <button className="reset-game-button reset-game-corner" type="button" onClick={requestReset}>
-        <RotateCcw /> Reset Game
-      </button>
-      {open && <ResetGameModal cancelReset={cancelReset} confirmReset={confirmReset} />}
-    </>
-  );
-}
-
 function ResetGameModal({ cancelReset, confirmReset }) {
   return (
     <div className="game-reset-overlay" role="presentation" onMouseDown={cancelReset}>
@@ -1607,7 +1582,6 @@ function TeamScoreboard({ teams, selectedTeamId, setSelectedTeamId }) {
         ))}
       </div>
       <div className="scoreboard-win-art">
-        <img src={assetPath("highestnetworthwins.png")} alt="" aria-hidden="true" />
         <strong>Highest Net Worth Wins!</strong>
       </div>
     </section>
