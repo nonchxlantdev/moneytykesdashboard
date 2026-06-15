@@ -290,9 +290,11 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
   return (
     <aside className={`sidebar ${open ? "open" : ""} ${collapsed ? "collapsed" : ""}`} aria-label="Primary navigation">
       <div className="sidebar-top">
-        <div className="brand">
-          <img className="brand-logo" src={assetPath("Logo.png")} alt="MoneyTykes" />
-        </div>
+        {!collapsed && (
+          <div className="brand">
+            <img className="brand-logo" src={assetPath("Logo.png")} alt="MoneyTykes" />
+          </div>
+        )}
         <button className="sidebar-collapse-button" type="button" aria-label={collapsed ? "Show sidebar" : "Hide sidebar"} onClick={() => {
           if (window.innerWidth < 768) closeMenu();
           else toggleCollapsed();
@@ -302,34 +304,38 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
       </div>
       <div className="sidebar-scroll mt-sidebar-scroll">
         <nav className="nav-list">
-          {navItems.map(item => <NavButton key={item.view} item={item} active={currentView === item.view} navigate={navigate} />)}
+          {navItems.map(item => <NavButton key={item.view} item={item} active={currentView === item.view} navigate={navigate} showLabel={!collapsed} />)}
         </nav>
-        <section className="challenge-card mt-sidebar-action-card">
-          <div className="challenge-badge mt-sidebar-action-icon" aria-hidden="true"><Trophy /></div>
-          <h2 className="mt-sidebar-action-title">Run a Challenge</h2>
-          <p className="mt-sidebar-action-text">Motivate students with fun class goals.</p>
-          <button className="secondary-action mt-sidebar-action-button" type="button" onClick={() => navigate("game")}>Start Challenge</button>
-        </section>
-        {/* TODO: Connect this card to teacher account settings when that route exists. */}
-        <button className="teacher-chip mt-sidebar-profile-card" type="button">
-          <span className="avatar initials mt-sidebar-profile-avatar">T</span>
-          <span className="mt-sidebar-profile-info">
-            <strong className="mt-sidebar-profile-name">Teacher</strong>
-            <span className="mt-sidebar-profile-role">Class owner</span>
-          </span>
-          <ChevronRight className="mt-sidebar-profile-arrow" />
-        </button>
+        {!collapsed && (
+          <>
+            <section className="challenge-card mt-sidebar-action-card">
+              <div className="challenge-badge mt-sidebar-action-icon" aria-hidden="true"><Trophy /></div>
+              <h2 className="mt-sidebar-action-title">Run a Challenge</h2>
+              <p className="mt-sidebar-action-text">Motivate students with fun class goals.</p>
+              <button className="secondary-action mt-sidebar-action-button" type="button" onClick={() => navigate("game")}>Start Challenge</button>
+            </section>
+            {/* TODO: Connect this card to teacher account settings when that route exists. */}
+            <button className="teacher-chip mt-sidebar-profile-card" type="button">
+              <span className="avatar initials mt-sidebar-profile-avatar">T</span>
+              <span className="mt-sidebar-profile-info">
+                <strong className="mt-sidebar-profile-name">Teacher</strong>
+                <span className="mt-sidebar-profile-role">Class owner</span>
+              </span>
+              <ChevronRight className="mt-sidebar-profile-arrow" />
+            </button>
+          </>
+        )}
       </div>
     </aside>
   );
 }
 
-function NavButton({ item, active, navigate, compact = false }) {
+function NavButton({ item, active, navigate, compact = false, showLabel = true }) {
   const Icon = item.icon;
   const className = compact ? "mobile-tab" : "nav-item";
   return (
     <button className={`${className} ${active ? "active" : ""}`} type="button" title={item.label} onClick={() => navigate(item.view)}>
-      <Icon /><span>{compact ? item.label.replace(" & Tasks", "") : item.label}</span>
+      <Icon />{showLabel && <span>{compact ? item.label.replace(" & Tasks", "") : item.label}</span>}
     </button>
   );
 }
