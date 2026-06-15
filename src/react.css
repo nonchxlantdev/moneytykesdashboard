@@ -2536,29 +2536,8 @@
 
 @media (min-width: 768px) and (max-width: 1199px) {
   .app-shell.react-app {
-    --tablet-sidebar-width: 260px;
     min-height: 100dvh;
     align-items: start;
-  }
-
-  .app-shell.react-app.sidebar-collapsed {
-    --tablet-sidebar-width: 76px;
-  }
-
-  .app-shell.react-app::before {
-    content: "";
-    position: fixed;
-    z-index: 19;
-    top: -25vh;
-    bottom: -25vh;
-    left: 0;
-    width: var(--tablet-sidebar-width);
-    pointer-events: none;
-    background:
-      radial-gradient(circle at 50% 22vh, rgba(255, 255, 255, 0.72), transparent 27%),
-      linear-gradient(180deg, #baf2ea 0%, #8fded5 48%, #72c7be 100%);
-    border-right: 1px solid rgba(15, 118, 110, 0.18);
-    transition: width 180ms ease;
   }
 
   .react-app .sidebar,
@@ -2570,6 +2549,7 @@
     overflow: hidden;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+    background-color: #8fded5;
   }
 
   .react-app .sidebar-scroll,
@@ -2582,6 +2562,8 @@
   }
 
   .react-app .dashboard {
+    grid-column: 2;
+    width: 100%;
     min-height: 100dvh;
     overflow-x: clip;
   }
@@ -2968,18 +2950,17 @@
   }
 
   .react-app .sidebar.collapsed .nav-item svg {
+    position: static;
+    display: block;
     width: 21px;
     height: 21px;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1023px) {
-  .app-shell.react-app {
-    --tablet-sidebar-width: 248px;
+    color: #0f766e;
+    visibility: visible;
+    opacity: 1;
   }
 
-  .app-shell.react-app.sidebar-collapsed {
-    --tablet-sidebar-width: 72px;
+  .react-app .sidebar.collapsed .nav-item.active svg {
+    color: #0f4f49;
   }
 }
 
@@ -3080,6 +3061,7 @@
   }
 
   .react-app .dashboard {
+    grid-column: 1;
     width: 100%;
     padding: 14px;
   }

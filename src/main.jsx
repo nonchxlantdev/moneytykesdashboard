@@ -170,7 +170,7 @@ function App() {
   const [status, setStatus] = useState("all");
   const [range, setRange] = useState("month");
   const [toast, setToast] = useState("");
-  const [sidebarHidden, setSidebarHidden] = useState(() => window.innerWidth >= 768 && window.innerWidth < 1200);
+  const [sidebarHidden, setSidebarHidden] = useState(false);
   const [studentFocus, setStudentFocus] = useState(null);
   const mainContentRef = useRef(null);
 
