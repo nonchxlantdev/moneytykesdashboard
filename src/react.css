@@ -12,6 +12,10 @@
   grid-template-columns: 72px minmax(0, 1fr);
 }
 
+.app-shell.react-app {
+  transition: grid-template-columns 180ms ease;
+}
+
 .sidebar-top {
   position: relative;
   flex: 0 0 auto;
@@ -2426,12 +2430,23 @@
 
 @media (min-width: 1024px) and (max-width: 1199px) {
   .app-shell.react-app {
-    grid-template-columns: 88px minmax(0, 1fr);
+    grid-template-columns: 260px minmax(0, 1fr);
   }
 
   .react-app .sidebar {
-    width: 88px;
-    padding-inline: 12px;
+    width: 260px;
+    padding: 18px 14px;
+    transition: width 180ms ease, padding 180ms ease;
+  }
+
+  .app-shell.react-app.sidebar-collapsed {
+    grid-template-columns: 76px minmax(0, 1fr);
+  }
+
+  .react-app .sidebar.collapsed {
+    width: 76px;
+    max-width: 76px;
+    padding: 18px 10px;
   }
 
   .react-app .dashboard {
@@ -2458,12 +2473,23 @@
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .app-shell.react-app {
-    grid-template-columns: 76px minmax(0, 1fr);
+    grid-template-columns: 248px minmax(0, 1fr);
   }
 
   .react-app .sidebar {
-    width: 76px;
-    padding: 16px 10px;
+    width: 248px;
+    padding: 16px 12px;
+    transition: width 180ms ease, padding 180ms ease;
+  }
+
+  .app-shell.react-app.sidebar-collapsed {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  .react-app .sidebar.collapsed {
+    width: 72px;
+    max-width: 72px;
+    padding: 16px 8px;
   }
 
   .react-app .dashboard {
@@ -2508,6 +2534,80 @@
   }
 }
 
+@media (min-width: 768px) and (max-width: 1199px) {
+  .react-app .sidebar:not(.collapsed) .sidebar-top {
+    grid-template-columns: minmax(0, 1fr) 44px;
+    align-items: center;
+    padding: 0 0 14px 6px;
+  }
+
+  .react-app .sidebar:not(.collapsed) .brand-logo {
+    width: 154px;
+  }
+
+  .react-app .sidebar:not(.collapsed) .nav-item {
+    grid-template-columns: 28px minmax(0, 1fr);
+    justify-items: start;
+    padding: 0 14px;
+  }
+
+  .react-app .sidebar:not(.collapsed) .nav-item span,
+  .react-app .sidebar:not(.collapsed) .challenge-card,
+  .react-app .sidebar:not(.collapsed) .mt-sidebar-profile-info,
+  .react-app .sidebar:not(.collapsed) .mt-sidebar-profile-arrow {
+    display: block;
+  }
+
+  .react-app .sidebar:not(.collapsed) .teacher-chip {
+    grid-template-columns: 44px minmax(0, 1fr) 18px;
+    justify-items: start;
+  }
+
+  .react-app .sidebar.collapsed .sidebar-top {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 0 0 14px;
+  }
+
+  .react-app .sidebar.collapsed .brand,
+  .react-app .sidebar.collapsed .nav-item span,
+  .react-app .sidebar.collapsed .challenge-card,
+  .react-app .sidebar.collapsed .mt-sidebar-profile-card {
+    display: none;
+  }
+
+  .react-app .sidebar.collapsed .sidebar-collapse-button {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .react-app .sidebar.collapsed .sidebar-scroll {
+    width: 100%;
+    padding: 0;
+    overflow-x: visible;
+  }
+
+  .react-app .sidebar.collapsed .nav-list {
+    gap: 8px;
+  }
+
+  .react-app .sidebar.collapsed .nav-item {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    width: 100%;
+    min-height: 48px;
+    padding: 0;
+  }
+
+  .react-app .sidebar.collapsed .nav-item svg {
+    width: 21px;
+    height: 21px;
+  }
+}
+
 @media (max-width: 767px) {
   .app-shell.react-app,
   .react-app.sidebar-collapsed {
@@ -2536,6 +2636,29 @@
 
   .react-app .sidebar .sidebar-scroll {
     overflow-y: auto;
+  }
+
+  .react-app .sidebar .brand {
+    display: flex;
+  }
+
+  .react-app .sidebar .challenge-card {
+    display: block;
+  }
+
+  .react-app .sidebar .mt-sidebar-profile-card {
+    display: grid;
+  }
+
+  .react-app .sidebar .nav-item span,
+  .react-app .sidebar .mt-sidebar-profile-info {
+    display: block;
+  }
+
+  .react-app .sidebar .nav-item {
+    grid-template-columns: 28px minmax(0, 1fr);
+    justify-items: start;
+    padding: 0 14px;
   }
 
   .sidebar-backdrop {
