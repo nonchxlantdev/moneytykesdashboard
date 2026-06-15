@@ -459,6 +459,8 @@
 
 .game-select-screen {
   display: grid;
+  grid-template-rows: auto auto;
+  align-content: start;
   gap: 18px;
 }
 
@@ -472,13 +474,27 @@
   align-items: center;
   gap: 16px;
   width: 100%;
+  min-height: 112px;
   padding: 22px;
   color: var(--ink);
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+  border: 2px solid #d7deeb;
   border-radius: var(--radius);
   text-align: left;
-  box-shadow: var(--shadow);
+  box-shadow: 0 12px 30px rgba(16, 22, 47, 0.12);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.game-choice-card:hover,
+.game-choice-card:focus-visible {
+  border-color: var(--purple);
+  box-shadow: 0 16px 34px rgba(91, 53, 213, 0.18);
+  transform: translateY(-2px);
+}
+
+.game-choice-card:focus-visible {
+  outline: 3px solid rgba(91, 53, 213, 0.22);
+  outline-offset: 3px;
 }
 
 .game-choice-card > span {
@@ -764,10 +780,9 @@
 }
 
 .money-live-header {
-  display: grid;
-  grid-template-columns: minmax(150px, 21vw) minmax(360px, 1fr) minmax(180px, 21vw);
+  display: flex;
   align-items: center;
-  gap: clamp(12px, 2vw, 24px);
+  justify-content: center;
   margin-bottom: 12px;
 }
 
@@ -809,6 +824,10 @@
 }
 
 .money-live-title {
+  display: grid;
+  grid-template-rows: auto auto;
+  justify-items: center;
+  align-content: center;
   text-align: center;
 }
 
@@ -855,7 +874,8 @@
 }
 
 .money-live-title p {
-  display: inline-block;
+  display: block;
+  width: fit-content;
   margin: 12px 0 0;
   padding: 8px 18px;
   color: #fff;
@@ -2607,8 +2627,8 @@
   }
 
   .react-app .dashboard.game-view .money-live-header {
-    grid-template-columns: minmax(90px, 0.55fr) minmax(280px, 1.7fr) minmax(130px, 0.7fr);
-    gap: 8px;
+    display: flex;
+    justify-content: center;
     margin: 0;
   }
 
@@ -2811,15 +2831,31 @@
   }
 
   .react-app .dashboard.game-view .question-overlay {
+    width: 100%;
+    max-width: 100%;
     padding: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .react-app .dashboard.game-view .question-card {
-    width: min(96vw, 980px);
+    width: 100%;
+    max-width: 980px;
+    min-width: 0;
     max-height: calc(100dvh - 20px);
     gap: 10px;
     padding: 14px;
+    box-sizing: border-box;
+    overflow-x: hidden;
     overflow-y: auto;
+  }
+
+  .react-app .dashboard.game-view .question-card header,
+  .react-app .dashboard.game-view .question-card header > div,
+  .react-app .dashboard.game-view .question-body,
+  .react-app .dashboard.game-view .question-body p {
+    min-width: 0;
+    max-width: 100%;
   }
 
   .react-app .dashboard.game-view .question-card h3 {
@@ -2855,7 +2891,9 @@
   }
 
   .react-app .dashboard.game-view .question-body p {
-    font-size: clamp(30px, 5.5vw, 58px);
+    font-size: clamp(28px, 4vw, 48px);
+    line-height: 1.08;
+    overflow-wrap: anywhere;
   }
 
   .react-app .dashboard.game-view .controller-row {
@@ -3008,24 +3046,25 @@
   }
 
   .react-app .dashboard.game-view .money-moves-live {
-    grid-template-rows: 68px 38px minmax(0, 1fr);
+    grid-template-rows: 110px 38px minmax(0, 1fr);
     gap: 5px;
     padding: 6px;
   }
 
   .react-app .dashboard.game-view .money-live-header {
-    grid-template-columns: minmax(76px, 0.5fr) minmax(0, 1.8fr) minmax(88px, 0.6fr);
-    gap: 6px;
+    display: flex;
+    justify-content: center;
     min-height: 0;
+    padding-top: 40px;
+    box-sizing: border-box;
   }
 
-  .react-app .dashboard.game-view .money-brand-lockup img {
-    width: clamp(76px, 11vw, 112px);
-    max-height: 64px;
+  .react-app .dashboard.game-view .money-live-title {
+    justify-self: center;
   }
 
   .react-app .dashboard.game-view .money-live-title h2 {
-    font-size: clamp(25px, 3.4vw, 39px);
+    font-size: clamp(48px, 6vw, 66px);
   }
 
   .react-app .dashboard.game-view .money-live-title-row > img {
@@ -3033,19 +3072,10 @@
   }
 
   .react-app .dashboard.game-view .money-live-title p {
-    display: none;
-  }
-
-  .react-app .dashboard.game-view .winner-callout {
-    gap: 5px;
-  }
-
-  .react-app .dashboard.game-view .winner-callout img {
-    width: 30px;
-  }
-
-  .react-app .dashboard.game-view .winner-callout strong {
-    font-size: 10px;
+    display: block;
+    margin-top: 4px;
+    padding: 3px 12px;
+    font-size: 11px;
   }
 
   .react-app .dashboard.game-view .game-toolbar,
@@ -3074,7 +3104,12 @@
   }
 
   .react-app .dashboard.game-view .live-board .money-tile {
-    font-size: clamp(15px, 2vw, 23px);
+    font-size: clamp(20px, 2.45vw, 28px);
+  }
+
+  .react-app .dashboard.game-view .live-board .money-tile-coin {
+    width: clamp(18px, 2.35vw, 27px);
+    height: clamp(18px, 2.35vw, 27px);
   }
 
   .react-app .dashboard.game-view .money-live-footer {
@@ -3121,7 +3156,7 @@
 
   .react-app .dashboard.game-view .game-rules-panel h3 {
     margin-bottom: 3px;
-    font-size: 12px;
+    font-size: 15px;
   }
 
   .react-app .dashboard.game-view .timer-token {
@@ -3151,15 +3186,16 @@
 
   .react-app .dashboard.game-view .game-rules-panel li {
     min-width: 0;
-    padding: 2px 4px;
-    font-size: 8px;
+    padding: 3px 5px;
+    font-size: 10px;
+    line-height: 1.1;
   }
 
   .react-app .dashboard.game-view .how-to-list li span {
-    flex-basis: 15px;
-    width: 15px;
-    height: 15px;
-    font-size: 8px;
+    flex-basis: 17px;
+    width: 17px;
+    height: 17px;
+    font-size: 9px;
   }
 }
 

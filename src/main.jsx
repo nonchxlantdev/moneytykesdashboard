@@ -1415,21 +1415,12 @@ function GameDashboard({ setToast }) {
     <section className="money-moves-live page-swap" style={{ "--game-bg": `url("${assetPath("gamebackground.png")}")` }}>
       <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
       <header className="money-live-header">
-        <div className="money-brand-lockup">
-          <img src={assetPath("Logo.png")} alt="MoneyTykes" />
-        </div>
         <div className="money-live-title">
           <div className="money-live-title-row">
-            <h2><span>Money Moves</span> <strong>Live</strong></h2>
+            <h2><span>Money Moves</span> <strong>Live!</strong></h2>
           </div>
-          <p>Build your net worth. Win your future.</p>
+          <p>Highest Net Worth Wins!</p>
         </div>
-        <aside className="winner-callout">
-          <div>
-            <strong>Highest Net Worth Wins!</strong>
-            <span>Every smart move builds your future.</span>
-          </div>
-        </aside>
       </header>
 
       <div className="game-toolbar">
