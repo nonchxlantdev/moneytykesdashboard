@@ -67,8 +67,7 @@ function LoginForm() {
     return Object.keys(nextErrors).length === 0;
   }
 
-  function handleLogin(values) {
-    console.log("MoneyTykes login submitted", values);
+  function handleLogin() {
     // TODO: Connect this placeholder to the teacher dashboard authentication flow.
     window.location.href = import.meta.env.BASE_URL;
   }
@@ -76,7 +75,7 @@ function LoginForm() {
   function handleSubmit(event) {
     event.preventDefault();
     if (!validateForm()) return;
-    handleLogin({ ...form, email: form.email.trim() });
+    handleLogin();
   }
 
   return (

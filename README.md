@@ -1,37 +1,69 @@
 # MoneyTykes Teacher Dashboard
 
-React classroom dashboard for a financial literacy reward system and game-based learning concept.
+A responsive React dashboard for teachers and schools to manage students, classroom tasks, rewards, financial literacy lessons, reporting, and MoneyTykes classroom games.
 
-## Run Locally
+## Tech Stack
 
-Install dependencies, then start the Vite dev server:
+- React
+- Vite
+- Lucide React icons
+- CSS with responsive desktop, tablet, and mobile layouts
+- Browser `localStorage` for the current prototype data layer
+- Supabase-ready environment variable placeholders for the planned backend integration
+
+## Install
 
 ```bash
 npm install
+```
+
+## Run Locally
+
+```bash
 npm run dev
 ```
 
-## What It Does
+Vite prints the local development URL in the terminal. The configured application base path is `/moneytykesdashboard/`.
 
-- Add students to a class roster
-- Create tasks and assign them to the class
-- Give student earnings through wallet transactions
-- Track balances, total earned, task progress, streaks, leaderboard ranking, and class insights
-- Persist classroom data locally in the browser with `localStorage`
-- Preview a Money Moves Live game dashboard inspired by `gameidea/gamefrontend.jpeg`
+## Build
 
-## Files
+```bash
+npm run build
+```
 
-- `index.html` - Vite mount point for the React app
-- `src/main.jsx` - React app, dashboard views, local data actions, and game view
-- `src/react.css` - React-specific animation and game board styling
-- `styles.css` - Existing responsive MoneyTykes interface styling shared by the React app
-- `public/Logo.png` - MoneyTykes logo asset
-- `public/gamefrontend.jpeg` - Money Moves Live reference image used in the game view
-- `app.js` - Legacy vanilla JavaScript prototype retained for reference
+The production build is generated in `dist/`. Vite also creates `dist/404.html` for GitHub Pages single-page application fallback handling.
 
-## Backend Transition Notes
+## Preview the Build
 
-The React app is still local-first. A backend can replace the local `update` actions and dashboard calculations later:
+```bash
+npm run preview
+```
 
-When moving to an API, replace the localStorage reads/writes with `fetch` calls or a client data library, then keep the React components focused on rendering and interaction.
+## Environment Variables
+
+Copy `.env.example` to a local `.env` when Supabase is connected:
+
+```env
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+Do not commit `.env`, `.env.local`, or `.env.production`. The current frontend remains localStorage-based and does not yet initialize a Supabase client.
+
+## Deployment
+
+The repository includes a GitHub Pages workflow and a Vite base path for the `moneytykesdashboard` repository.
+
+- Build command: `npm run build`
+- Output directory: `dist`
+- Node install command: `npm install`
+
+Vercel and Netlify can use the same build command and output directory. See `DEPLOYMENT_NOTES.md` for GitHub and hosting details.
+
+## Main Files
+
+- `src/main.jsx`: application shell, dashboard pages, lessons, and game state
+- `src/react.css`: React page, game, lessons, and responsive styling
+- `styles.css`: shared dashboard styling
+- `src/pages/LoginPage.jsx`: teacher login frontend
+- `vite.config.js`: Vite and GitHub Pages configuration

@@ -5,4 +5,8 @@ dist/
 build/
 .env
 .env.*
+!.env.example
+.env.local
+.env.production
+vite-*.log
 ~$*

@@ -11,6 +11,7 @@ import {
   Flame,
   Gift,
   GraduationCap,
+  Heart,
   Home,
   Lightbulb,
   LogOut,
@@ -23,9 +24,11 @@ import {
   PiggyBank,
   Play,
   Plus,
+  RotateCcw,
   Settings,
   ShieldAlert,
   School,
+  Search,
   Timer,
   Trophy,
   Star,
@@ -55,6 +58,7 @@ const navItems = [
   { label: "Admin", view: "admin", icon: ShieldAlert },
   { label: "Dashboard", view: "dashboard", icon: Home },
   { label: "Students", view: "students", icon: Users },
+  { label: "Lessons", view: "lessons", icon: Play },
   { label: "Assign & Tasks", view: "tasks", icon: ClipboardList },
   { label: "Rewards", view: "rewards", icon: Gift },
   { label: "Leaderboard", view: "leaderboard", icon: Trophy },
@@ -176,6 +180,14 @@ function App() {
     const timer = setTimeout(() => setToast(""), 2200);
     return () => clearTimeout(timer);
   }, [toast]);
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    function closeOnEscape(event) {
+      if (event.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [menuOpen]);
 
   const dashboard = useMemo(() => buildDashboard(db, range), [db, range]);
 
@@ -215,7 +227,8 @@ function App() {
     studentFocus,
     setStudentFocus,
     update,
-    navigate
+    navigate,
+    setToast
   };
 
   if (isLoginRoute) return <LoginPage />;
@@ -228,15 +241,21 @@ function App() {
         navigate={navigate}
         collapsed={sidebarHidden}
         toggleCollapsed={() => setSidebarHidden(!sidebarHidden)}
+        closeMenu={() => setMenuOpen(false)}
       />
+      {menuOpen && <button className="sidebar-backdrop" type="button" aria-label="Close navigation menu" onClick={() => setMenuOpen(false)} />}
       <main className="dashboard" ref={mainContentRef}>
         <header className="topbar app-entrance">
-          <button className="icon-button mobile-menu" type="button" aria-label="Open menu" onClick={() => setMenuOpen(!menuOpen)}>
+          <button className="icon-button mobile-menu" type="button" aria-label="Open menu" onClick={() => {
+            setSidebarHidden(false);
+            setMenuOpen(!menuOpen);
+          }}>
             <Menu />
           </button>
           <div>
             <p className="eyebrow">{db.school} - {db.className}</p>
-            <h1>Welcome back, {db.teacher.first}</h1>
+            <h1>{view === "lessons" ? "Lessons Library" : `Welcome back, ${db.teacher.first}`}</h1>
+            {view === "lessons" && <p className="topbar-subtitle">Browse, assign, and manage learning content for your students.</p>}
           </div>
           <button className="logout-button" type="button" onClick={logout}>
             <LogOut />
@@ -248,12 +267,13 @@ function App() {
           {view === "admin" && <AdminDashboard db={db} update={update} />}
           {view === "dashboard" && <Dashboard {...pageProps} />}
           {view === "students" && <Students {...pageProps} />}
+          {view === "lessons" && <LessonsPage {...pageProps} />}
           {view === "tasks" && <Tasks {...pageProps} />}
           {view === "rewards" && <Rewards {...pageProps} />}
           {view === "leaderboard" && <Leaderboard {...pageProps} />}
           {view === "reports" && <Reports dashboard={dashboard} />}
           {view === "literacy" && <Literacy tip={currentTip} />}
-          {view === "game" && <GameDashboard />}
+          {view === "game" && <GameDashboard setToast={setToast} />}
           {view === "settings" && <SettingsPage db={db} />}
         </div>
       </main>
@@ -266,7 +286,7 @@ function App() {
   );
 }
 
-function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed }) {
+function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, closeMenu }) {
   return (
     <aside className={`sidebar ${open ? "open" : ""} ${collapsed ? "collapsed" : ""}`} aria-label="Primary navigation">
       <div className="sidebar-top">
@@ -275,7 +295,10 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed }) {
             <img className="brand-logo" src={assetPath("Logo.png")} alt="MoneyTykes" />
           </div>
         )}
-        <button className="sidebar-collapse-button" type="button" aria-label={collapsed ? "Show sidebar" : "Hide sidebar"} onClick={toggleCollapsed}>
+        <button className="sidebar-collapse-button" type="button" aria-label={collapsed ? "Show sidebar" : "Hide sidebar"} onClick={() => {
+          if (window.innerWidth < 768) closeMenu();
+          else toggleCollapsed();
+        }}>
           {collapsed ? <ChevronRight /> : <Menu />}
         </button>
       </div>
@@ -312,6 +335,164 @@ function NavButton({ item, active, navigate, compact = false }) {
     <button className={`${className} ${active ? "active" : ""}`} type="button" title={item.label} onClick={() => navigate(item.view)}>
       <Icon /><span>{compact ? item.label.replace(" & Tasks", "") : item.label}</span>
     </button>
+  );
+}
+
+const lessons = [
+  {
+    id: "child-sign-up",
+    title: "Child Sign Up",
+    module: "Getting Started",
+    topic: "Account Setup",
+    grade: "Parent/Child",
+    duration: "3:45",
+    status: "Not Started",
+    reward: 50,
+    videoId: "ZBVL6Cla3JY"
+  },
+  {
+    id: "parents-sign-up",
+    title: "Parents Sign Up",
+    module: "Getting Started",
+    topic: "Parent Access",
+    grade: "Parents",
+    duration: "4:12",
+    status: "Not Started",
+    reward: 50,
+    videoId: "q_MXzC8Pq-g"
+  },
+  {
+    id: "moneytykes-music-video",
+    title: "MoneyTykes Music Video",
+    module: "MoneyTykes Intro",
+    topic: "Engagement",
+    grade: "All Ages",
+    duration: "4:50",
+    status: "Not Started",
+    reward: 50,
+    videoId: "FcoHlbgjz5A"
+  }
+].map(lesson => ({
+  ...lesson,
+  videoUrl: `https://www.youtube.com/watch?v=${lesson.videoId}`,
+  thumbnail: `https://img.youtube.com/vi/${lesson.videoId}/hqdefault.jpg`
+}));
+
+function LessonsPage({ setToast }) {
+  const [query, setQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("All Lessons");
+  const [moduleFilter, setModuleFilter] = useState("All Modules");
+  const [topicFilter, setTopicFilter] = useState("All Topics");
+  const [gradeFilter, setGradeFilter] = useState("All Grades");
+  const [durationFilter, setDurationFilter] = useState("Duration");
+  const [favorites, setFavorites] = useState([]);
+  const [selectedLesson, setSelectedLesson] = useState(null);
+
+  const filteredLessons = lessons.filter(lesson => {
+    const matchesQuery = `${lesson.title} ${lesson.module}`.toLowerCase().includes(query.toLowerCase());
+    const matchesTab = activeTab === "All Lessons"
+      || (activeTab === "Favorites" ? favorites.includes(lesson.id) : lesson.status === activeTab);
+    const matchesModule = moduleFilter === "All Modules" || lesson.module === moduleFilter;
+    const matchesTopic = topicFilter === "All Topics" || lesson.topic === topicFilter;
+    const matchesGrade = gradeFilter === "All Grades" || lesson.grade === gradeFilter;
+    const seconds = Number(lesson.duration.split(":")[0]) * 60 + Number(lesson.duration.split(":")[1]);
+    const matchesDuration = durationFilter === "Duration"
+      || (durationFilter === "Under 4 min" && seconds < 240)
+      || (durationFilter === "4+ min" && seconds >= 240);
+    return matchesQuery && matchesTab && matchesModule && matchesTopic && matchesGrade && matchesDuration;
+  });
+
+  function toggleFavorite(event, lessonId) {
+    event.stopPropagation();
+    setFavorites(current => current.includes(lessonId)
+      ? current.filter(id => id !== lessonId)
+      : [...current, lessonId]);
+  }
+
+  function showAssignment(event) {
+    event?.stopPropagation();
+    setToast("Lesson assignment workflow coming soon.");
+  }
+
+  return (
+    <section className="lessons-library" aria-label="Lessons library">
+      <div className="lesson-stats-grid">
+        {[
+          { label: "Total Lessons", value: lessons.length, meta: "Available in library", icon: BookOpen },
+          { label: "Assigned", value: 0, meta: "To your students", icon: Users },
+          { label: "Completed", value: 0, meta: "This month", icon: Check },
+          { label: "Drafts", value: 0, meta: "Created by you", icon: Pencil }
+        ].map(({ label, value, meta, icon: Icon }) => (
+          <article className="lesson-stat-card" key={label}>
+            <span className="lesson-stat-icon"><Icon /></span>
+            <span><small>{label}</small><strong>{value}</strong><em>{meta}</em></span>
+          </article>
+        ))}
+      </div>
+
+      <div className="lesson-filter-bar">
+        <select aria-label="Lesson type"><option>All Lessons</option></select>
+        <select value={moduleFilter} onChange={event => setModuleFilter(event.target.value)} aria-label="Module">
+          <option>All Modules</option>{[...new Set(lessons.map(lesson => lesson.module))].map(value => <option key={value}>{value}</option>)}
+        </select>
+        <select value={topicFilter} onChange={event => setTopicFilter(event.target.value)} aria-label="Topic">
+          <option>All Topics</option>{lessons.map(lesson => <option key={lesson.topic}>{lesson.topic}</option>)}
+        </select>
+        <select value={gradeFilter} onChange={event => setGradeFilter(event.target.value)} aria-label="Grade">
+          <option>All Grades</option>{lessons.map(lesson => <option key={lesson.grade}>{lesson.grade}</option>)}
+        </select>
+        <select value={durationFilter} onChange={event => setDurationFilter(event.target.value)} aria-label="Duration">
+          <option>Duration</option><option>Under 4 min</option><option>4+ min</option>
+        </select>
+        <label className="lesson-search"><Search /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search lessons..." /></label>
+      </div>
+
+      <div className="lesson-tabs" role="tablist" aria-label="Lesson status">
+        {["All Lessons", "Not Started", "In Progress", "Completed", "Favorites"].map(tab => (
+          <button className={activeTab === tab ? "active" : ""} type="button" role="tab" aria-selected={activeTab === tab} onClick={() => setActiveTab(tab)} key={tab}>{tab}</button>
+        ))}
+      </div>
+
+      {filteredLessons.length ? (
+        <div className="lesson-card-grid">
+          {filteredLessons.map(lesson => (
+            <article className="lesson-card" key={lesson.id} onClick={() => setSelectedLesson(lesson)}>
+              <div className="lesson-thumbnail">
+                <img src={lesson.thumbnail} alt="" />
+                <span className="lesson-play"><Play fill="currentColor" /></span>
+                <span className="lesson-duration">{lesson.duration}</span>
+                <button className={`lesson-favorite ${favorites.includes(lesson.id) ? "active" : ""}`} type="button" aria-label="Toggle favorite" onClick={event => toggleFavorite(event, lesson.id)}><Heart fill={favorites.includes(lesson.id) ? "currentColor" : "none"} /></button>
+              </div>
+              <div className="lesson-card-body">
+                <div className="lesson-card-heading"><span>{lesson.topic}</span><span>{lesson.grade}</span></div>
+                <h2>{lesson.title}</h2>
+                <p>{lesson.module}</p>
+                <div className="lesson-card-footer">
+                  <span className="lesson-status"><Play /> {lesson.status}</span>
+                  <strong className="lesson-reward"><span>$</span> {lesson.reward}</strong>
+                </div>
+                <button className="lesson-assign-button" type="button" onClick={showAssignment}>Assign Lesson</button>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : <div className="lesson-empty"><BookOpen /><h2>No lessons found</h2><p>Try another search, filter, or status.</p></div>}
+
+      <section className="lesson-callout">
+        <span className="lesson-callout-icon"><Trophy /></span>
+        <div><h2>Empower your students with financial knowledge!</h2><p>Assign engaging lessons and watch your class grow their money skills.</p></div>
+        <button type="button" onClick={showAssignment}><BookOpen /> Assign Lessons</button>
+      </section>
+
+      {selectedLesson && (
+        <div className="lesson-modal-backdrop" role="presentation" onMouseDown={() => setSelectedLesson(null)}>
+          <section className="lesson-video-modal" role="dialog" aria-modal="true" aria-label={`${selectedLesson.title} video`} onMouseDown={event => event.stopPropagation()}>
+            <div className="lesson-modal-heading"><div><small>{selectedLesson.module}</small><h2>{selectedLesson.title}</h2></div><button type="button" aria-label="Close video" onClick={() => setSelectedLesson(null)}><X /></button></div>
+            <div className="lesson-video-frame"><iframe src={`https://www.youtube.com/embed/${selectedLesson.videoId}?autoplay=1`} title={selectedLesson.title} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen /></div>
+          </section>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -1029,7 +1210,7 @@ function MoneyTykesTipBanner({ tip, inline = false }) {
   );
 }
 
-function GameDashboard() {
+function GameDashboard({ setToast }) {
   const audioRef = useRef(null);
   const [stage, setStage] = useState("select");
   const [teams, setTeams] = useState([{ id: 1, name: "Team Tykes", score: 0 }]);
@@ -1042,6 +1223,7 @@ function GameDashboard() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   const [audioMuted, setAudioMuted] = useState(false);
+  const [resetConfirmationOpen, setResetConfirmationOpen] = useState(false);
 
   useEffect(() => {
     if (!audioRef.current) return;
@@ -1138,24 +1320,39 @@ function GameDashboard() {
   }
 
   function resetGame() {
-    setTeams(current => current.map(team => ({ ...team, score: 0 })));
+    setStage("select");
+    setTeams([{ id: 1, name: "Team Tykes", score: 0 }]);
+    setTeamCount(1);
     setUsedTiles([]);
-    setQuestionPool(shuffleQuestions(moneyMoveQuestions));
+    setQuestionPool([]);
     setActiveQuestion(null);
+    setSelectedTeamId(1);
     setShowAnswer(false);
     setTimeLeft(0);
     setTimerRunning(false);
+    setResetConfirmationOpen(false);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    // TODO: Reset the active Supabase game-session record here when persistent game sessions are added.
+    setToast("Game has been reset.");
   }
 
-  function startNewGame() {
-    resetGame();
-    setStage("teams");
-  }
+  const resetControls = (
+    <GameResetControls
+      open={resetConfirmationOpen}
+      requestReset={() => setResetConfirmationOpen(true)}
+      cancelReset={() => setResetConfirmationOpen(false)}
+      confirmReset={resetGame}
+    />
+  );
 
   if (stage === "select") {
     return (
       <section className="game-select-screen page-swap">
         <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
+        {resetControls}
         <div className="game-hero compact">
           <img src={assetPath("gamefrontend.jpeg")} alt="Money Moves Live dashboard concept" />
           <div>
@@ -1178,6 +1375,7 @@ function GameDashboard() {
     return (
       <section className="money-loading-screen page-swap">
         <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
+        {resetControls}
         <img src={assetPath("Logo.png")} alt="MoneyTykes" />
         <p className="eyebrow">Money Moves Live</p>
         <h2>Build Your Net Worth. Win Your Future.</h2>
@@ -1190,6 +1388,7 @@ function GameDashboard() {
     return (
       <section className="team-setup-screen page-swap">
         <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
+        {resetControls}
         <div className="team-setup-heading">
           <p className="game-kicker"><BarChart3 /> Money Moves Live</p>
           <h2>Enter Teams</h2>
@@ -1249,6 +1448,9 @@ function GameDashboard() {
         <button type="button" onClick={() => setAudioMuted(!audioMuted)}>
           {audioMuted ? <VolumeX /> : <Volume2 />}
           {audioMuted ? "Unmute" : "Mute"}
+        </button>
+        <button className="reset-game-button" type="button" onClick={() => setResetConfirmationOpen(true)}>
+          <RotateCcw /> Reset Game
         </button>
       </div>
 
@@ -1322,7 +1524,37 @@ function GameDashboard() {
           closeQuestion={closeQuestion}
         />
       )}
+      {resetConfirmationOpen && (
+        <ResetGameModal cancelReset={() => setResetConfirmationOpen(false)} confirmReset={resetGame} />
+      )}
     </section>
+  );
+}
+
+function GameResetControls({ open, requestReset, cancelReset, confirmReset }) {
+  return (
+    <>
+      <button className="reset-game-button reset-game-corner" type="button" onClick={requestReset}>
+        <RotateCcw /> Reset Game
+      </button>
+      {open && <ResetGameModal cancelReset={cancelReset} confirmReset={confirmReset} />}
+    </>
+  );
+}
+
+function ResetGameModal({ cancelReset, confirmReset }) {
+  return (
+    <div className="game-reset-overlay" role="presentation" onMouseDown={cancelReset}>
+      <section className="game-reset-modal" role="alertdialog" aria-modal="true" aria-labelledby="reset-game-title" aria-describedby="reset-game-description" onMouseDown={event => event.stopPropagation()}>
+        <span className="game-reset-icon"><RotateCcw /></span>
+        <h2 id="reset-game-title">Reset Game?</h2>
+        <p id="reset-game-description">This will reset the current game progress. This action cannot be undone.</p>
+        <div className="game-reset-actions">
+          <button className="game-reset-cancel" type="button" onClick={cancelReset}>Cancel</button>
+          <button className="game-reset-confirm" type="button" onClick={confirmReset}><RotateCcw /> Yes, Reset Game</button>
+        </div>
+      </section>
+    </div>
   );
 }
 
