@@ -4,8 +4,10 @@ import {
   BarChart3,
   BookOpen,
   Calculator,
+  CalendarDays,
   Check,
   ChevronRight,
+  ClipboardCheck,
   X,
   ClipboardList,
   Flame,
@@ -14,6 +16,7 @@ import {
   Heart,
   Home,
   Lightbulb,
+  Lock,
   LogOut,
   Mail,
   Menu,
@@ -40,6 +43,14 @@ import {
 } from "lucide-react";
 import { moneyMoveQuestions } from "./moneyMoveQuestions";
 import LoginPage from "./pages/LoginPage";
+import RewardsPage from "./pages/RewardsPage";
+import AttendancePage from "./pages/Attendance";
+import CreateLessonsPage from "./pages/CreateLessonsPage";
+import FinancialZonePage from "./pages/FinancialZone";
+import CalendarPage from "./pages/Calendar";
+import DateCard from "./components/DateCard";
+import CalendarWidget from "./components/CalendarWidget";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 import "../styles.css";
 import "./react.css";
 
@@ -59,11 +70,13 @@ const navItems = [
   { label: "Dashboard", view: "dashboard", icon: Home },
   { label: "Students", view: "students", icon: Users },
   { label: "Lessons", view: "lessons", icon: Play },
-  { label: "Assign & Tasks", view: "tasks", icon: ClipboardList },
+  { label: "Create Lessons", view: "create-lessons", icon: BookOpen },
+  { label: "Attendance", view: "attendance", icon: ClipboardCheck },
+  { label: "Calendar", view: "calendar", icon: CalendarDays },
   { label: "Rewards", view: "rewards", icon: Gift },
   { label: "Leaderboard", view: "leaderboard", icon: Trophy },
   { label: "Reports", view: "reports", icon: BarChart3 },
-  { label: "Financial Literacy", view: "literacy", icon: GraduationCap },
+  { label: "Financial Zone", view: "financial-zone", icon: Lock },
   { label: "Game", view: "game", icon: Calculator },
   { label: "Class Settings", view: "settings", icon: Settings }
 ];
@@ -172,6 +185,8 @@ function App() {
   const [toast, setToast] = useState("");
   const [sidebarHidden, setSidebarHidden] = useState(false);
   const [studentFocus, setStudentFocus] = useState(null);
+  const [calendarFocusDate, setCalendarFocusDate] = useState(null);
+  const [calendarEvents] = useLocalStorage("calendar_events", []);
   const mainContentRef = useRef(null);
 
   useEffect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(db)), [db]);
@@ -200,8 +215,9 @@ function App() {
     setToast(message);
   }
 
-  function navigate(nextView) {
+  function navigate(nextView, options = {}) {
     setView(nextView);
+    if (options.focusDate) setCalendarFocusDate(options.focusDate);
     setCurrentTip(current => randomFinancialTip(current));
     setMenuOpen(false);
     requestAnimationFrame(() => {
@@ -228,7 +244,8 @@ function App() {
     setStudentFocus,
     update,
     navigate,
-    setToast
+    setToast,
+    calendarEvents
   };
 
   if (isLoginRoute) return <LoginPage />;
@@ -254,9 +271,17 @@ function App() {
           </button>
           <div>
             <p className="eyebrow">{db.school} - {db.className}</p>
-            <h1>{view === "lessons" ? "Lessons Library" : `Welcome back, ${db.teacher.first}`}</h1>
+            <h1>{
+              view === "lessons" ? "Lessons Library"
+              : view === "create-lessons" ? "Create Lessons"
+              : view === "attendance" ? "Attendance"
+              : view === "calendar" ? "Calendar"
+              : view === "financial-zone" ? "Financial Zone"
+              : `Welcome back, ${db.teacher.first}`
+            }</h1>
             {view === "lessons" && <p className="topbar-subtitle">Browse, assign, and manage learning content for your students.</p>}
           </div>
+          {view === "dashboard" && <DateCard />}
           <button className="logout-button" type="button" onClick={logout}>
             <LogOut />
             <span>Log Out</span>
@@ -268,11 +293,20 @@ function App() {
           {view === "dashboard" && <Dashboard {...pageProps} />}
           {view === "students" && <Students {...pageProps} />}
           {view === "lessons" && <LessonsPage {...pageProps} />}
-          {view === "tasks" && <Tasks {...pageProps} />}
-          {view === "rewards" && <Rewards {...pageProps} />}
+          {view === "create-lessons" && <CreateLessonsPage db={db} setToast={setToast} />}
+          {view === "attendance" && <AttendancePage db={db} setToast={setToast} />}
+          {view === "calendar" && (
+            <CalendarPage
+              db={db}
+              setToast={setToast}
+              focusDate={calendarFocusDate}
+              onFocusHandled={() => setCalendarFocusDate(null)}
+            />
+          )}
+          {view === "rewards" && <RewardsPage db={db} setToast={setToast} />}
           {view === "leaderboard" && <Leaderboard {...pageProps} />}
           {view === "reports" && <Reports dashboard={dashboard} />}
-          {view === "literacy" && <Literacy tip={currentTip} />}
+          {view === "financial-zone" && <FinancialZonePage setToast={setToast} />}
           {view === "game" && <GameDashboard setToast={setToast} />}
           {view === "settings" && <SettingsPage db={db} />}
         </div>
@@ -335,7 +369,7 @@ function NavButton({ item, active, navigate, compact = false, showLabel = true }
   const className = compact ? "mobile-tab" : "nav-item";
   return (
     <button className={`${className} ${active ? "active" : ""}`} type="button" title={item.label} onClick={() => navigate(item.view)}>
-      <Icon />{showLabel && <span>{compact ? item.label.replace(" & Tasks", "") : item.label}</span>}
+      <Icon />{showLabel && <span>{item.label}</span>}
     </button>
   );
 }
@@ -779,7 +813,7 @@ function StatusBadge({ status }) {
 }
 
 function Dashboard(props) {
-  const { dashboard, db, search, setSearch, status, setStatus, range, setRange, currentTip, navigate, setStudentFocus } = props;
+  const { dashboard, db, search, setSearch, status, setStatus, range, setRange, currentTip, navigate, setStudentFocus, calendarEvents } = props;
   return (
     <>
       <StatsGrid dashboard={dashboard} />
@@ -788,13 +822,17 @@ function Dashboard(props) {
         <div className="quick-action-grid">
           <ActionCard icon={Plus} title="Add Student" text="Grow your classroom roster." onClick={() => navigate("students")} />
           <ActionCard icon={Wallet} title="Give Earnings" text="Reward participation quickly." onClick={() => navigate("students")} />
-          <ActionCard icon={ClipboardList} title="Create Task" text="Assign money lessons." onClick={() => navigate("tasks")} />
+          <ActionCard icon={BookOpen} title="Create Lesson" text="Build and publish lessons." onClick={() => navigate("create-lessons")} />
           <ActionCard icon={Trophy} title="Launch Game" text="Open Money Moves Live." onClick={() => navigate("game")} />
         </div>
       </section>
       <section className="content-grid">
         <StudentOverview db={db} search={search} setSearch={setSearch} status={status} setStatus={setStatus} navigate={navigate} setStudentFocus={setStudentFocus} />
         <TopEarners earners={dashboard.leaderboard.slice(0, 5)} range={range} setRange={setRange} navigate={navigate} />
+        <CalendarWidget
+          events={calendarEvents}
+          onNavigate={date => navigate("calendar", { focusDate: date })}
+        />
         <RecentTasks tasks={db.tasks.slice(-4).reverse()} navigate={navigate} />
         <Insights dashboard={dashboard} />
       </section>
@@ -1108,75 +1146,6 @@ function EarningsForm({ students, update }) {
   );
 }
 
-function Tasks({ db, update }) {
-  const [form, setForm] = useState({ title: "", category: "Financial Literacy", reward: 8, due: addDays(today(), 7) });
-  function submit(event) {
-    event.preventDefault();
-    update(db => {
-      db.tasks.push({ id: Date.now(), ...form, reward: Number(form.reward), completed: 0, assigned: db.students.length, createdAt: today() });
-    }, "Task created");
-    setForm({ title: "", category: "Financial Literacy", reward: 8, due: addDays(today(), 7) });
-  }
-  return (
-    <>
-      <PageHeading eyebrow="Assignments" title="Tasks Dashboard" />
-      <div className="management-grid">
-        <article className="section-panel">
-          <div className="section-heading"><h2>Create Task</h2></div>
-          <form className="stacked-form" onSubmit={submit}>
-            <Field label="Title" value={form.title} onChange={title => setForm({ ...form, title })} required />
-            <label>Category<select value={form.category} onChange={event => setForm({ ...form, category: event.target.value })}><option>Financial Literacy</option><option>Economics</option><option>Budgeting</option><option>Saving</option><option>Investing</option><option>Chores</option><option>Custom</option></select></label>
-            <div className="form-grid">
-              <Field label="Reward Amount" type="number" value={form.reward} onChange={reward => setForm({ ...form, reward })} required />
-              <Field label="Due Date" type="date" value={form.due} onChange={due => setForm({ ...form, due })} required />
-            </div>
-            <button className="primary-action" type="submit">Create & Assign</button>
-          </form>
-        </article>
-        <article className="section-panel">
-          <div className="section-heading"><h2>Task Summary</h2></div>
-          <div className="insight-grid"><Insight title="Created" value={db.tasks.length} /><Insight title="Students" value={db.students.length} /></div>
-        </article>
-      </div>
-      <article className="section-panel full-width-panel"><div className="section-heading"><h2>Task Library</h2></div><div className="task-list">{db.tasks.length ? db.tasks.map(task => <TaskRow key={task.id} task={task} />) : <EmptyState title="No tasks created" text="Create your first classroom task." />}</div></article>
-    </>
-  );
-}
-
-function Rewards({ db, update }) {
-  const [reward, setReward] = useState({ title: "", category: "Classroom", type: "experience", cost: 0, quantity: 1, description: "" });
-  function submit(event) {
-    event.preventDefault();
-    update(db => db.rewards.push({ id: Date.now(), ...reward, cost: Number(reward.cost), quantity: Number(reward.quantity) }), "Reward created");
-    setReward({ title: "", category: "Classroom", type: "experience", cost: 0, quantity: 1, description: "" });
-  }
-  return (
-    <>
-      <PageHeading eyebrow="Motivation" title="Rewards Dashboard" />
-      <div className="management-grid">
-        <article className="section-panel">
-          <div className="section-heading"><h2>Create Reward</h2></div>
-          <form className="stacked-form" onSubmit={submit}>
-            <Field label="Reward Title" value={reward.title} onChange={title => setReward({ ...reward, title })} required />
-            <div className="form-grid">
-              <Field label="Category" value={reward.category} onChange={category => setReward({ ...reward, category })} />
-              <Field label="Type" value={reward.type} onChange={type => setReward({ ...reward, type })} />
-            </div>
-            <div className="form-grid">
-              <Field label="Cost" type="number" value={reward.cost} onChange={cost => setReward({ ...reward, cost })} required />
-              <Field label="Quantity" type="number" value={reward.quantity} onChange={quantity => setReward({ ...reward, quantity })} required />
-            </div>
-            <Field label="Description" value={reward.description} onChange={description => setReward({ ...reward, description })} />
-            <button className="primary-action" type="submit">Create Reward</button>
-          </form>
-        </article>
-        <article className="section-panel"><div className="section-heading"><h2>Reward Activity</h2></div><EmptyState title="No redemptions yet" text="Reward activity appears after students redeem items." /></article>
-      </div>
-      <article className="section-panel full-width-panel"><div className="section-heading"><h2>Reward Catalog</h2></div><div className="reward-grid">{db.rewards.length ? db.rewards.map(item => <RewardCard key={item.id} reward={item} />) : <EmptyState title="No rewards yet" text="Create a classroom reward to fill the catalog." />}</div></article>
-    </>
-  );
-}
-
 function Leaderboard({ dashboard, range, setRange }) {
   return (
     <>
@@ -1191,10 +1160,6 @@ function Leaderboard({ dashboard, range, setRange }) {
 
 function Reports({ dashboard }) {
   return <><PageHeading eyebrow="Class Analytics" title="Reports" /><article className="section-panel full-width-panel"><div className="insight-grid"><Insight title="Total Earned" value={money(dashboard.totalEarned)} /><Insight title="Average Balance" value={money(dashboard.averageBalance)} /><Insight title="Completion" value={`${dashboard.completionRate}%`} /><Insight title="Top Category" value={dashboard.topCategory} /></div></article></>;
-}
-
-function Literacy({ tip }) {
-  return <><PageHeading eyebrow="Learning Content" title="Financial Literacy" /><MoneyTykesTipBanner tip={tip} inline /><article className="section-panel full-width-panel"><div className="section-heading"><h2>Lesson Ideas</h2></div><div className="insight-grid"><Insight title="Needs vs Wants" value="Budgeting" /><Insight title="Savings Goals" value="Saving" /><Insight title="Income Choices" value="Earning" /></div></article></>;
 }
 
 function MoneyTykesTipBanner({ tip, inline = false }) {
@@ -1705,10 +1670,6 @@ function EarnersList({ earners }) {
 
 function TaskRow({ task }) {
   return <div className="task-row"><span className="task-dot" /><div><strong>{task.title}</strong><span>{task.category} - Due {formatDate(task.due)}</span></div><em>{money(task.reward)}</em></div>;
-}
-
-function RewardCard({ reward }) {
-  return <article className="reward-card"><strong>{reward.title}</strong><span>{reward.category}</span><p>{reward.description || "Classroom reward"}</p><em>{money(reward.cost)}</em></article>;
 }
 
 function Insight({ title, value }) {

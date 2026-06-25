@@ -1,0 +1,77 @@
+import { useMemo, useState } from "react";
+import { Search, X } from "lucide-react";
+
+/**
+ * Searchable student dropdown for award flows.
+ * @param {{ students: Array, value: string|number, onChange: (id: string) => void, placeholder?: string, required?: boolean }} props
+ */
+export default function StudentSelector({ students, value, onChange, placeholder = "Search students...", required = false }) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+
+  const selected = students.find(student => String(student.id) === String(value));
+
+  const filtered = useMemo(() => {
+    const term = query.trim().toLowerCase();
+    if (!term) return students;
+    return students.filter(student =>
+      `${student.first} ${student.last} ${student.email || ""}`.toLowerCase().includes(term)
+    );
+  }, [query, students]);
+
+  function selectStudent(studentId) {
+    onChange(String(studentId));
+    setQuery("");
+    setOpen(false);
+  }
+
+  function clearSelection() {
+    onChange("");
+    setQuery("");
+  }
+
+  return (
+    <div className="student-selector">
+      <div className="student-selector-input">
+        <Search size={16} />
+        <input
+          type="text"
+          value={open ? query : (selected ? `${selected.first} ${selected.last}` : query)}
+          placeholder={placeholder}
+          onChange={event => {
+            setQuery(event.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          required={required && !value}
+        />
+        {value && (
+          <button type="button" className="student-selector-clear" onClick={clearSelection} aria-label="Clear student">
+            <X size={14} />
+          </button>
+        )}
+      </div>
+      {open && (
+        <ul className="student-selector-list" role="listbox">
+          {filtered.length ? filtered.map(student => (
+            <li key={student.id}>
+              <button
+                type="button"
+                className={String(student.id) === String(value) ? "selected" : ""}
+                onClick={() => selectStudent(student.id)}
+              >
+                <span className="student-selector-avatar">{student.first?.[0]}{student.last?.[0]}</span>
+                <span>
+                  <strong>{student.first} {student.last}</strong>
+                  <small>{student.classLabel || "Student"}</small>
+                </span>
+              </button>
+            </li>
+          )) : (
+            <li className="student-selector-empty">No students found</li>
+          )}
+        </ul>
+      )}
+    </div>
+  );
+}
