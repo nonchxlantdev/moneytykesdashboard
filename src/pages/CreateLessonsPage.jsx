@@ -1,15 +1,8 @@
 import { useMemo, useState } from "react";
-import { Bold, Check, Italic, List, Play, Search } from "lucide-react";
+import { Bold, Italic, List, Play, Check } from "lucide-react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import Badge from "../components/Badge";
-import EmptyState from "../components/EmptyState";
-import Modal from "../components/Modal";
-import {
-  formatLessonText,
-  isValidYoutubeUrl,
-  youtubeEmbedUrl,
-  youtubeThumbnail
-} from "../utils/youtube";
+import { CREATED_LESSONS_KEY } from "../utils/lessonsStorage";
+import { isValidYoutubeUrl, youtubeThumbnail } from "../utils/youtube";
 
 const SUBJECTS = [
   "Financial Literacy",
@@ -31,17 +24,13 @@ const emptyLesson = {
 };
 
 /**
- * Create lessons form and saved lessons library.
- * @param {{ db: object, setToast: (msg: string) => void }} props
+ * Create lessons form — saved lessons appear in the Lessons library.
+ * @param {{ db: object, setToast: (msg: string) => void, navigate: (view: string) => void }} props
  */
-export default function CreateLessonsPage({ db, setToast }) {
-  const [lessons, setLessons] = useLocalStorage("created_lessons", []);
+export default function CreateLessonsPage({ db, setToast, navigate }) {
+  const [, setLessons] = useLocalStorage(CREATED_LESSONS_KEY, []);
   const [form, setForm] = useState(emptyLesson);
   const [urlError, setUrlError] = useState("");
-  const [search, setSearch] = useState("");
-  const [subjectFilter, setSubjectFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedLesson, setSelectedLesson] = useState(null);
   const [descriptionRef, setDescriptionRef] = useState(null);
 
   const subjects = useMemo(() => {
@@ -96,23 +85,8 @@ export default function CreateLessonsPage({ db, setToast }) {
     setLessons(current => [lesson, ...current]);
     setForm(emptyLesson);
     setUrlError("");
-    setToast("Lesson saved to library.");
+    setToast(form.status === "Published" ? "Lesson published to your Lessons library." : "Lesson saved as draft. View it in Lessons.");
   }
-
-  function markCompleted(lesson) {
-    setLessons(current => current.map(item => item.id === lesson.id
-      ? { ...item, status: "Completed", completedAt: new Date().toISOString() }
-      : item));
-    setSelectedLesson(current => current ? { ...current, status: "Completed", completedAt: new Date().toISOString() } : current);
-    setToast("Lesson marked as completed.");
-  }
-
-  const filteredLessons = lessons.filter(lesson => {
-    const matchesSearch = lesson.title.toLowerCase().includes(search.toLowerCase());
-    const matchesSubject = subjectFilter === "all" || lesson.subject === subjectFilter;
-    const matchesStatus = statusFilter === "all" || lesson.status === statusFilter;
-    return matchesSearch && matchesSubject && matchesStatus;
-  });
 
   return (
     <section className="create-lessons-page">
@@ -120,154 +94,86 @@ export default function CreateLessonsPage({ db, setToast }) {
         <div>
           <p className="eyebrow">Curriculum</p>
           <h2>Create Lessons</h2>
+          <p className="topbar-subtitle">Lessons you save here appear in the Lessons library.</p>
         </div>
+        <button className="secondary-action" type="button" onClick={() => navigate("lessons")}>
+          <Play size={16} /> View Lessons Library
+        </button>
       </div>
 
-      <div className="create-lessons-layout">
-        <article className="section-panel create-lesson-form-card">
-          <div className="section-heading"><h2>Create Lesson</h2></div>
-          <form className="stacked-form" onSubmit={submitLesson}>
-            <label className="field-label">
-              Lesson Title
-              <input type="text" value={form.title} onChange={event => setForm({ ...form, title: event.target.value })} required />
-            </label>
+      <article className="section-panel create-lesson-form-card create-lesson-form-only">
+        <div className="section-heading"><h2>Create Lesson</h2></div>
+        <form className="stacked-form" onSubmit={submitLesson}>
+          <label className="field-label">
+            Lesson Title
+            <input type="text" value={form.title} onChange={event => setForm({ ...form, title: event.target.value })} required />
+          </label>
 
-            <label className="field-label">
-              Subject
-              <select value={form.subject} onChange={event => setForm({ ...form, subject: event.target.value })}>
-                {subjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}
-              </select>
-            </label>
+          <label className="field-label">
+            Subject
+            <select value={form.subject} onChange={event => setForm({ ...form, subject: event.target.value })}>
+              {subjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}
+            </select>
+          </label>
 
-            <label className="field-label">
-              YouTube URL
-              <input
-                type="url"
-                value={form.youtubeUrl}
-                placeholder="https://www.youtube.com/watch?v=..."
-                onChange={event => setForm({ ...form, youtubeUrl: event.target.value })}
-                onBlur={event => validateYoutubeUrl(event.target.value)}
-              />
-              {urlError && <span className="field-error">{urlError}</span>}
-              {thumbnail && <img className="lesson-youtube-preview" src={thumbnail} alt="YouTube thumbnail preview" />}
-            </label>
+          <label className="field-label">
+            YouTube URL
+            <input
+              type="url"
+              value={form.youtubeUrl}
+              placeholder="https://www.youtube.com/watch?v=..."
+              onChange={event => setForm({ ...form, youtubeUrl: event.target.value })}
+              onBlur={event => validateYoutubeUrl(event.target.value)}
+            />
+            {urlError && <span className="field-error">{urlError}</span>}
+            {thumbnail && <img className="lesson-youtube-preview" src={thumbnail} alt="YouTube thumbnail preview" />}
+          </label>
 
-            <div className="field-label">
-              Lesson Plan / Description
-              <div className="lesson-editor-toolbar">
-                <button type="button" onClick={() => applyFormat("**")} aria-label="Bold"><Bold size={15} /></button>
-                <button type="button" onClick={() => applyFormat("*")} aria-label="Italic"><Italic size={15} /></button>
-                <button type="button" onClick={addBullet} aria-label="Bullet list"><List size={15} /></button>
-              </div>
-              <textarea
-                ref={setDescriptionRef}
-                rows={6}
-                value={form.description}
-                placeholder="Write your lesson plan. Use **bold**, *italic*, and - bullet lines."
-                onChange={event => setForm({ ...form, description: event.target.value })}
-              />
+          <div className="field-label">
+            Lesson Plan / Description
+            <div className="lesson-editor-toolbar">
+              <button type="button" onClick={() => applyFormat("**")} aria-label="Bold"><Bold size={15} /></button>
+              <button type="button" onClick={() => applyFormat("*")} aria-label="Italic"><Italic size={15} /></button>
+              <button type="button" onClick={addBullet} aria-label="Bullet list"><List size={15} /></button>
             </div>
+            <textarea
+              ref={setDescriptionRef}
+              rows={8}
+              value={form.description}
+              placeholder="Write your lesson plan. Use **bold**, *italic*, and - bullet lines."
+              onChange={event => setForm({ ...form, description: event.target.value })}
+            />
+          </div>
 
-            <label className="field-label">
-              Tags <span className="field-optional">(optional, comma-separated)</span>
-              <input type="text" value={form.tags} onChange={event => setForm({ ...form, tags: event.target.value })} />
-            </label>
+          <label className="field-label">
+            Tags <span className="field-optional">(optional, comma-separated)</span>
+            <input type="text" value={form.tags} onChange={event => setForm({ ...form, tags: event.target.value })} />
+          </label>
 
-            <div className="lesson-status-toggle">
-              <span>Status</span>
-              {["Draft", "Published"].map(status => (
-                <button
-                  key={status}
-                  type="button"
-                  className={form.status === status ? "active" : ""}
-                  onClick={() => setForm({ ...form, status })}
-                >
-                  {status}
-                </button>
-              ))}
-            </div>
+          <div className="lesson-status-toggle">
+            <span>Status</span>
+            {["Draft", "Published"].map(status => (
+              <button
+                key={status}
+                type="button"
+                className={form.status === status ? "active" : ""}
+                onClick={() => setForm({ ...form, status })}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
 
+          <div className="create-lesson-actions">
             <button className="primary-action teal-action" type="submit">
               <Play size={16} /> Save Lesson
             </button>
-          </form>
-        </article>
-
-        <article className="section-panel lessons-library-card">
-          <div className="section-heading"><h2>Lessons Library</h2></div>
-
-          <div className="lessons-library-filters">
-            <label className="lesson-search">
-              <Search size={16} />
-              <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search by title..." />
-            </label>
-            <select value={subjectFilter} onChange={event => setSubjectFilter(event.target.value)}>
-              <option value="all">All Subjects</option>
-              {subjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}
-            </select>
-            <select value={statusFilter} onChange={event => setStatusFilter(event.target.value)}>
-              <option value="all">All Statuses</option>
-              <option value="Draft">Draft</option>
-              <option value="Published">Published</option>
-              <option value="Completed">Completed</option>
-            </select>
+            <button className="secondary-action" type="button" onClick={() => navigate("lessons")}>
+              <Check size={16} /> Go to Lessons Library
+            </button>
           </div>
-
-          {filteredLessons.length ? (
-            <div className="created-lessons-grid">
-              {filteredLessons.map(lesson => (
-                <button type="button" className="created-lesson-card" key={lesson.id} onClick={() => setSelectedLesson(lesson)}>
-                  <div className="created-lesson-thumb">
-                    {lesson.thumbnail ? <img src={lesson.thumbnail} alt="" /> : <Play size={24} />}
-                    {lesson.status === "Completed" && <span className="lesson-complete-badge"><Check size={14} /></span>}
-                  </div>
-                  <div className="created-lesson-body">
-                    <strong>{lesson.title}</strong>
-                    <Badge tone="teal">{lesson.subject}</Badge>
-                    <Badge tone={lesson.status === "Completed" ? "success" : "default"}>{lesson.status}</Badge>
-                  </div>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <EmptyState title="No lessons yet" text="Create your first lesson to populate the library." icon={<Play size={24} />} />
-          )}
-        </article>
-      </div>
-
-      <Modal open={Boolean(selectedLesson)} onClose={() => setSelectedLesson(null)} title={selectedLesson?.title}>
-        {selectedLesson && (
-          <div className="lesson-detail-layout">
-            <div className="lesson-detail-video">
-              {youtubeEmbedUrl(selectedLesson.youtubeUrl) ? (
-                <iframe
-                  src={youtubeEmbedUrl(selectedLesson.youtubeUrl)}
-                  title={selectedLesson.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              ) : (
-                <EmptyState title="No video attached" text="Add a YouTube URL when creating the lesson." />
-              )}
-            </div>
-            <div className="lesson-detail-plan">
-              <div className="lesson-detail-meta">
-                <Badge tone="teal">{selectedLesson.subject}</Badge>
-                <Badge tone={selectedLesson.status === "Completed" ? "success" : "default"}>{selectedLesson.status}</Badge>
-              </div>
-              <div
-                className="lesson-detail-content"
-                dangerouslySetInnerHTML={{ __html: formatLessonText(selectedLesson.description) }}
-              />
-              {selectedLesson.status !== "Completed" && (
-                <button type="button" className="primary-action teal-action" onClick={() => markCompleted(selectedLesson)}>
-                  <Check size={16} /> Mark as Completed
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-      </Modal>
+        </form>
+      </article>
     </section>
   );
 }

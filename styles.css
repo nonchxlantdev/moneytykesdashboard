@@ -1033,6 +1033,7 @@ input {
   }
 
   .student-row > .money::before,
+  .student-row > .points-value::before,
   .student-row > .streak::before,
   .student-row > span:last-child::before {
     display: block;
@@ -1043,8 +1044,12 @@ input {
     text-transform: uppercase;
   }
 
+  .student-row > .points-value::before {
+    content: "Points";
+  }
+
   .student-row > .money::before {
-    content: "Balance";
+    content: "Points";
   }
 
   .student-row > .streak::before {
@@ -1775,6 +1780,7 @@ input {
 .react-app .secondary-action,
 .react-app .link-button,
 .react-app .money,
+.react-app .points-value,
 .react-app .earners-list em,
 .react-app .task-row em,
 .react-app .reward-card em {

@@ -39,9 +39,9 @@ function studentInitials(student) {
 
 /**
  * Teacher rewards dashboard with bank, point awards, leaderboard, and history.
- * @param {{ db: object, setToast: (msg: string) => void }} props
+ * @param {{ db: object, setToast: (msg: string) => void, update?: (mutator: Function, message?: string) => void }} props
  */
-export default function RewardsPage({ db, setToast }) {
+export default function RewardsPage({ db, setToast, update }) {
   const [rewardsBank, setRewardsBank] = useLocalStorage("rewards_bank", []);
   const [rewardForm, setRewardForm] = useState(emptyRewardForm);
   const [selectedStudentId, setSelectedStudentId] = useState("");
@@ -125,12 +125,17 @@ export default function RewardsPage({ db, setToast }) {
       return;
     }
 
+    const awardMessage = targetIds.length > 1
+      ? `Awarded ${selectedReward.name} to ${targetIds.length} students.`
+      : `${selectedReward.name} awarded successfully.`;
+
     targetIds.forEach(studentId => {
-      const currentPoints = getStudentPoints(studentId);
+      const numericId = Number(studentId);
+      const currentPoints = getStudentPoints(numericId);
       const nextPoints = currentPoints + selectedReward.pointValue;
-      setStudentPoints(studentId, nextPoints);
-      addPointsLogEntry(studentId, {
-        id: Date.now() + studentId,
+      setStudentPoints(numericId, nextPoints);
+      addPointsLogEntry(numericId, {
+        id: Date.now() + numericId,
         date: today(),
         rewardId: selectedReward.id,
         rewardName: selectedReward.name,
@@ -141,15 +146,31 @@ export default function RewardsPage({ db, setToast }) {
       });
     });
 
+    if (update) {
+      update(dbState => {
+        targetIds.forEach(studentId => {
+          const student = dbState.students.find(item => item.id === Number(studentId));
+          if (!student) return;
+          student.balance = (student.balance || 0) + selectedReward.pointValue;
+          student.totalEarned = (student.totalEarned || 0) + selectedReward.pointValue;
+          student.streak = (student.streak || 0) + 1;
+          student.status = "on_track";
+          dbState.transactions.push({
+            id: Date.now() + student.id,
+            studentId: student.id,
+            amount: selectedReward.pointValue,
+            description: `${selectedReward.icon} ${selectedReward.name}${awardNote.trim() ? `: ${awardNote.trim()}` : ""}`,
+            date: today()
+          });
+        });
+      });
+    }
+
     setAwardNote("");
     if (!bulkMode) setSelectedStudentId("");
     if (bulkMode) setBulkStudentIds([]);
     bumpRefresh();
-    setToast(
-      targetIds.length > 1
-        ? `Awarded ${selectedReward.name} to ${targetIds.length} students.`
-        : `${selectedReward.name} awarded successfully.`
-    );
+    setToast(awardMessage);
   }
 
   function openHistory(student) {
@@ -293,6 +314,7 @@ export default function RewardsPage({ db, setToast }) {
             </button>
           </div>
 
+          <p className="rewards-award-hint">Select a student, pick a reward, then click Award Points.</p>
           <div className="rewards-award-form">
             {!bulkMode ? (
               <label className="field-label">

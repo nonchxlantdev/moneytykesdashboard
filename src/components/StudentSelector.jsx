@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 
 /**
@@ -8,6 +8,7 @@ import { Search, X } from "lucide-react";
 export default function StudentSelector({ students, value, onChange, placeholder = "Search students...", required = false }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
 
   const selected = students.find(student => String(student.id) === String(value));
 
@@ -19,19 +20,33 @@ export default function StudentSelector({ students, value, onChange, placeholder
     );
   }, [query, students]);
 
+  useEffect(() => {
+    if (!open) return undefined;
+    function handlePointerDown(event) {
+      if (!rootRef.current?.contains(event.target)) {
+        setOpen(false);
+        setQuery("");
+      }
+    }
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [open]);
+
   function selectStudent(studentId) {
     onChange(String(studentId));
     setQuery("");
     setOpen(false);
   }
 
-  function clearSelection() {
+  function clearSelection(event) {
+    event.stopPropagation();
     onChange("");
     setQuery("");
+    setOpen(false);
   }
 
   return (
-    <div className="student-selector">
+    <div className="student-selector" ref={rootRef}>
       <div className="student-selector-input">
         <Search size={16} />
         <input
@@ -51,6 +66,9 @@ export default function StudentSelector({ students, value, onChange, placeholder
           </button>
         )}
       </div>
+      {selected && !open && (
+        <p className="student-selector-selected">Selected: <strong>{selected.first} {selected.last}</strong></p>
+      )}
       {open && (
         <ul className="student-selector-list" role="listbox">
           {filtered.length ? filtered.map(student => (
@@ -58,6 +76,7 @@ export default function StudentSelector({ students, value, onChange, placeholder
               <button
                 type="button"
                 className={String(student.id) === String(value) ? "selected" : ""}
+                onMouseDown={event => event.preventDefault()}
                 onClick={() => selectStudent(student.id)}
               >
                 <span className="student-selector-avatar">{student.first?.[0]}{student.last?.[0]}</span>

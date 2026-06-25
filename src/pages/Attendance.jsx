@@ -141,70 +141,95 @@ export default function AttendancePage({ db, setToast }) {
   }
 
   return (
-    <section className="attendance-page">
-      <div className="page-heading">
-        <div>
-          <p className="eyebrow">Classroom</p>
-          <h2>Attendance</h2>
-        </div>
-        <div className="attendance-mode-toggle">
+    <section className="attendance-page attendance-compact">
+      <div className="attendance-topbar">
+        <div className="attendance-mode-toggle compact">
           <button type="button" className={mode === "take" ? "active" : ""} onClick={() => setMode("take")}>
-            <ClipboardCheck size={16} /> Take Attendance
+            <ClipboardCheck size={15} /> Take
           </button>
           <button type="button" className={mode === "report" ? "active" : ""} onClick={() => setMode("report")}>
-            <FileText size={16} /> View Report
+            <FileText size={15} /> Report
           </button>
+        </div>
+
+        <div className="attendance-toolbar-inline">
+          {mode === "take" ? (
+            <>
+              <label className="attendance-inline-field">
+                <span>Class</span>
+                <select value={selectedClassId} onChange={event => handleClassChange(event.target.value)}>
+                  {classes.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
+                </select>
+              </label>
+              <label className="attendance-inline-field">
+                <span>Date</span>
+                <input type="date" value={selectedDate} onChange={event => handleDateChange(event.target.value)} />
+              </label>
+              {recordExists && (
+                <button type="button" className="secondary-action compact" onClick={startEdit}>Edit</button>
+              )}
+            </>
+          ) : (
+            <>
+              <label className="attendance-inline-field">
+                <span>Class</span>
+                <select value={reportClassId} onChange={event => setReportClassId(event.target.value)}>
+                  <option value="all">All</option>
+                  {classes.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
+                </select>
+              </label>
+              <label className="attendance-inline-field">
+                <span>From</span>
+                <input type="date" value={reportStart} onChange={event => setReportStart(event.target.value)} />
+              </label>
+              <label className="attendance-inline-field">
+                <span>To</span>
+                <input type="date" value={reportEnd} onChange={event => setReportEnd(event.target.value)} />
+              </label>
+              <label className="attendance-inline-field grow">
+                <span>Student</span>
+                <input type="search" value={reportStudent} placeholder="Filter..." onChange={event => setReportStudent(event.target.value)} />
+              </label>
+              <button type="button" className="secondary-action compact" onClick={exportCsv}>
+                <Download size={15} /> Export
+              </button>
+            </>
+          )}
         </div>
       </div>
 
       {mode === "take" ? (
         <>
-          <div className="attendance-toolbar section-panel">
-            <label className="field-label">
-              Class / Group
-              <select value={selectedClassId} onChange={event => handleClassChange(event.target.value)}>
-                {classes.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
-              </select>
-            </label>
-            <label className="field-label">
-              Date
-              <input type="date" value={selectedDate} onChange={event => handleDateChange(event.target.value)} />
-            </label>
-          </div>
-
           {recordExists && (
-            <div className="attendance-warning section-panel">
-              <AlertTriangle size={18} />
-              <div>
-                <strong>Attendance already recorded for this class and date.</strong>
-                <p>Use Edit mode to update the saved record.</p>
-              </div>
-              <button type="button" className="secondary-action" onClick={startEdit}>Edit Attendance</button>
+            <div className="attendance-warning compact">
+              <AlertTriangle size={16} />
+              <span>Attendance saved for this date. Use Edit to change it.</span>
             </div>
           )}
 
-          <article className="section-panel attendance-list-card">
-            <div className="section-heading">
-              <h2>Students</h2>
-              <Badge tone="teal">{classStudents.length} enrolled</Badge>
+          <article className="section-panel attendance-list-card compact">
+            <div className="section-heading compact">
+              <h2>Roll Call</h2>
+              <Badge tone="teal">{classStudents.length}</Badge>
             </div>
             {!classStudents.length ? (
               <EmptyState title="No students in this class" text="Add students to take attendance." />
             ) : (
-              <div className="attendance-student-list">
+              <div className="attendance-student-list compact">
                 {classStudents.map(student => (
-                  <div className="attendance-student-row" key={student.id}>
+                  <div className="attendance-student-row compact" key={student.id}>
                     <div className="attendance-student-name">
                       <span className="attendance-avatar">{student.first?.[0]}{student.last?.[0]}</span>
                       <strong>{student.first} {student.last}</strong>
                     </div>
-                    <div className="attendance-status-options">
+                    <div className="attendance-status-options compact">
                       {ATTENDANCE_STATUSES.map(status => (
                         <button
                           key={status.value}
                           type="button"
-                          className={`attendance-status-btn ${entries[student.id]?.status === status.value ? "selected" : ""}`}
+                          className={`attendance-status-btn compact ${entries[student.id]?.status === status.value ? "selected" : ""}`}
                           disabled={recordExists}
+                          title={status.label}
                           onClick={() => updateEntry(student.id, { status: status.value })}
                         >
                           <span>{status.emoji}</span>
@@ -214,9 +239,9 @@ export default function AttendancePage({ db, setToast }) {
                     </div>
                     {entries[student.id]?.status === "other" && (
                       <input
-                        className="attendance-note-input"
+                        className="attendance-note-input compact"
                         type="text"
-                        placeholder="Add a short note..."
+                        placeholder="Note..."
                         value={entries[student.id]?.note || ""}
                         disabled={recordExists}
                         onChange={event => updateEntry(student.id, { note: event.target.value })}
@@ -227,7 +252,7 @@ export default function AttendancePage({ db, setToast }) {
               </div>
             )}
             <button
-              className="primary-action teal-action"
+              className="primary-action teal-action compact"
               type="button"
               disabled={recordExists || !classStudents.length}
               onClick={saveAttendance}
@@ -237,66 +262,39 @@ export default function AttendancePage({ db, setToast }) {
           </article>
         </>
       ) : (
-        <>
-          <div className="attendance-toolbar section-panel">
-            <label className="field-label">
-              Class
-              <select value={reportClassId} onChange={event => setReportClassId(event.target.value)}>
-                <option value="all">All Classes</option>
-                {classes.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
-              </select>
-            </label>
-            <label className="field-label">
-              Start Date
-              <input type="date" value={reportStart} onChange={event => setReportStart(event.target.value)} />
-            </label>
-            <label className="field-label">
-              End Date
-              <input type="date" value={reportEnd} onChange={event => setReportEnd(event.target.value)} />
-            </label>
-            <label className="field-label">
-              Student Name
-              <input type="search" value={reportStudent} placeholder="Filter by name..." onChange={event => setReportStudent(event.target.value)} />
-            </label>
-            <button type="button" className="secondary-action" onClick={exportCsv}>
-              <Download size={16} /> Export CSV
-            </button>
-          </div>
-
-          <article className="section-panel">
-            <div className="section-heading"><h2>Attendance Report</h2></div>
-            {reportRows.length ? (
-              <>
-                <div className="attendance-report-table">
-                  <div className="attendance-report-head">
-                    <span>Student Name</span>
-                    <span>Date</span>
-                    <span>Status</span>
-                    <span>Notes</span>
+        <article className="section-panel attendance-report-card compact">
+          <div className="section-heading compact"><h2>Report</h2></div>
+          {reportRows.length ? (
+            <>
+              <div className="attendance-report-table compact">
+                <div className="attendance-report-head">
+                  <span>Student</span>
+                  <span>Date</span>
+                  <span>Status</span>
+                  <span>Notes</span>
+                </div>
+                {reportRows.map((row, index) => (
+                  <div className="attendance-report-row" key={`${row.studentId}-${row.date}-${index}`}>
+                    <span>{row.studentName}</span>
+                    <span>{row.date}</span>
+                    <span><Badge tone={row.status === "present" ? "success" : "default"}>{row.status}</Badge></span>
+                    <span>{row.note || "—"}</span>
                   </div>
-                  {reportRows.map((row, index) => (
-                    <div className="attendance-report-row" key={`${row.studentId}-${row.date}-${index}`}>
-                      <span>{row.studentName}</span>
-                      <span>{row.date}</span>
-                      <span><Badge tone={row.status === "present" ? "success" : "default"}>{row.status}</Badge></span>
-                      <span>{row.note || "—"}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="attendance-summary-grid">
-                  {Object.entries(reportSummary).map(([name, counts]) => (
-                    <article className="attendance-summary-card" key={name}>
-                      <strong>{name}</strong>
-                      <p>Present {counts.present} · Late {counts.late} · Absent {counts.absent} · Sick {counts.sick}</p>
-                    </article>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <EmptyState title="No attendance records" text="Take attendance to populate this report." />
-            )}
-          </article>
-        </>
+                ))}
+              </div>
+              <div className="attendance-summary-grid compact">
+                {Object.entries(reportSummary).map(([name, counts]) => (
+                  <article className="attendance-summary-card compact" key={name}>
+                    <strong>{name}</strong>
+                    <p>P {counts.present} · L {counts.late} · A {counts.absent} · S {counts.sick}</p>
+                  </article>
+                ))}
+              </div>
+            </>
+          ) : (
+            <EmptyState title="No attendance records" text="Take attendance to populate this report." />
+          )}
+        </article>
       )}
     </section>
   );

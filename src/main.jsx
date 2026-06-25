@@ -38,39 +38,33 @@ import {
   AlertTriangle,
   User,
   UserPlus,
-  Users,
-  Wallet
+  Users
 } from "lucide-react";
 import { moneyMoveQuestions } from "./moneyMoveQuestions";
 import LoginPage from "./pages/LoginPage";
 import RewardsPage from "./pages/RewardsPage";
 import AttendancePage from "./pages/Attendance";
 import CreateLessonsPage from "./pages/CreateLessonsPage";
+import LessonsLibraryPage from "./pages/LessonsLibraryPage";
 import FinancialZonePage from "./pages/FinancialZone";
 import CalendarPage from "./pages/Calendar";
 import DateCard from "./components/DateCard";
 import CalendarWidget from "./components/CalendarWidget";
 import { useLocalStorage } from "./hooks/useLocalStorage";
+import { applyMockSeed, seedLocalStorageMockData, shouldSeedMockData } from "./data/seedMockData";
+import { formatPoints } from "./utils/points";
 import "../styles.css";
 import "./react.css";
 
 const STORAGE_KEY = "moneytykes.teacher.dashboard.v3";
 const assetPath = path => `${import.meta.env.BASE_URL}${path}`;
 
-const currency = new Intl.NumberFormat("en-BZ", {
-  style: "currency",
-  currency: "BZD",
-  currencyDisplay: "narrowSymbol",
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 0
-});
-
 const navItems = [
   { label: "Admin", view: "admin", icon: ShieldAlert },
   { label: "Dashboard", view: "dashboard", icon: Home },
   { label: "Students", view: "students", icon: Users },
-  { label: "Lessons", view: "lessons", icon: Play },
   { label: "Create Lessons", view: "create-lessons", icon: BookOpen },
+  { label: "Lessons", view: "lessons", icon: Play },
   { label: "Attendance", view: "attendance", icon: ClipboardCheck },
   { label: "Calendar", view: "calendar", icon: CalendarDays },
   { label: "Rewards", view: "rewards", icon: Gift },
@@ -141,18 +135,28 @@ function createDatabase() {
     transactions: [],
     tips: [
       "Encourage students to set savings goals. Small steps today build financial confidence.",
-      "Ask students to separate needs from wants before spending classroom earnings.",
-      "A clear budget gives every dollar a job before it gets spent."
+      "Ask students to separate needs from wants before spending reward points.",
+      "A clear point goal gives every reward a purpose before it gets spent."
     ]
   };
 }
 
 function loadDatabase() {
+  const baseUrl = import.meta.env.BASE_URL;
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || createDatabase();
-    return normalizeDatabase(saved);
+    let saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || createDatabase();
+    saved = normalizeDatabase(saved);
+    if (shouldSeedMockData(saved)) {
+      saved = applyMockSeed(saved, baseUrl);
+      seedLocalStorageMockData(saved);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    }
+    return saved;
   } catch {
-    return createDatabase();
+    const saved = applyMockSeed(createDatabase(), baseUrl);
+    seedLocalStorageMockData(saved);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    return saved;
   }
 }
 
@@ -212,7 +216,7 @@ function App() {
       mutator(next);
       return next;
     });
-    setToast(message);
+    if (message) setToast(message);
   }
 
   function navigate(nextView, options = {}) {
@@ -292,8 +296,8 @@ function App() {
           {view === "admin" && <AdminDashboard db={db} update={update} />}
           {view === "dashboard" && <Dashboard {...pageProps} />}
           {view === "students" && <Students {...pageProps} />}
-          {view === "lessons" && <LessonsPage {...pageProps} />}
-          {view === "create-lessons" && <CreateLessonsPage db={db} setToast={setToast} />}
+          {view === "lessons" && <LessonsLibraryPage setToast={setToast} navigate={navigate} />}
+          {view === "create-lessons" && <CreateLessonsPage db={db} setToast={setToast} navigate={navigate} />}
           {view === "attendance" && <AttendancePage db={db} setToast={setToast} />}
           {view === "calendar" && (
             <CalendarPage
@@ -303,7 +307,7 @@ function App() {
               onFocusHandled={() => setCalendarFocusDate(null)}
             />
           )}
-          {view === "rewards" && <RewardsPage db={db} setToast={setToast} />}
+          {view === "rewards" && <RewardsPage db={db} setToast={setToast} update={update} />}
           {view === "leaderboard" && <Leaderboard {...pageProps} />}
           {view === "reports" && <Reports dashboard={dashboard} />}
           {view === "financial-zone" && <FinancialZonePage setToast={setToast} />}
@@ -371,164 +375,6 @@ function NavButton({ item, active, navigate, compact = false, showLabel = true }
     <button className={`${className} ${active ? "active" : ""}`} type="button" title={item.label} onClick={() => navigate(item.view)}>
       <Icon />{showLabel && <span>{item.label}</span>}
     </button>
-  );
-}
-
-const lessons = [
-  {
-    id: "child-sign-up",
-    title: "Child Sign Up",
-    module: "Getting Started",
-    topic: "Account Setup",
-    grade: "Parent/Child",
-    duration: "3:45",
-    status: "Not Started",
-    reward: 50,
-    videoId: "ZBVL6Cla3JY"
-  },
-  {
-    id: "parents-sign-up",
-    title: "Parents Sign Up",
-    module: "Getting Started",
-    topic: "Parent Access",
-    grade: "Parents",
-    duration: "4:12",
-    status: "Not Started",
-    reward: 50,
-    videoId: "q_MXzC8Pq-g"
-  },
-  {
-    id: "moneytykes-music-video",
-    title: "MoneyTykes Music Video",
-    module: "MoneyTykes Intro",
-    topic: "Engagement",
-    grade: "All Ages",
-    duration: "4:50",
-    status: "Not Started",
-    reward: 50,
-    videoId: "FcoHlbgjz5A"
-  }
-].map(lesson => ({
-  ...lesson,
-  videoUrl: `https://www.youtube.com/watch?v=${lesson.videoId}`,
-  thumbnail: `https://img.youtube.com/vi/${lesson.videoId}/hqdefault.jpg`
-}));
-
-function LessonsPage({ setToast }) {
-  const [query, setQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("All Lessons");
-  const [moduleFilter, setModuleFilter] = useState("All Modules");
-  const [topicFilter, setTopicFilter] = useState("All Topics");
-  const [gradeFilter, setGradeFilter] = useState("All Grades");
-  const [durationFilter, setDurationFilter] = useState("Duration");
-  const [favorites, setFavorites] = useState([]);
-  const [selectedLesson, setSelectedLesson] = useState(null);
-
-  const filteredLessons = lessons.filter(lesson => {
-    const matchesQuery = `${lesson.title} ${lesson.module}`.toLowerCase().includes(query.toLowerCase());
-    const matchesTab = activeTab === "All Lessons"
-      || (activeTab === "Favorites" ? favorites.includes(lesson.id) : lesson.status === activeTab);
-    const matchesModule = moduleFilter === "All Modules" || lesson.module === moduleFilter;
-    const matchesTopic = topicFilter === "All Topics" || lesson.topic === topicFilter;
-    const matchesGrade = gradeFilter === "All Grades" || lesson.grade === gradeFilter;
-    const seconds = Number(lesson.duration.split(":")[0]) * 60 + Number(lesson.duration.split(":")[1]);
-    const matchesDuration = durationFilter === "Duration"
-      || (durationFilter === "Under 4 min" && seconds < 240)
-      || (durationFilter === "4+ min" && seconds >= 240);
-    return matchesQuery && matchesTab && matchesModule && matchesTopic && matchesGrade && matchesDuration;
-  });
-
-  function toggleFavorite(event, lessonId) {
-    event.stopPropagation();
-    setFavorites(current => current.includes(lessonId)
-      ? current.filter(id => id !== lessonId)
-      : [...current, lessonId]);
-  }
-
-  function showAssignment(event) {
-    event?.stopPropagation();
-    setToast("Lesson assignment workflow coming soon.");
-  }
-
-  return (
-    <section className="lessons-library" aria-label="Lessons library">
-      <div className="lesson-stats-grid">
-        {[
-          { label: "Total Lessons", value: lessons.length, meta: "Available in library", icon: BookOpen },
-          { label: "Assigned", value: 0, meta: "To your students", icon: Users },
-          { label: "Completed", value: 0, meta: "This month", icon: Check },
-          { label: "Drafts", value: 0, meta: "Created by you", icon: Pencil }
-        ].map(({ label, value, meta, icon: Icon }) => (
-          <article className="lesson-stat-card" key={label}>
-            <span className="lesson-stat-icon"><Icon /></span>
-            <span><small>{label}</small><strong>{value}</strong><em>{meta}</em></span>
-          </article>
-        ))}
-      </div>
-
-      <div className="lesson-filter-bar">
-        <select aria-label="Lesson type"><option>All Lessons</option></select>
-        <select value={moduleFilter} onChange={event => setModuleFilter(event.target.value)} aria-label="Module">
-          <option>All Modules</option>{[...new Set(lessons.map(lesson => lesson.module))].map(value => <option key={value}>{value}</option>)}
-        </select>
-        <select value={topicFilter} onChange={event => setTopicFilter(event.target.value)} aria-label="Topic">
-          <option>All Topics</option>{lessons.map(lesson => <option key={lesson.topic}>{lesson.topic}</option>)}
-        </select>
-        <select value={gradeFilter} onChange={event => setGradeFilter(event.target.value)} aria-label="Grade">
-          <option>All Grades</option>{lessons.map(lesson => <option key={lesson.grade}>{lesson.grade}</option>)}
-        </select>
-        <select value={durationFilter} onChange={event => setDurationFilter(event.target.value)} aria-label="Duration">
-          <option>Duration</option><option>Under 4 min</option><option>4+ min</option>
-        </select>
-        <label className="lesson-search"><Search /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search lessons..." /></label>
-      </div>
-
-      <div className="lesson-tabs" role="tablist" aria-label="Lesson status">
-        {["All Lessons", "Not Started", "In Progress", "Completed", "Favorites"].map(tab => (
-          <button className={activeTab === tab ? "active" : ""} type="button" role="tab" aria-selected={activeTab === tab} onClick={() => setActiveTab(tab)} key={tab}>{tab}</button>
-        ))}
-      </div>
-
-      {filteredLessons.length ? (
-        <div className="lesson-card-grid">
-          {filteredLessons.map(lesson => (
-            <article className="lesson-card" key={lesson.id} onClick={() => setSelectedLesson(lesson)}>
-              <div className="lesson-thumbnail">
-                <img src={lesson.thumbnail} alt="" />
-                <span className="lesson-play"><Play fill="currentColor" /></span>
-                <span className="lesson-duration">{lesson.duration}</span>
-                <button className={`lesson-favorite ${favorites.includes(lesson.id) ? "active" : ""}`} type="button" aria-label="Toggle favorite" onClick={event => toggleFavorite(event, lesson.id)}><Heart fill={favorites.includes(lesson.id) ? "currentColor" : "none"} /></button>
-              </div>
-              <div className="lesson-card-body">
-                <div className="lesson-card-heading"><span>{lesson.topic}</span><span>{lesson.grade}</span></div>
-                <h2>{lesson.title}</h2>
-                <p>{lesson.module}</p>
-                <div className="lesson-card-footer">
-                  <span className="lesson-status"><Play /> {lesson.status}</span>
-                  <strong className="lesson-reward"><span>$</span> {lesson.reward}</strong>
-                </div>
-                <button className="lesson-assign-button" type="button" onClick={showAssignment}>Assign Lesson</button>
-              </div>
-            </article>
-          ))}
-        </div>
-      ) : <div className="lesson-empty"><BookOpen /><h2>No lessons found</h2><p>Try another search, filter, or status.</p></div>}
-
-      <section className="lesson-callout">
-        <span className="lesson-callout-icon"><Trophy /></span>
-        <div><h2>Empower your students with financial knowledge!</h2><p>Assign engaging lessons and watch your class grow their money skills.</p></div>
-        <button type="button" onClick={showAssignment}><BookOpen /> Assign Lessons</button>
-      </section>
-
-      {selectedLesson && (
-        <div className="lesson-modal-backdrop" role="presentation" onMouseDown={() => setSelectedLesson(null)}>
-          <section className="lesson-video-modal" role="dialog" aria-modal="true" aria-label={`${selectedLesson.title} video`} onMouseDown={event => event.stopPropagation()}>
-            <div className="lesson-modal-heading"><div><small>{selectedLesson.module}</small><h2>{selectedLesson.title}</h2></div><button type="button" aria-label="Close video" onClick={() => setSelectedLesson(null)}><X /></button></div>
-            <div className="lesson-video-frame"><iframe src={`https://www.youtube.com/embed/${selectedLesson.videoId}?autoplay=1`} title={selectedLesson.title} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen /></div>
-          </section>
-        </div>
-      )}
-    </section>
   );
 }
 
@@ -821,7 +667,7 @@ function Dashboard(props) {
         <div className="section-heading"><h2>Quick Actions</h2></div>
         <div className="quick-action-grid">
           <ActionCard icon={Plus} title="Add Student" text="Grow your classroom roster." onClick={() => navigate("students")} />
-          <ActionCard icon={Wallet} title="Give Earnings" text="Reward participation quickly." onClick={() => navigate("students")} />
+          <ActionCard icon={Trophy} title="Award Points" text="Recognize student achievements." onClick={() => navigate("rewards")} />
           <ActionCard icon={BookOpen} title="Create Lesson" text="Build and publish lessons." onClick={() => navigate("create-lessons")} />
           <ActionCard icon={Trophy} title="Launch Game" text="Open Money Moves Live." onClick={() => navigate("game")} />
         </div>
@@ -844,7 +690,7 @@ function Dashboard(props) {
 function StatsGrid({ dashboard }) {
   const stats = [
     ["Students", dashboard.studentCount, Users],
-    ["Total Earned", money(dashboard.totalEarned), Wallet],
+    ["Total Points", formatPoints(dashboard.totalEarned), Trophy],
     ["Completion", `${dashboard.completionRate}%`, Check],
     ["Active Streaks", dashboard.activeStreaks, Flame]
   ];
@@ -900,7 +746,7 @@ function TopEarners({ earners, range, setRange, navigate }) {
   return (
     <article className="section-panel">
       <div className="section-heading inline-control">
-        <h2>Top Earners</h2>
+        <h2>Top Point Earners</h2>
         <select value={range} onChange={event => setRange(event.target.value)}>
           <option value="week">This Week</option>
           <option value="month">This Month</option>
@@ -918,7 +764,7 @@ function RecentTasks({ tasks, navigate }) {
     <article className="section-panel">
       <div className="section-heading inline-control">
         <h2>Recent Tasks</h2>
-        <button className="link-button" type="button" onClick={() => navigate("tasks")}>Create Task</button>
+        <button className="link-button" type="button" onClick={() => navigate("create-lessons")}>Create Lesson</button>
       </div>
       <div className="task-list">
         {tasks.length ? tasks.map(task => <TaskRow key={task.id} task={task} />) : <EmptyState title="No tasks yet" text="Create a task to start tracking progress." />}
@@ -932,7 +778,7 @@ function Insights({ dashboard }) {
     <article className="section-panel">
       <div className="section-heading"><h2>Class Insights</h2></div>
       <div className="insight-grid">
-        <Insight title="Average Wallet" value={money(dashboard.averageBalance)} />
+        <Insight title="Average Points" value={formatPoints(Math.round(dashboard.averageBalance))} />
         <Insight title="Task Library" value={dashboard.taskCount} />
         <Insight title="Top Category" value={dashboard.topCategory} />
         <Insight title="Momentum" value={`${dashboard.completionRate}%`} />
@@ -981,7 +827,7 @@ function Students({ db, dashboard, update, studentFocus, setStudentFocus }) {
       <PageHeading eyebrow="Class Roster" title="Students Dashboard" />
       <div className="management-grid">
         <StudentForm db={db} update={update} editingStudent={editingStudent} onCancelEdit={closeEdit} />
-        <EarningsForm students={db.students} update={update} />
+        <PointsForm students={db.students} update={update} />
       </div>
       {viewingStudent && <StudentProfile student={viewingStudent} onClose={() => setViewingStudent(null)} onEdit={() => { setEditingStudent(viewingStudent); setViewingStudent(null); }} onDelete={deleteStudent} />}
       <article className="section-panel full-width-panel students-roster-card">
@@ -1114,10 +960,10 @@ function StudentForm({ db, update, editingStudent, onCancelEdit }) {
   );
 }
 
-function EarningsForm({ students, update }) {
+function PointsForm({ students, update }) {
   const [studentId, setStudentId] = useState("");
   const [amount, setAmount] = useState(10);
-  const [description, setDescription] = useState("Class participation reward");
+  const [description, setDescription] = useState("Great class participation");
   function submit(event) {
     event.preventDefault();
     update(db => {
@@ -1128,19 +974,19 @@ function EarningsForm({ students, update }) {
       student.streak += 1;
       student.status = "on_track";
       db.transactions.push({ id: Date.now(), studentId: student.id, amount: Number(amount), description, date: today() });
-    }, "Earnings added");
+    }, "Points awarded");
   }
   return (
     <article className="section-panel students-form-card earnings-form-card">
       <div className="section-heading students-card-heading">
-        <span className="card-heading-icon"><Wallet /></span>
-        <h2>Give Earnings</h2>
+        <span className="card-heading-icon"><Trophy /></span>
+        <h2>Award Points</h2>
       </div>
       <form className="stacked-form" onSubmit={submit}>
         <label className="field-label">Student<span className="input-with-icon"><Users /><select value={studentId} onChange={event => setStudentId(event.target.value)} required><option value="">Select student</option>{students.map(student => <option key={student.id} value={student.id}>{student.first} {student.last}</option>)}</select></span></label>
-        <Field label="Amount" icon={Wallet} type="number" value={amount} onChange={setAmount} required />
+        <Field label="Points" icon={Trophy} type="number" value={amount} onChange={setAmount} required />
         <Field label="Description" icon={ClipboardList} value={description} onChange={setDescription} required />
-        <button className="primary-action teal-action" type="submit"><Wallet /> Add BZ$ Earnings</button>
+        <button className="primary-action teal-action" type="submit"><Trophy /> Award Points</button>
       </form>
     </article>
   );
@@ -1151,7 +997,7 @@ function Leaderboard({ dashboard, range, setRange }) {
     <>
       <PageHeading eyebrow="Competition" title="Leaderboard" />
       <article className="section-panel full-width-panel">
-        <div className="section-heading inline-control"><h2>Top Earners</h2><select value={range} onChange={event => setRange(event.target.value)}><option value="week">This Week</option><option value="month">This Month</option><option value="all">All Time</option></select></div>
+        <div className="section-heading inline-control"><h2>Top Point Earners</h2><select value={range} onChange={event => setRange(event.target.value)}><option value="week">This Week</option><option value="month">This Month</option><option value="all">All Time</option></select></div>
         <EarnersList earners={dashboard.leaderboard} />
       </article>
     </>
@@ -1159,7 +1005,7 @@ function Leaderboard({ dashboard, range, setRange }) {
 }
 
 function Reports({ dashboard }) {
-  return <><PageHeading eyebrow="Class Analytics" title="Reports" /><article className="section-panel full-width-panel"><div className="insight-grid"><Insight title="Total Earned" value={money(dashboard.totalEarned)} /><Insight title="Average Balance" value={money(dashboard.averageBalance)} /><Insight title="Completion" value={`${dashboard.completionRate}%`} /><Insight title="Top Category" value={dashboard.topCategory} /></div></article></>;
+  return <><PageHeading eyebrow="Class Analytics" title="Reports" /><article className="section-panel full-width-panel"><div className="insight-grid"><Insight title="Total Points" value={formatPoints(dashboard.totalEarned)} /><Insight title="Average Points" value={formatPoints(Math.round(dashboard.averageBalance))} /><Insight title="Completion" value={`${dashboard.completionRate}%`} /><Insight title="Top Category" value={dashboard.topCategory} /></div></article></>;
 }
 
 function MoneyTykesTipBanner({ tip, inline = false }) {
@@ -1321,7 +1167,7 @@ function GameDashboard({ setToast }) {
         <button className="game-choice-card" type="button" onClick={openLoading}>
           <span><Calculator /></span>
           <strong>Money Moves</strong>
-          <small>Fast questions, timed answers, and team net worth scoring.</small>
+          <small>Fast questions, timed answers, and team point scoring.</small>
           <ChevronRight />
         </button>
       </section>
@@ -1334,7 +1180,7 @@ function GameDashboard({ setToast }) {
         <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
         <img src={assetPath("Logo.png")} alt="MoneyTykes" />
         <p className="eyebrow">Money Moves Live</p>
-        <h2>Build Your Net Worth. Win Your Future.</h2>
+        <h2>Build Your Team Score. Win Your Future.</h2>
         <button className="game-start-button" type="button" onClick={startSetup}><Play /> Start Game</button>
       </section>
     );
@@ -1384,7 +1230,7 @@ function GameDashboard({ setToast }) {
           <div className="money-live-title-row">
             <h2><span>Money Moves</span> <strong>Live!</strong></h2>
           </div>
-          <p>Highest Net Worth Wins!</p>
+          <p>Highest Team Score Wins!</p>
         </div>
       </header>
 
@@ -1415,7 +1261,7 @@ function GameDashboard({ setToast }) {
                     return (
                       <button type="button" key={value} className={`money-tile ${used ? "used" : ""}`} disabled={used} onClick={() => chooseTile(category, value)}>
                         <img className="money-tile-coin" src={assetPath("mtcoinpng.png")} alt="" aria-hidden="true" />
-                        <strong className="money-value">{money(value)}</strong>
+                        <strong className="money-value">{formatPoints(value)}</strong>
                       </button>
                     );
                   })}
@@ -1424,8 +1270,8 @@ function GameDashboard({ setToast }) {
             })}
           </div>
           <footer className="money-live-footer">
-            <div className="goal-card"><strong>Your Goal: Build Your Net Worth!</strong><span>Smart answers. Smart choices. Bigger net worth.</span></div>
-            <NetWorthFactors />
+            <div className="goal-card"><strong>Your Goal: Build Your Team Score!</strong><span>Smart answers. Smart choices. More team points.</span></div>
+            <TeamPointFactors />
             <TeamScoreboard teams={teams} selectedTeamId={selectedTeamId} setSelectedTeamId={setSelectedTeamId} />
           </footer>
         </div>
@@ -1436,8 +1282,8 @@ function GameDashboard({ setToast }) {
             <div className="timer-token"><strong>10</strong><span>sec</span></div>
             <p>Timer is based on question value.</p>
             <ul>
-              <li><span>$100 - $300</span><strong>10 sec</strong></li>
-              <li><span>$400 - $500</span><strong>15 sec</strong></li>
+              <li><span>100 - 300 pts</span><strong>10 sec</strong></li>
+              <li><span>400 - 500 pts</span><strong>15 sec</strong></li>
             </ul>
           </section>
           <section>
@@ -1446,7 +1292,7 @@ function GameDashboard({ setToast }) {
               <li><span>1</span>Choose a category.</li>
               <li><span>2</span>Pick a value.</li>
               <li><span>3</span>Answer within the time.</li>
-              <li><span>4</span>Award net worth.</li>
+              <li><span>4</span>Award team points.</li>
               <li><span>5</span>Highest score wins.</li>
             </ol>
           </section>
@@ -1491,12 +1337,12 @@ function ResetGameModal({ cancelReset, confirmReset }) {
   );
 }
 
-function NetWorthFactors() {
+function TeamPointFactors() {
   return (
     <section className="net-worth-card">
-      <strong>What Affects Your Net Worth?</strong>
+      <strong>What Affects Your Team Score?</strong>
       <div className="factor-row">
-        <span className="factor positive"><Wallet /></span>
+        <span className="factor positive"><Trophy /></span>
         <b>+</b>
         <span className="factor bonus"><BarChart3 /></span>
         <b>+</b>
@@ -1522,7 +1368,7 @@ function TeamScoreboard({ teams, selectedTeamId, setSelectedTeamId }) {
       <div className="scoreboard-list">
         <div className="scoreboard-heading">
           <strong>Scoreboard</strong>
-          <span>Net Worth</span>
+          <span>Team Score</span>
         </div>
         {rankedTeams.map((team, index) => (
           <button
@@ -1533,12 +1379,12 @@ function TeamScoreboard({ teams, selectedTeamId, setSelectedTeamId }) {
           >
             <span className="leader-star-slot">{team.score > 0 && team.score === topScore && <Star className="leader-star" />}</span>
             <span>{team.name}</span>
-            <strong>{money(team.score)}</strong>
+            <strong>{formatPoints(team.score)}</strong>
           </button>
         ))}
       </div>
       <div className="scoreboard-win-art">
-        <strong>Highest Net Worth Wins!</strong>
+        <strong>Highest Team Score Wins!</strong>
       </div>
     </section>
   );
@@ -1552,7 +1398,7 @@ function QuestionModal({ question, timeLeft, timerRunning, startTimer, showAnswe
       <article className="question-card">
         <header>
           <div>
-            <p className="eyebrow">{question.boardTitle} - {money(question.value)}</p>
+            <p className="eyebrow">{question.boardTitle} - {formatPoints(question.value)}</p>
             <h3>{showAnswer ? "Answer" : "Question"}</h3>
           </div>
           <div className="question-header-actions">
@@ -1583,7 +1429,7 @@ function QuestionModal({ question, timeLeft, timerRunning, startTimer, showAnswe
           <button className="secondary-action" type="button" onClick={() => setShowAnswer(!showAnswer)}>
             {showAnswer ? "Show Question" : "Flip Answer"}
           </button>
-          <button className="primary-action" type="button" onClick={awardPoints}>Add {money(question.value)}</button>
+          <button className="primary-action" type="button" onClick={awardPoints}>Award {formatPoints(question.value)}</button>
           <button className="wide-button" type="button" onClick={() => closeQuestion(true)}>No Points</button>
         </div>
       </article>
@@ -1622,7 +1468,7 @@ function StudentTable({ students, detailed = false, onView, onEdit, onDelete }) 
             <div><strong>{student.first} {student.last}</strong><span>{student.schoolName || student.teacherName || student.classLabel || "Student profile"}</span></div>
           </div>
           <span className="student-class">{student.classLabel || "Standard / Form"}</span>
-          <strong className="money student-balance">{money(student.balance || 0)}</strong>
+          <strong className="points-value student-balance">{formatPoints(student.balance || 0)}</strong>
           <div className="student-actions">
             <button className="student-action-button profile" type="button" onClick={() => onView?.(student)}>View Profile</button>
             <button className="student-action-button edit" type="button" onClick={() => onEdit?.(student)}><Pencil /> Edit</button>
@@ -1649,7 +1495,8 @@ function StudentProfile({ student, onClose, onEdit, onDelete }) {
             <p><strong>Age</strong><span>{student.age || "Not set"}</span></p>
             <p><strong>Parent / Guardian</strong><span>{student.guardian || "Not set"}</span></p>
             <p><strong>Contact Number</strong><span>{student.phone || "Not set"}</span></p>
-            <p><strong>Balance</strong><span>{money(student.balance || 0)}</span></p>
+            <p><strong>Points</strong><span>{formatPoints(student.balance || 0)}</span></p>
+            <p><strong>Total Points Earned</strong><span>{formatPoints(student.totalEarned || 0)}</span></p>
             <p><strong>Status</strong><span>{labelStatus(student.status)}</span></p>
           </div>
         </div>
@@ -1664,12 +1511,12 @@ function StudentProfile({ student, onClose, onEdit, onDelete }) {
 }
 
 function EarnersList({ earners }) {
-  if (!earners.length) return <EmptyState title="No earnings yet" text="Add earnings to build the leaderboard." />;
-  return <ol className="earners-list">{earners.map((student, index) => <li key={student.id}><span>{index + 1}</span><strong>{student.first} {student.last}</strong><em>{money(student.totalEarned || 0)}</em></li>)}</ol>;
+  if (!earners.length) return <EmptyState title="No points yet" text="Award points to build the leaderboard." />;
+  return <ol className="earners-list">{earners.map((student, index) => <li key={student.id}><span>{index + 1}</span><strong>{student.first} {student.last}</strong><em>{formatPoints(student.totalEarned || 0)}</em></li>)}</ol>;
 }
 
 function TaskRow({ task }) {
-  return <div className="task-row"><span className="task-dot" /><div><strong>{task.title}</strong><span>{task.category} - Due {formatDate(task.due)}</span></div><em>{money(task.reward)}</em></div>;
+  return <div className="task-row"><span className="task-dot" /><div><strong>{task.title}</strong><span>{task.category} - Due {formatDate(task.due)}</span></div><em>{formatPoints(task.reward)}</em></div>;
 }
 
 function Insight({ title, value }) {
@@ -1720,10 +1567,6 @@ function isValidEmail(value) {
 
 function initials(student) {
   return `${student.first?.[0] || ""}${student.last?.[0] || ""}`.toUpperCase();
-}
-
-function money(value) {
-  return currency.format(Number(value || 0));
 }
 
 function labelStatus(status) {
