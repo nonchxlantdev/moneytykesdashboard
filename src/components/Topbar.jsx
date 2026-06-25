@@ -42,7 +42,6 @@ export default function Topbar({ view, db, search, setSearch, onOpenMenu, menuOp
   const pageSubtitle = PAGE_SUBTITLES[view];
   const isMobileTabView = MOBILE_TAB_VIEWS.has(view);
   const showPageMeta = view !== "dashboard" && !isMobileTabView;
-  const showHomeMeta = view === "dashboard";
 
   function notifySoon(label) {
     setToast(`${label} coming soon.`);
@@ -83,12 +82,6 @@ export default function Topbar({ view, db, search, setSearch, onOpenMenu, menuOp
           </button>
         </div>
       </div>
-
-      {showHomeMeta && (
-        <div className="topbar-meta topbar-meta-home">
-          <p className="eyebrow">{db.school} · {db.className}</p>
-        </div>
-      )}
 
       {showPageMeta && (
         <div className="topbar-meta">

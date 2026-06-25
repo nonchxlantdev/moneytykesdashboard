@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
 import {
   BarChart3,
@@ -145,6 +146,11 @@ function createDatabase() {
   };
 }
 
+function resolveDefaultSchoolFilter(db) {
+  const match = (db.schools || []).find(school => school.name === db.school);
+  return match ? String(match.id) : "all";
+}
+
 function loadDatabase() {
   const baseUrl = import.meta.env.BASE_URL;
   try {
@@ -189,6 +195,7 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
+  const [schoolFilter, setSchoolFilter] = useState(() => resolveDefaultSchoolFilter(loadDatabase()));
   const [range, setRange] = useState("month");
   const [toast, setToast] = useState("");
   const [sidebarHidden, setSidebarHidden] = useState(false);
@@ -263,6 +270,8 @@ function App() {
     setSearch,
     status,
     setStatus,
+    schoolFilter,
+    setSchoolFilter,
     range,
     setRange,
     currentTip,
@@ -301,6 +310,12 @@ function App() {
           setToast={setToast}
         />
 
+        {view === "dashboard" && (
+          <div className="mobile-school-context" aria-label="School context">
+            <p className="eyebrow">{db.school} · {db.className}</p>
+          </div>
+        )}
+
           <div className="view active page-swap" key={view}>
           {view === "admin" && <AdminDashboard db={db} update={update} />}
           {view === "dashboard" && <Dashboard {...pageProps} />}
@@ -325,20 +340,12 @@ function App() {
         </div>
       </main>
 
-      <nav className="mobile-tabbar" aria-label="Mobile navigation">
-        {mobileTabItems.map(item => (
-          <NavButton key={item.view} item={item} active={view === item.view} navigate={navigate} compact />
-        ))}
-        <button
-          type="button"
-          className={`mobile-tab ${menuOpen ? "active" : ""}`}
-          aria-label="Open navigation menu"
-          onClick={toggleSidebarMenu}
-        >
-          <Menu />
-          <span>Menu</span>
-        </button>
-      </nav>
+      <MobileTabBar
+        view={view}
+        menuOpen={menuOpen}
+        navigate={navigate}
+        onOpenMenu={toggleSidebarMenu}
+      />
       <div className={`toast ${toast ? "show" : ""}`} role="status" aria-live="polite">{toast}</div>
     </div>
   );
@@ -408,6 +415,34 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
         )}
       </div>
     </aside>
+  );
+}
+
+function MobileTabBar({ view, menuOpen, navigate, onOpenMenu }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || view === "game") return null;
+
+  return createPortal(
+    <nav className="mobile-tabbar" aria-label="Mobile navigation">
+      {mobileTabItems.map(item => (
+        <NavButton key={item.view} item={item} active={view === item.view} navigate={navigate} compact />
+      ))}
+      <button
+        type="button"
+        className={`mobile-tab ${menuOpen ? "active" : ""}`}
+        aria-label="Open navigation menu"
+        onClick={onOpenMenu}
+      >
+        <Menu />
+        <span>Menu</span>
+      </button>
+    </nav>,
+    document.body
   );
 }
 
@@ -717,7 +752,7 @@ function StatusBadge({ status }) {
 }
 
 function Dashboard(props) {
-  const { dashboard, db, search, setSearch, status, setStatus, currentTip, navigate, setStudentFocus, calendarEvents } = props;
+  const { dashboard, db, search, setSearch, status, setStatus, schoolFilter, setSchoolFilter, currentTip, navigate, setStudentFocus, calendarEvents } = props;
   return (
     <div className="dashboard-main">
       <section className="dashboard-hero-row">
@@ -762,7 +797,17 @@ function Dashboard(props) {
       </section>
 
       <section className="content-grid">
-        <StudentOverview db={db} search={search} setSearch={setSearch} status={status} setStatus={setStatus} navigate={navigate} setStudentFocus={setStudentFocus} />
+        <StudentOverview
+          db={db}
+          search={search}
+          setSearch={setSearch}
+          status={status}
+          setStatus={setStatus}
+          schoolFilter={schoolFilter}
+          setSchoolFilter={setSchoolFilter}
+          navigate={navigate}
+          setStudentFocus={setStudentFocus}
+        />
         <RecentTasks tasks={db.tasks.slice(-4).reverse()} navigate={navigate} />
         <Insights dashboard={dashboard} />
       </section>
@@ -782,8 +827,8 @@ function ActionCard({ icon: Icon, title, text, onClick }) {
   );
 }
 
-function StudentOverview({ db, search, setSearch, status, setStatus, navigate, setStudentFocus }) {
-  const students = filterStudents(db.students, search, status).slice(0, 5);
+function StudentOverview({ db, search, setSearch, status, setStatus, schoolFilter, setSchoolFilter, navigate, setStudentFocus }) {
+  const students = filterStudents(db.students, search, status, schoolFilter).slice(0, 5);
   function openStudent(student, mode) {
     setStudentFocus({ id: student.id, mode });
     navigate("students");
@@ -791,18 +836,16 @@ function StudentOverview({ db, search, setSearch, status, setStatus, navigate, s
   return (
     <article className="section-panel student-overview">
       <div className="section-heading"><h2>Student Overview</h2></div>
-      <div className="student-tools">
-        <label className="search-box">
-          <input type="search" placeholder="Search students..." value={search} onChange={event => setSearch(event.target.value)} />
-        </label>
-        <select value={status} onChange={event => setStatus(event.target.value)}>
-          <option value="all">All statuses</option>
-          <option value="on_track">On Track</option>
-          <option value="at_risk">At Risk</option>
-          <option value="inactive">Inactive</option>
-        </select>
-      </div>
-      <StudentTable students={students} onView={student => openStudent(student, "view")} linkNamesOnly />
+      <StudentListFilters
+        schools={db.schools}
+        schoolFilter={schoolFilter}
+        setSchoolFilter={setSchoolFilter}
+        search={search}
+        setSearch={setSearch}
+        status={status}
+        setStatus={setStatus}
+      />
+      <StudentTable students={students} simple onView={student => openStudent(student, "view")} linkNamesOnly />
     </article>
   );
 }
@@ -852,9 +895,10 @@ function Insights({ dashboard }) {
   );
 }
 
-function Students({ db, dashboard, update, studentFocus, setStudentFocus }) {
+function Students({ db, dashboard, update, studentFocus, setStudentFocus, search, setSearch, status, setStatus, schoolFilter, setSchoolFilter }) {
   const [editingStudent, setEditingStudent] = useState(null);
   const [viewingStudent, setViewingStudent] = useState(null);
+  const rosterStudents = filterStudents(dashboard.students, search, status, schoolFilter);
 
   useEffect(() => {
     if (!studentFocus) return;
@@ -900,7 +944,20 @@ function Students({ db, dashboard, update, studentFocus, setStudentFocus }) {
           <span className="card-heading-icon"><Users /></span>
           <h2>Students</h2>
         </div>
-        <StudentTable students={dashboard.students} detailed onView={setViewingStudent} onEdit={setEditingStudent} onDelete={deleteStudent} />
+        <StudentListFilters
+          schools={db.schools}
+          schoolFilter={schoolFilter}
+          setSchoolFilter={setSchoolFilter}
+          search={search}
+          setSearch={setSearch}
+          status={status}
+          setStatus={setStatus}
+        />
+        <StudentTable
+          students={rosterStudents}
+          simple
+          onView={setViewingStudent}
+        />
       </article>
     </div>
   );
@@ -1526,28 +1583,64 @@ function PageHeading({ eyebrow, title, hideOnMobile = false }) {
   );
 }
 
-function StudentTable({ students, detailed = false, onView, onEdit, onDelete, linkNamesOnly = false }) {
+function StudentListFilters({ schools, schoolFilter, setSchoolFilter, search, setSearch, status, setStatus, showStatus = true }) {
+  return (
+    <div className="student-tools">
+      <label className="search-box">
+        <input
+          type="search"
+          placeholder="Search students..."
+          value={search}
+          onChange={event => setSearch(event.target.value)}
+          aria-label="Search students"
+        />
+      </label>
+      <select value={schoolFilter} onChange={event => setSchoolFilter(event.target.value)} aria-label="Filter by school">
+        <option value="all">All schools</option>
+        {(schools || []).map(school => (
+          <option key={school.id} value={String(school.id)}>{school.name}</option>
+        ))}
+      </select>
+      {showStatus && (
+        <select value={status} onChange={event => setStatus(event.target.value)} aria-label="Filter by status">
+          <option value="all">All statuses</option>
+          <option value="on_track">On Track</option>
+          <option value="at_risk">At Risk</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      )}
+    </div>
+  );
+}
+
+function StudentTable({ students, detailed = false, onView, onEdit, onDelete, linkNamesOnly = false, simple = false }) {
   if (!students.length) return <EmptyState title="No students yet" text="Add students to begin tracking progress." />;
   return (
-    <div className={`student-table ${linkNamesOnly ? "name-links" : ""}`}>
+    <div className={`student-table ${linkNamesOnly ? "name-links" : ""} ${simple ? "student-table-simple" : ""}`}>
       {students.map(student => (
-        <div className="student-row" key={student.id}>
+        <div className={`student-row ${simple ? "student-row-simple" : ""}`} key={student.id}>
           <div className="student-person">
             <span className="avatar initials">{student.photo ? <img src={student.photo} alt="" /> : initials(student)}</span>
             <div>
-              {linkNamesOnly ? (
+              {linkNamesOnly || simple ? (
                 <button type="button" className="student-name-link" onClick={() => onView?.(student)}>
                   {student.first} {student.last}
                 </button>
               ) : (
                 <strong>{student.first} {student.last}</strong>
               )}
-              <span>{student.schoolName || student.teacherName || student.classLabel || "Student profile"}</span>
+              {!simple && (
+                <span>{student.schoolName || student.teacherName || student.classLabel || "Student profile"}</span>
+              )}
             </div>
           </div>
-          <span className="student-class">{student.classLabel || "Standard / Form"}</span>
+          {simple ? (
+            <span className="student-age">{student.age ? `${student.age} yrs` : "—"}</span>
+          ) : (
+            <span className="student-class">{student.classLabel || "Standard / Form"}</span>
+          )}
           <strong className="points-value student-balance">{formatPoints(student.balance || 0)}</strong>
-          {!linkNamesOnly && (
+          {!simple && !linkNamesOnly && (
             <div className="student-actions">
               <button className="student-action-button profile" type="button" onClick={() => onView?.(student)}>View Profile</button>
               <button className="student-action-button edit" type="button" onClick={() => onEdit?.(student)}><Pencil /> Edit</button>
@@ -1633,11 +1726,12 @@ function buildDashboard(db) {
   };
 }
 
-function filterStudents(students, search, status) {
+function filterStudents(students, search, status, schoolId = "all") {
   return students.filter(student => {
     const matchesSearch = `${student.first} ${student.last} ${student.email}`.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = status === "all" || student.status === status;
-    return matchesSearch && matchesStatus;
+    const matchesSchool = schoolId === "all" || String(student.schoolId) === String(schoolId);
+    return matchesSearch && matchesStatus && matchesSchool;
   });
 }
 

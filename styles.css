@@ -874,7 +874,7 @@ input {
 
 .student-tools {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 142px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(140px, 0.95fr) minmax(128px, 0.8fr);
   gap: 10px;
   margin-bottom: 14px;
 }

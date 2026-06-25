@@ -259,13 +259,13 @@ a,
     flex: 0 0 auto;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 2px;
+    gap: 6px;
     margin-left: auto;
   }
 
   .topbar-icon-button {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     padding: 6px;
   }
 
@@ -274,8 +274,8 @@ a,
   }
 
   .topbar-logout-button {
-    width: 34px;
-    min-width: 34px;
+    width: 36px;
+    min-width: 36px;
     padding: 0;
     justify-content: center;
   }
@@ -586,14 +586,38 @@ a,
     gap: 8px;
   }
 
-  .student-table.name-links .student-row {
+  .student-table.name-links:not(.student-table-simple) .student-row {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px;
     padding: 12px 6px;
   }
 
-  .student-table.name-links .student-class {
+  .student-table.name-links:not(.student-table-simple) .student-class {
     display: none;
+  }
+
+  .student-table-simple .student-row,
+  .student-table-simple.name-links .student-row,
+  .students-roster-card .student-table-simple .student-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 10px 14px;
+    padding: 14px;
+  }
+
+  .student-table-simple .student-person {
+    grid-column: auto;
+    min-width: 0;
+  }
+
+  .student-table-simple .student-age::before {
+    content: "Age";
+    display: block;
+    margin-bottom: 2px;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   .student-person {
@@ -652,14 +676,15 @@ a,
     min-height: 140px;
   }
 
-  .topbar-meta-home {
+  .mobile-school-context {
     display: block;
     width: 100%;
     min-width: 0;
-    padding: 0;
+    margin: -4px 0 10px;
+    padding: 0 2px;
   }
 
-  .topbar-meta-home .eyebrow {
+  .mobile-school-context .eyebrow {
     margin: 0;
     font-size: 0.78rem;
     line-height: 1.35;
@@ -810,6 +835,36 @@ a,
 /* Dashboard student overview — clickable names */
 .student-table.name-links .student-row {
   grid-template-columns: minmax(150px, 1.5fr) 92px 70px;
+}
+
+.student-tools {
+  grid-template-columns: minmax(0, 1.2fr) minmax(140px, 0.95fr) minmax(128px, 0.8fr);
+}
+
+.student-table-simple .student-row,
+.students-roster-card .student-table-simple .student-row {
+  grid-template-columns: minmax(0, 1fr) 72px 92px;
+  align-items: center;
+}
+
+.student-table-simple.name-links .student-row {
+  grid-template-columns: minmax(0, 1fr) 72px 92px;
+}
+
+.student-table-simple .student-person > div {
+  min-width: 0;
+}
+
+.student-age {
+  color: #64748b;
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.react-app.theme-light .student-age {
+  color: var(--mt-text-muted, #64748b);
 }
 
 .student-name-link {
@@ -981,7 +1036,7 @@ a,
   }
 
   .student-tools {
-    grid-template-columns: minmax(0, 1fr) 170px;
+    grid-template-columns: minmax(0, 1fr) minmax(140px, 0.95fr) minmax(128px, 0.8fr);
   }
 
   .topbar-search {
@@ -995,9 +1050,9 @@ a,
   }
 }
 
-/* School context only on Home — hidden on tablet/desktop topbar */
+/* School context below topbar on mobile Home only */
 @media (min-width: 768px) {
-  .topbar-meta-home {
+  .mobile-school-context {
     display: none;
   }
 }
@@ -1016,9 +1071,46 @@ a,
 
   .app-shell .topbar,
   .react-app .topbar {
-    margin: 0 0 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    margin: 0 0 8px !important;
     width: 100% !important;
     max-width: 100% !important;
+  }
+
+  .react-app .topbar-main {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .react-app .topbar-search {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .react-app .topbar-actions {
+    gap: 6px !important;
+  }
+
+  .react-app .mobile-tabbar {
+    position: fixed !important;
+    left: max(12px, var(--safe-left)) !important;
+    right: max(12px, var(--safe-right)) !important;
+    bottom: calc(8px + var(--safe-bottom)) !important;
+    z-index: 120 !important;
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    width: auto !important;
+    min-height: 64px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 
   .react-app .view {
