@@ -87,15 +87,61 @@ a,
 
 /* Phones + small tablets in portrait (max 767px) */
 @media (max-width: 767px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  #root,
+  .app-shell.react-app,
+  .app-shell.react-app:not(.sidebar-collapsed),
+  .app-shell.react-app.sidebar-collapsed {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .react-app .dashboard {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding:
+      max(10px, var(--safe-top))
+      max(12px, var(--safe-right))
+      var(--mobile-tabbar-offset)
+      max(12px, var(--safe-left));
+  }
+
+  .react-app .view,
+  .react-app .dashboard-main,
+  .students-dashboard-screen,
+  .create-lessons-page,
+  .lessons-library,
+  .attendance-page,
+  .section-panel {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
   .mobile-tabbar {
     position: fixed;
-    left: 50%;
+    left: max(12px, var(--safe-left));
+    right: max(12px, var(--safe-right));
     bottom: calc(8px + var(--safe-bottom));
     z-index: 40;
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 4px;
-    width: min(420px, calc(100vw - max(20px, var(--safe-left)) - max(20px, var(--safe-right))));
+    width: auto;
     min-height: 64px;
     padding:
       6px
@@ -105,7 +151,7 @@ a,
     background: #0f766e;
     border-radius: 28px;
     box-shadow: 0 18px 44px rgba(15, 118, 110, 0.28);
-    transform: translateX(-50%);
+    transform: none;
   }
 
   .react-app.theme-light .mobile-tabbar {
@@ -152,51 +198,75 @@ a,
     display: grid;
   }
 
-  .react-app .dashboard {
-    padding:
-      max(10px, var(--safe-top))
-      max(12px, var(--safe-right))
-      var(--mobile-tabbar-offset)
-      max(12px, var(--safe-left));
-  }
-
   .react-app.game-active .dashboard {
     padding-bottom: max(12px, var(--safe-bottom));
   }
 
   .react-app .topbar {
-    gap: 10px;
-    margin: -10px -12px 14px;
+    position: sticky;
+    z-index: 30;
+    top: 0;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 0 12px;
     padding:
       max(8px, calc(6px + var(--safe-top)))
-      max(12px, var(--safe-right))
-      10px
-      max(12px, var(--safe-left));
+      0
+      10px;
     background: rgba(15, 23, 42, 0.96);
     border-bottom: 1px solid var(--mt-border-default);
+    box-sizing: border-box;
+  }
+
+  .react-app.theme-light .topbar {
+    background: rgba(255, 255, 255, 0.98);
+    border-bottom-color: var(--mt-border-default, #e2e8f0);
   }
 
   .topbar-menu-button {
     display: inline-flex;
     flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
   }
 
   .topbar-main {
-    flex-wrap: wrap;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
     gap: 8px;
+    width: 100%;
     min-height: 0;
     padding: 0;
     border-bottom: 0;
   }
 
   .topbar-search {
-    order: 3;
-    flex: 1 1 100%;
+    order: 0;
+    flex: 1 1 auto;
+    min-width: 0;
     max-width: none;
   }
 
+  .topbar-search input {
+    width: 100%;
+    min-width: 0;
+  }
+
   .topbar-actions {
-    margin-left: 0;
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+  }
+
+  .topbar-icon-button {
+    width: 34px;
+    height: 34px;
+    padding: 6px;
   }
 
   .topbar-logout-button span {
@@ -204,25 +274,72 @@ a,
   }
 
   .topbar-logout-button {
-    width: 36px;
-    min-width: 36px;
+    width: 34px;
+    min-width: 34px;
     padding: 0;
     justify-content: center;
   }
 
-  .topbar-meta h1 {
-    font-size: 1.2rem;
+  .topbar-meta {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
   }
 
   .topbar-meta .eyebrow {
+    display: block;
+    margin: 0 0 4px;
     font-size: 0.72rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
+  .topbar-meta h1 {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .topbar-subtitle {
     display: none;
+  }
+
+  .react-app .sidebar:not(.open) {
+    transform: translateX(-100%);
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .react-app .sidebar.open {
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  body:has(.react-app .sidebar.open) {
+    overflow: hidden;
+  }
+
+  .dashboard-hero-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .dashboard-main {
+    gap: 14px;
+  }
+
+  .dashboard-split-row,
+  .content-grid,
+  .quick-action-grid,
+  .insight-grid,
+  .management-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .stats-grid {
@@ -412,6 +529,129 @@ a,
     white-space: nowrap;
   }
 
+  .welcome-banner {
+    min-height: 128px;
+    padding: 18px 16px;
+  }
+
+  .welcome-banner-copy {
+    max-width: 100%;
+    padding-right: 0;
+  }
+
+  .welcome-banner-art {
+    height: 84px;
+    right: 4px;
+  }
+
+  .date-card.panel {
+    min-height: auto;
+    padding: 16px;
+  }
+
+  .dash-card {
+    padding: 16px;
+  }
+
+  .dashboard-stats-row,
+  .dashboard-stats-row-two {
+    grid-template-columns: 1fr;
+  }
+
+  .create-lessons-toolbar {
+    justify-content: stretch;
+    margin-bottom: 10px;
+  }
+
+  .create-lessons-library-link {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .create-lesson-form-only {
+    max-width: none;
+  }
+
+  .lesson-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .lesson-stat-card {
+    padding: 12px;
+  }
+
+  .student-tools {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .student-table.name-links .student-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 12px 6px;
+  }
+
+  .student-table.name-links .student-class {
+    display: none;
+  }
+
+  .student-person {
+    min-width: 0;
+  }
+
+  .student-name-link {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  .task-row {
+    grid-template-columns: 12px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 12px 10px;
+  }
+
+  .task-row .task-reward {
+    font-size: 0.82rem;
+  }
+
+  .lesson-status-toggle {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .lesson-youtube-preview {
+    max-width: 100%;
+  }
+
+  .lesson-empty {
+    padding: 24px 16px;
+  }
+
+  .lesson-empty .primary-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .topbar-menu-button.mobile-menu {
+    display: none;
+  }
+
+  .section-heading {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .section-heading h2 {
+    font-size: 1rem;
+  }
+
+  .stacked-form textarea {
+    min-height: 140px;
+  }
+
   /* Prevent iOS zoom on focus */
   input,
   select,
@@ -449,6 +689,17 @@ a,
   .lesson-app-header h2 {
     font-size: 1.15rem;
   }
+
+  .lesson-stats-grid,
+  .dashboard-stats-row,
+  .dashboard-stats-row-two,
+  .quick-action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-banner h2 {
+    font-size: 1.1rem;
+  }
 }
 
 /* Large phones in landscape */
@@ -485,7 +736,7 @@ a,
 }
 
 /* Undo legacy styles.css icon-only sidebar rules for the React app */
-@media (max-width: 1180px) {
+@media (min-width: 768px) and (max-width: 1180px) {
   .app-shell.react-app:not(.sidebar-collapsed) {
     grid-template-columns: 260px minmax(0, 1fr);
   }
@@ -525,27 +776,6 @@ a,
 @media (min-width: 768px) and (max-width: 1023px) {
   .app-shell.react-app:not(.sidebar-collapsed) {
     grid-template-columns: 248px minmax(0, 1fr);
-  }
-}
-
-@media (max-width: 767px) {
-  .app-shell.react-app {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .react-app .sidebar:not(.open) {
-    transform: translateX(-100%);
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  .react-app .sidebar.open {
-    visibility: visible;
-    pointer-events: auto;
-  }
-
-  body:has(.react-app .sidebar.open) {
-    overflow: hidden;
   }
 }
 
@@ -737,164 +967,27 @@ a,
   }
 }
 
-/* Mobile (max 767px) */
+/* Final mobile overrides — beat legacy styles.css / react.css conflicts */
 @media (max-width: 767px) {
-  .react-app.theme-light .topbar {
-    background: rgba(255, 255, 255, 0.96);
-    border-bottom-color: var(--mt-border-default, #e2e8f0);
+  .app-shell .dashboard,
+  .react-app .dashboard {
+    margin: 0 !important;
+    padding:
+      max(10px, var(--safe-top))
+      max(12px, var(--safe-right))
+      var(--mobile-tabbar-offset)
+      max(12px, var(--safe-left)) !important;
   }
 
-  .react-app.theme-v2 .topbar {
-    background: rgba(15, 23, 42, 0.96);
+  .app-shell .topbar,
+  .react-app .topbar {
+    margin: 0 0 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
-  .dashboard-hero-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-
-  .dashboard-main {
-    gap: 14px;
-  }
-
-  .dashboard-split-row,
-  .content-grid,
-  .quick-action-grid,
-  .insight-grid,
-  .management-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .welcome-banner {
-    min-height: 128px;
-    padding: 18px 16px;
-  }
-
-  .welcome-banner-copy {
-    max-width: 100%;
-    padding-right: 0;
-  }
-
-  .welcome-banner-art {
-    height: 84px;
-    right: 4px;
-  }
-
-  .date-card.panel {
-    min-height: auto;
-    padding: 16px;
-  }
-
-  .dash-card {
-    padding: 16px;
-  }
-
-  .create-lessons-toolbar {
-    justify-content: stretch;
-    margin-bottom: 10px;
-  }
-
-  .create-lessons-library-link {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .create-lesson-form-only {
-    max-width: none;
-  }
-
-  .lesson-stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .lesson-stat-card {
-    padding: 12px;
-  }
-
-  .student-tools {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .student-table.name-links .student-row {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 8px;
-    padding: 12px 6px;
-  }
-
-  .student-table.name-links .student-class {
-    display: none;
-  }
-
-  .student-person {
-    min-width: 0;
-  }
-
-  .student-name-link {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 100%;
-  }
-
-  .task-row {
-    grid-template-columns: 12px minmax(0, 1fr) auto;
-    gap: 10px;
-    padding: 12px 10px;
-  }
-
-  .task-row .task-reward {
-    font-size: 0.82rem;
-  }
-
-  .section-heading {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .section-heading h2 {
-    font-size: 1rem;
-  }
-
-  .stacked-form textarea {
-    min-height: 140px;
-  }
-
-  .lesson-status-toggle {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .lesson-youtube-preview {
-    max-width: 100%;
-  }
-
-  .lesson-empty {
-    padding: 24px 16px;
-  }
-
-  .lesson-empty .primary-action {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 390px) {
-  .lesson-stats-grid,
-  .dashboard-stats-row,
-  .quick-action-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .welcome-banner h2 {
-    font-size: 1.1rem;
-  }
-
-  .topbar-icon-button {
-    width: 34px;
-    height: 34px;
+  .react-app .view {
+    max-width: 100% !important;
+    margin-inline: 0 !important;
   }
 }
