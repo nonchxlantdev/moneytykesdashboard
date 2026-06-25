@@ -1,0 +1,580 @@
+/* Mobile + tablet responsive optimizations (iPhone, Android, iPad) */
+
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --mobile-tabbar-offset: calc(88px + var(--safe-bottom));
+}
+
+.topbar-date-compact {
+  display: none;
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+button,
+a,
+.mobile-tab,
+.nav-item,
+.attendance-status-btn,
+.lesson-card {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tablet portrait + landscape (768px – 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .rewards-grid-top,
+  .rewards-grid-bottom {
+    grid-template-columns: 1fr;
+  }
+
+  .reward-icon-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .attendance-student-row.compact {
+    grid-template-columns: minmax(120px, 0.9fr) minmax(0, 1.4fr);
+  }
+
+  .attendance-toolbar-inline {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .attendance-toolbar-inline .secondary-action.compact {
+    grid-column: span 1;
+    justify-self: start;
+  }
+
+  .page-heading {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .create-lesson-form-only {
+    max-width: none;
+  }
+
+  .calendar-grid {
+    gap: 6px;
+  }
+
+  .lesson-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Tablet landscape (1024px – 1180px) */
+@media (min-width: 1024px) and (max-width: 1180px) {
+  .rewards-grid-bottom {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quick-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Phones + small tablets in portrait (max 767px) */
+@media (max-width: 767px) {
+  .mobile-tabbar {
+    position: fixed;
+    left: 50%;
+    bottom: calc(8px + var(--safe-bottom));
+    z-index: 40;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    width: min(420px, calc(100vw - max(20px, var(--safe-left)) - max(20px, var(--safe-right))));
+    min-height: 64px;
+    padding:
+      6px
+      max(8px, var(--safe-left))
+      max(6px, var(--safe-bottom))
+      max(8px, var(--safe-right));
+    background: #0f766e;
+    border-radius: 28px;
+    box-shadow: 0 18px 44px rgba(15, 118, 110, 0.28);
+    transform: translateX(-50%);
+  }
+
+  .mobile-tab {
+    display: grid;
+    place-items: center;
+    gap: 3px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 4px 2px;
+    color: rgba(255, 255, 255, 0.72);
+    background: transparent;
+    border: 0;
+    border-radius: 22px;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .mobile-tab svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .mobile-tab.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  .react-app .mobile-menu {
+    display: grid;
+  }
+
+  .react-app .dashboard {
+    padding:
+      max(10px, var(--safe-top))
+      max(12px, var(--safe-right))
+      var(--mobile-tabbar-offset)
+      max(12px, var(--safe-left));
+  }
+
+  .react-app.game-active .dashboard {
+    padding-bottom: max(12px, var(--safe-bottom));
+  }
+
+  .react-app .topbar {
+    gap: 10px;
+    margin: -10px -12px 14px;
+    padding:
+      max(8px, calc(6px + var(--safe-top)))
+      max(12px, var(--safe-right))
+      10px
+      max(12px, var(--safe-left));
+    background: rgba(15, 23, 42, 0.96);
+    border-bottom: 1px solid var(--mt-border-default);
+  }
+
+  .topbar-menu-button {
+    display: inline-flex;
+    flex: 0 0 auto;
+  }
+
+  .topbar-main {
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 0;
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  .topbar-search {
+    order: 3;
+    flex: 1 1 100%;
+    max-width: none;
+  }
+
+  .topbar-actions {
+    margin-left: 0;
+  }
+
+  .topbar-logout-button span {
+    display: none;
+  }
+
+  .topbar-logout-button {
+    width: 36px;
+    min-width: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .topbar-meta h1 {
+    font-size: 1.2rem;
+  }
+
+  .topbar-meta .eyebrow {
+    font-size: 0.72rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .topbar-subtitle {
+    display: none;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .stat-card {
+    min-height: 0;
+    padding: 14px;
+    grid-template-columns: 42px 1fr;
+    gap: 10px;
+  }
+
+  .stat-card h2 {
+    font-size: 0.78rem;
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-size: 1.35rem;
+  }
+
+  .section-panel {
+    padding: 14px 16px;
+  }
+
+  .page-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .rewards-grid-top,
+  .rewards-grid-bottom {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .reward-icon-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .rewards-bank-grid {
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  .attendance-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .attendance-toolbar-inline {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .attendance-toolbar-inline .grow {
+    grid-column: 1 / -1;
+  }
+
+  .attendance-student-row.compact {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .attendance-status-options.compact {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 6px;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .attendance-status-options.compact::-webkit-scrollbar {
+    display: none;
+  }
+
+  .attendance-status-btn.compact {
+    flex: 0 0 auto;
+    min-width: 58px;
+  }
+
+  .lesson-tabs {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .lesson-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lesson-tabs button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .lesson-filter-bar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .lesson-filter-bar .secondary-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .create-lesson-actions {
+    flex-direction: column;
+  }
+
+  .create-lesson-actions .primary-action,
+  .create-lesson-actions .secondary-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .calendar-widget-item {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .calendar-grid {
+    gap: 4px;
+  }
+
+  .calendar-cell {
+    min-height: 58px;
+    padding: 4px;
+  }
+
+  .calendar-day-number {
+    font-size: 0.78rem;
+  }
+
+  .calendar-event-chip {
+    font-size: 0.62rem;
+    padding: 2px 4px;
+  }
+
+  .calendar-month-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .student-selector-list {
+    max-height: min(42dvh, 280px);
+  }
+
+  .rewards-history-modal {
+    width: min(100%, 560px);
+    max-height: calc(100dvh - var(--mobile-tabbar-offset));
+  }
+
+  .react-app .toast {
+    right: max(12px, var(--safe-right));
+    left: max(12px, var(--safe-left));
+    bottom: var(--mobile-tabbar-offset);
+  }
+
+  .react-app.game-active .mobile-tabbar {
+    display: none;
+  }
+
+  .mobile-tab span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Prevent iOS zoom on focus */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  .field-label input,
+  .field-label select,
+  .field-label textarea,
+  .attendance-inline-field input,
+  .attendance-inline-field select {
+    font-size: 16px;
+  }
+}
+
+/* Small phones (iPhone SE, compact Android) */
+@media (max-width: 390px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .react-app .topbar h1 {
+    font-size: 1.05rem;
+  }
+
+  .reward-icon-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .mobile-tab span {
+    font-size: 9px;
+  }
+
+  .lesson-app-header h2 {
+    font-size: 1.15rem;
+  }
+}
+
+/* Large phones in landscape */
+@media (max-width: 767px) and (orientation: landscape) {
+  .react-app .dashboard {
+    padding-bottom: calc(72px + var(--safe-bottom));
+  }
+
+  .mobile-tabbar {
+    min-height: 56px;
+  }
+
+  .lesson-app-modal {
+    max-height: 92dvh;
+  }
+
+  .lesson-app-hero {
+    aspect-ratio: 21 / 9;
+  }
+}
+
+/* Sidebar must stay inside its grid column (prevents overlap with main content) */
+@media (min-width: 768px) {
+  .app-shell.react-app .sidebar {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .app-shell.react-app .dashboard {
+    min-width: 0;
+  }
+}
+
+/* Undo legacy styles.css icon-only sidebar rules for the React app */
+@media (max-width: 1180px) {
+  .app-shell.react-app:not(.sidebar-collapsed) {
+    grid-template-columns: 260px minmax(0, 1fr);
+  }
+
+  .react-app .nav-item span,
+  .react-app .mt-sidebar-profile-info,
+  .react-app .mt-sidebar-profile-arrow,
+  .react-app .challenge-card,
+  .react-app .mt-sidebar-action-card {
+    display: revert;
+  }
+
+  .react-app .nav-item {
+    grid-template-columns: 28px minmax(0, 1fr);
+    justify-items: start;
+    padding: 0 14px;
+  }
+
+  .react-app.sidebar-collapsed .nav-item,
+  .react-app .sidebar.collapsed .nav-item {
+    display: flex;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    margin: 0 auto;
+    padding: 0;
+    border-left: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .react-app .teacher-chip.mt-sidebar-profile-card {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .app-shell.react-app:not(.sidebar-collapsed) {
+    grid-template-columns: 248px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .app-shell.react-app {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .react-app .sidebar:not(.open) {
+    transform: translateX(-100%);
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .react-app .sidebar.open {
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  body:has(.react-app .sidebar.open) {
+    overflow: hidden;
+  }
+}
+
+/* Dashboard student overview — clickable names */
+.student-table.name-links .student-row {
+  grid-template-columns: minmax(150px, 1.5fr) 92px 70px;
+}
+
+.student-name-link {
+  display: inline-block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.student-name-link:hover {
+  color: #0f766e;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.react-app.theme-v2 .student-name-link:hover {
+  color: var(--accent-teal, #0ea5e9);
+}
+
+/* Recent tasks — spacing between title and category */
+.task-row-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.task-row .task-title {
+  display: block;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.task-row .task-meta {
+  display: block;
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--muted, #64748b);
+}
+
+.task-row .task-reward {
+  text-align: right;
+}

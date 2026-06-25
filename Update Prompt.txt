@@ -1,0 +1,246 @@
+MoneyTykes Teacher Dashboard — Feature Enhancement Prompt
+
+Project Context
+
+This is a Vite + React.js teacher dashboard application. The existing project structure includes src/pages/, main.jsx, app.js, styles.css, and react.css. Before making any changes, scan all existing pages and components to understand current routing, state management patterns, component naming conventions, and any existing UI library or styling system in use. Preserve all existing functionality unless explicitly told to replace it.
+
+
+Design System Directive
+
+Redesign the overall dashboard with a sleek, modern aesthetic using the following principles:
+
+
+Color palette: Deep navy (#0F172A) as the primary background, with rich teal (#0EA5E9) as the accent color, and soft white (#F8FAFC) for content surfaces. Use emerald green (#10B981) for success/positive states and amber (#F59E0B) for warnings/alerts.
+Typography: Clean sans-serif (Inter or system-ui), with clear visual hierarchy — bold 24px headings, 14px secondary labels in muted gray.
+Component style: Rounded cards (border-radius: 12px) with subtle box shadows, smooth hover transitions (200ms ease), and a sidebar navigation that feels premium and minimal.
+Layout: Fixed sidebar on the left, scrollable main content area on the right. Fully responsive down to tablet (768px).
+Apply these design tokens globally via CSS variables in styles.css so all new and existing components inherit them.
+
+
+
+Feature 1: Attendance Tracking
+
+Create src/pages/Attendance.jsx and all supporting components.
+
+Functionality:
+
+
+Teachers can select a class/group and a date (defaults to today) at the top of the page.
+Display a list of all students enrolled in the selected class.
+For each student, render an inline status selector with these options:
+
+✅ Present
+🕐 Late
+❌ Absent
+🤒 Sick
+📝 Other (reveals a short text input for a description when selected)
+
+
+
+A Save Attendance button submits the record for that date/class combination.
+Prevent duplicate submissions for the same class + date — show a warning if a record already exists and offer an "Edit" mode instead.
+
+
+Attendance Report:
+
+
+Add a "View Report" button/tab on the Attendance page.
+The report view allows teachers to filter by: class, date range (start date → end date), and student name.
+Display results in a clean table with columns: Student Name | Date | Status | Notes.
+Include a summary row per student showing total Present / Late / Absent / Sick counts.
+Add a CSV export button that downloads the filtered report.
+
+
+Data:
+
+
+Store attendance records in localStorage keyed by attendance_[classId]_[YYYY-MM-DD] until a backend is connected.
+Structure each record as: { studentId, studentName, status, note, timestamp }.
+
+
+
+Feature 2: Lessons (Replace "Assign & Task")
+
+Rename the existing "Assign & Task" navigation item and page to "Create Lessons". Update all references in routing and the sidebar.
+
+Create Lesson Form:
+
+
+Fields:
+
+Lesson Title (text input, required)
+Subject (dropdown, populated from existing subjects/classes)
+YouTube URL (text input — validate it is a valid YouTube URL on blur and show a thumbnail preview if valid)
+Lesson Plan / Description (rich textarea — support basic markdown or a simple toolbar with bold, italic, bullet list)
+Tags (optional, comma-separated)
+Status toggle: Draft / Published
+
+
+
+
+
+Lessons Library:
+
+
+Display all saved lessons as cards in a grid (3 columns desktop, 1 column mobile).
+Each card shows: thumbnail (from YouTube), title, subject tag, and a status badge (Draft / Published / Completed).
+Clicking a lesson card opens a Lesson Detail View with a side-by-side layout:
+
+Left (60%): Embedded YouTube player (use youtube-nocookie.com for privacy)
+Right (40%): Lesson plan/description rendered as formatted text, scrollable independently
+
+
+
+In the detail view, include a "Mark as Completed" button that updates the lesson's status and adds a completed timestamp. Once marked complete, show a green checkmark badge on the card.
+Add filter/search bar above the library grid: filter by subject, status, or search by title.
+
+
+
+Feature 3: Financial Zone (Replace "Financial Literacy")
+
+
+Rename the "Financial Literacy" navigation item to "Financial Zone" everywhere it appears.
+When a teacher navigates to this page, display a polished "Coming Soon" screen:
+
+Centered layout with the MoneyTykes logo or an illustrative icon
+Heading: "Financial Zone — Coming Soon"
+Subtext: "We're building something amazing. Stay tuned for financial literacy tools, budgeting games, and more."
+Optional: a simple email capture input ("Notify me when it launches") that saves to localStorage
+
+
+
+Do not render any existing Financial Literacy content — replace the entire page body with this Coming Soon component.
+
+
+
+Feature 4: Rewards System Overhaul
+
+Redesign the existing Rewards page with the following teacher-focused enhancements:
+
+Reward Creation:
+
+
+Teachers can create custom rewards with:
+
+Reward Name (e.g., "Star Student", "Money Master")
+Point Value (number input with +/- stepper)
+Icon/Badge selector — a grid of 12–16 emoji or icon options the teacher clicks to assign to the reward (e.g., ⭐, 🏆, 💰, 🎯, 🚀, 📚, 💡, 🎖️)
+Description (optional, short)
+Category (Behaviour, Academic, Participation, Effort — dropdown)
+
+
+
+Saved rewards appear in a Rewards Bank — a reusable panel showing all created rewards.
+
+
+Assigning Points to Students:
+
+
+Dedicated "Award Points" panel where the teacher:
+
+Selects a student (searchable dropdown)
+Selects a reward from the Rewards Bank (shows icon + name + point value)
+Optionally adds a personal note ("Great work on the quiz!")
+Clicks "Award" — this adds to the student's point total and logs the transaction
+
+
+
+Support bulk award: teacher selects multiple students via checkboxes and awards the same reward to all at once.
+
+
+Student Leaderboard:
+
+
+A visual leaderboard card showing the top 5 students by total points for the current week/month (togglable).
+Each entry shows: rank number, student name, avatar/initials circle, and total points with a mini progress bar.
+
+
+Student Point History:
+
+
+Each student has a point history log showing: date, reward name, points awarded, awarded by (teacher name), and note.
+Accessible via clicking a student's name in the leaderboard or the student list.
+
+
+Data:
+
+
+Store in localStorage as rewards_bank, student_points_[studentId], and points_log_[studentId].
+
+
+
+Feature 5: Stylish Date Display on Dashboard
+
+On the main Dashboard (src/pages/Dashboard.jsx or equivalent):
+
+
+Replace any plain text date with a styled date card component.
+Design: Large display showing the day of the week (e.g., "Wednesday") in bold teal accent color, below it the full date (e.g., "June 24, 2026") in a slightly smaller weight, and optionally the current time updating live every second using setInterval.
+Style it as a standalone card in the top-right of the dashboard header area — give it a subtle gradient border or an accent left-border using the teal color token.
+Use Intl.DateTimeFormat for formatting to support locale properly.
+
+
+
+Feature 6: Teacher Calendar
+
+Create src/pages/Calendar.jsx and a CalendarWidget component for the dashboard.
+
+Full Calendar Page:
+
+
+Implement a monthly calendar view (build from scratch or integrate react-big-calendar or @fullcalendar/react — choose whichever fits the existing dependency style).
+Teachers can click any date to create an event with:
+
+Event Title (e.g., "Chapter 3 Quiz")
+Type (Test, Quiz, Assignment, Reminder — color-coded: Test = red, Quiz = amber, Assignment = blue, Reminder = gray)
+Class/Subject (dropdown from existing classes)
+Date (pre-filled from the clicked date)
+Time (time picker, 12hr format)
+Notes (optional)
+
+
+
+Events display on the calendar as color-coded chips on their respective date cells.
+Clicking an existing event opens an edit/delete modal.
+Add a List View toggle that shows all upcoming events in a timeline list sorted by date.
+
+
+Dashboard Notification Widget:
+
+
+On the main dashboard, add an "Upcoming Events" card showing the next 3–5 events within the next 7 days.
+Each item shows: event type badge (color-coded), title, class name, and relative time ("Tomorrow at 10:00 AM", "In 3 days").
+If an event is today, highlight it with a pulsing dot or bold accent styling.
+Clicking an event in the widget navigates to the Calendar page with that date focused.
+
+
+Data:
+
+
+Store calendar events in localStorage as calendar_events — array of event objects: { id, title, type, classId, date, time, notes, createdAt }.
+
+
+
+Navigation & Sidebar Updates
+
+Update the sidebar/navigation with these changes:
+
+
+Rename "Assign & Task" → "Create Lessons" (use a book/play icon)
+Rename "Financial Literacy" → "Financial Zone" (use a chart/lock icon)
+Add "Attendance" as a new nav item (use a clipboard/check icon)
+Add "Calendar" as a new nav item (use a calendar icon)
+Ensure all new routes are registered in the app's routing configuration (React Router or equivalent)
+Active nav item should have a teal left-border accent and slightly lighter background
+
+
+
+General Code Standards
+
+
+Use functional components with React hooks (useState, useEffect, useCallback, useMemo) throughout.
+Create reusable components in src/components/ for: Modal.jsx, Badge.jsx, StudentSelector.jsx, DateCard.jsx, EmptyState.jsx.
+All localStorage reads/writes should go through a custom useLocalStorage(key, defaultValue) hook stored in src/hooks/useLocalStorage.js.
+Add PropTypes or JSDoc comments to all new components.
+No external CSS frameworks (unless one is already in use in the project) — use CSS modules or extend the existing styles.css / react.css pattern.
+Ensure no console errors or warnings in development mode after implementation.

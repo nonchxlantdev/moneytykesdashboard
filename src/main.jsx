@@ -49,30 +49,35 @@ import LessonsLibraryPage from "./pages/LessonsLibraryPage";
 import FinancialZonePage from "./pages/FinancialZone";
 import CalendarPage from "./pages/Calendar";
 import DateCard from "./components/DateCard";
-import CalendarWidget from "./components/CalendarWidget";
+import WelcomeBanner from "./components/WelcomeBanner";
+import Topbar from "./components/Topbar";
+import AttendanceStatCard from "./components/dashboard/AttendanceStatCard";
+import HelpRequestsCard from "./components/dashboard/HelpRequestsCard";
+import UpcomingEventsCard from "./components/dashboard/UpcomingEventsCard";
+import LeaderboardCard from "./components/dashboard/LeaderboardCard";
+import LessonActivitiesCard from "./components/dashboard/LessonActivitiesCard";
+import { useTheme } from "./hooks/useTheme";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { applyMockSeed, seedLocalStorageMockData, shouldSeedMockData } from "./data/seedMockData";
 import { formatPoints } from "./utils/points";
 import "../styles.css";
 import "./react.css";
+import "./responsive.css";
+import "./theme-v2.css";
+import "./theme-light.css";
+import "./dashboard.css";
+
+import { navSections, ICON_SIZE, ICON_STROKE } from "./config/navigation";
+import { IconMoon, IconSun } from "@tabler/icons-react";
 
 const STORAGE_KEY = "moneytykes.teacher.dashboard.v3";
 const assetPath = path => `${import.meta.env.BASE_URL}${path}`;
 
-const navItems = [
-  { label: "Admin", view: "admin", icon: ShieldAlert },
-  { label: "Dashboard", view: "dashboard", icon: Home },
+const mobileTabItems = [
+  { label: "Home", view: "dashboard", icon: Home },
   { label: "Students", view: "students", icon: Users },
-  { label: "Create Lessons", view: "create-lessons", icon: BookOpen },
-  { label: "Lessons", view: "lessons", icon: Play },
   { label: "Attendance", view: "attendance", icon: ClipboardCheck },
-  { label: "Calendar", view: "calendar", icon: CalendarDays },
-  { label: "Rewards", view: "rewards", icon: Gift },
-  { label: "Leaderboard", view: "leaderboard", icon: Trophy },
-  { label: "Reports", view: "reports", icon: BarChart3 },
-  { label: "Financial Zone", view: "financial-zone", icon: Lock },
-  { label: "Game", view: "game", icon: Calculator },
-  { label: "Class Settings", view: "settings", icon: Settings }
+  { label: "Rewards", view: "rewards", icon: Gift }
 ];
 
 const gameCategories = [
@@ -191,6 +196,7 @@ function App() {
   const [studentFocus, setStudentFocus] = useState(null);
   const [calendarFocusDate, setCalendarFocusDate] = useState(null);
   const [calendarEvents] = useLocalStorage("calendar_events", []);
+  const { theme, toggleTheme, isLight } = useTheme();
   const mainContentRef = useRef(null);
 
   useEffect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(db)), [db]);
@@ -202,7 +208,7 @@ function App() {
   useEffect(() => {
     if (!menuOpen) return undefined;
     function closeOnEscape(event) {
-      if (event.key === "Escape") setMenuOpen(false);
+      if (event.key === "Escape") closeSidebarMenu();
     }
     document.addEventListener("keydown", closeOnEscape);
     return () => document.removeEventListener("keydown", closeOnEscape);
@@ -219,11 +225,28 @@ function App() {
     if (message) setToast(message);
   }
 
+  function closeSidebarMenu() {
+    setMenuOpen(false);
+  }
+
+  function openSidebarMenu() {
+    setSidebarHidden(false);
+    setMenuOpen(true);
+  }
+
+  function toggleSidebarMenu() {
+    if (menuOpen) {
+      closeSidebarMenu();
+      return;
+    }
+    openSidebarMenu();
+  }
+
   function navigate(nextView, options = {}) {
     setView(nextView);
     if (options.focusDate) setCalendarFocusDate(options.focusDate);
     setCurrentTip(current => randomFinancialTip(current));
-    setMenuOpen(false);
+    closeSidebarMenu();
     requestAnimationFrame(() => {
       mainContentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -255,42 +278,29 @@ function App() {
   if (isLoginRoute) return <LoginPage />;
 
   return (
-    <div className={`app-shell react-app ${sidebarHidden ? "sidebar-collapsed" : ""}`}>
+    <div className={`app-shell react-app ${isLight ? "theme-light" : "theme-v2"} ${sidebarHidden ? "sidebar-collapsed" : ""} ${view === "game" ? "game-active" : ""}`}>
       <Sidebar
         currentView={view}
         open={menuOpen}
         navigate={navigate}
         collapsed={sidebarHidden}
         toggleCollapsed={() => setSidebarHidden(!sidebarHidden)}
-        closeMenu={() => setMenuOpen(false)}
+        closeMenu={closeSidebarMenu}
+        isLight={isLight}
+        onToggleTheme={toggleTheme}
       />
-      {menuOpen && <button className="sidebar-backdrop" type="button" aria-label="Close navigation menu" onClick={() => setMenuOpen(false)} />}
+      {menuOpen && <button className="sidebar-backdrop" type="button" aria-label="Close navigation menu" onClick={closeSidebarMenu} />}
       <main className={`dashboard ${view === "game" ? "game-view" : ""}`} ref={mainContentRef}>
-        <header className="topbar app-entrance">
-          <button className="icon-button mobile-menu" type="button" aria-label="Open menu" onClick={() => {
-            setSidebarHidden(false);
-            setMenuOpen(!menuOpen);
-          }}>
-            <Menu />
-          </button>
-          <div>
-            <p className="eyebrow">{db.school} - {db.className}</p>
-            <h1>{
-              view === "lessons" ? "Lessons Library"
-              : view === "create-lessons" ? "Create Lessons"
-              : view === "attendance" ? "Attendance"
-              : view === "calendar" ? "Calendar"
-              : view === "financial-zone" ? "Financial Zone"
-              : `Welcome back, ${db.teacher.first}`
-            }</h1>
-            {view === "lessons" && <p className="topbar-subtitle">Browse, assign, and manage learning content for your students.</p>}
-          </div>
-          {view === "dashboard" && <DateCard />}
-          <button className="logout-button" type="button" onClick={logout}>
-            <LogOut />
-            <span>Log Out</span>
-          </button>
-        </header>
+        <Topbar
+          view={view}
+          db={db}
+          search={search}
+          setSearch={setSearch}
+          onOpenMenu={toggleSidebarMenu}
+          menuOpen={menuOpen}
+          onLogout={logout}
+          setToast={setToast}
+        />
 
           <div className="view active page-swap" key={view}>
           {view === "admin" && <AdminDashboard db={db} update={update} />}
@@ -317,14 +327,25 @@ function App() {
       </main>
 
       <nav className="mobile-tabbar" aria-label="Mobile navigation">
-        {navItems.slice(0, 5).map(item => <NavButton key={item.view} item={item} active={view === item.view} navigate={navigate} compact />)}
+        {mobileTabItems.map(item => (
+          <NavButton key={item.view} item={item} active={view === item.view} navigate={navigate} compact />
+        ))}
+        <button
+          type="button"
+          className={`mobile-tab ${menuOpen ? "active" : ""}`}
+          aria-label="Open navigation menu"
+          onClick={toggleSidebarMenu}
+        >
+          <Menu />
+          <span>Menu</span>
+        </button>
       </nav>
       <div className={`toast ${toast ? "show" : ""}`} role="status" aria-live="polite">{toast}</div>
     </div>
   );
 }
 
-function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, closeMenu }) {
+function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, closeMenu, isLight, onToggleTheme }) {
   return (
     <aside className={`sidebar ${open ? "open" : ""} ${collapsed ? "collapsed" : ""}`} aria-label="Primary navigation">
       <div className="sidebar-top">
@@ -333,17 +354,30 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
             <img className="brand-logo" src={assetPath("Logo.png")} alt="MoneyTykes" />
           </div>
         )}
-        <button className="sidebar-collapse-button" type="button" aria-label={collapsed ? "Show sidebar" : "Hide sidebar"} onClick={() => {
-          if (window.innerWidth < 768) closeMenu();
+        <button className="sidebar-collapse-button" type="button" aria-label={open ? "Close menu" : collapsed ? "Show sidebar" : "Hide sidebar"} onClick={() => {
+          if (open) closeMenu();
           else toggleCollapsed();
         }}>
-          {collapsed ? <ChevronRight /> : <Menu />}
+          {open ? <X /> : collapsed ? <ChevronRight /> : <Menu />}
         </button>
       </div>
       <div className="sidebar-scroll mt-sidebar-scroll">
-        <nav className="nav-list">
-          {navItems.map(item => <NavButton key={item.view} item={item} active={currentView === item.view} navigate={navigate} showLabel={!collapsed} />)}
-        </nav>
+        {navSections.map(section => (
+          <nav className="nav-section" key={section.label} aria-label={section.label}>
+            {!collapsed && <p className="nav-section-label">{section.label}</p>}
+            <div className="nav-list">
+              {section.items.map(item => (
+                <NavButton
+                  key={item.view}
+                  item={item}
+                  active={currentView === item.view}
+                  navigate={navigate}
+                  showLabel={!collapsed}
+                />
+              ))}
+            </div>
+          </nav>
+        ))}
         {!collapsed && (
           <>
             <section className="challenge-card mt-sidebar-action-card">
@@ -352,7 +386,6 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
               <p className="mt-sidebar-action-text">Motivate students with fun class goals.</p>
               <button className="secondary-action mt-sidebar-action-button" type="button" onClick={() => navigate("game")}>Start Challenge</button>
             </section>
-            {/* TODO: Connect this card to teacher account settings when that route exists. */}
             <button className="teacher-chip mt-sidebar-profile-card" type="button">
               <span className="avatar initials mt-sidebar-profile-avatar">T</span>
               <span className="mt-sidebar-profile-info">
@@ -361,6 +394,17 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
               </span>
               <ChevronRight className="mt-sidebar-profile-arrow" />
             </button>
+            <div className="sidebar-footer-tools">
+              <button
+                type="button"
+                className="sidebar-theme-toggle"
+                onClick={onToggleTheme}
+                aria-label={isLight ? "Switch to dark theme" : "Switch to light theme"}
+              >
+                {isLight ? <IconMoon size={18} stroke={ICON_STROKE} /> : <IconSun size={18} stroke={ICON_STROKE} />}
+                <span>{isLight ? "Dark mode" : "Light mode"}</span>
+              </button>
+            </div>
           </>
         )}
       </div>
@@ -371,9 +415,24 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
 function NavButton({ item, active, navigate, compact = false, showLabel = true }) {
   const Icon = item.icon;
   const className = compact ? "mobile-tab" : "nav-item";
+  const badgeText = item.badge?.text ?? (item.badge?.count != null ? String(item.badge.count) : null);
+
   return (
-    <button className={`${className} ${active ? "active" : ""}`} type="button" title={item.label} onClick={() => navigate(item.view)}>
-      <Icon />{showLabel && <span>{item.label}</span>}
+    <button
+      className={`${className} ${active ? "active" : ""}`}
+      type="button"
+      title={item.label}
+      onClick={() => navigate(item.view)}
+    >
+      {compact ? (
+        <Icon />
+      ) : (
+        <Icon size={ICON_SIZE} stroke={ICON_STROKE} />
+      )}
+      {showLabel && <span className="nav-item-label">{item.label}</span>}
+      {showLabel && badgeText && (
+        <span className={`nav-item-badge ${item.badge?.variant || "gray"}`}>{badgeText}</span>
+      )}
     </button>
   );
 }
@@ -659,10 +718,41 @@ function StatusBadge({ status }) {
 }
 
 function Dashboard(props) {
-  const { dashboard, db, search, setSearch, status, setStatus, range, setRange, currentTip, navigate, setStudentFocus, calendarEvents } = props;
+  const { dashboard, db, search, setSearch, status, setStatus, currentTip, navigate, setStudentFocus, calendarEvents } = props;
   return (
-    <>
-      <StatsGrid dashboard={dashboard} />
+    <div className="dashboard-main">
+      <section className="dashboard-hero-row">
+        <WelcomeBanner
+          teacherName={db.teacher.first}
+          className={db.className}
+          studentCount={dashboard.studentCount}
+          onViewAnalytics={() => navigate("reports")}
+          assetPath={assetPath}
+        />
+        <DateCard panel />
+      </section>
+
+      <section className="dashboard-stats-row" aria-label="Class statistics">
+        <AttendanceStatCard
+          className={db.className}
+          studentCount={dashboard.studentCount}
+          onNavigate={() => navigate("attendance")}
+        />
+        <HelpRequestsCard tasks={db.tasks} />
+        <UpcomingEventsCard
+          events={calendarEvents}
+          onNavigate={date => navigate("calendar", date ? { focusDate: date } : {})}
+        />
+      </section>
+
+      <section className="dashboard-split-row">
+        <LeaderboardCard
+          earners={dashboard.leaderboard}
+          onNavigate={() => navigate("leaderboard")}
+        />
+        <LessonActivitiesCard onNavigate={() => navigate("lessons")} />
+      </section>
+
       <section className="quick-actions section-panel">
         <div className="section-heading"><h2>Quick Actions</h2></div>
         <div className="quick-action-grid">
@@ -672,38 +762,15 @@ function Dashboard(props) {
           <ActionCard icon={Trophy} title="Launch Game" text="Open Money Moves Live." onClick={() => navigate("game")} />
         </div>
       </section>
+
       <section className="content-grid">
         <StudentOverview db={db} search={search} setSearch={setSearch} status={status} setStatus={setStatus} navigate={navigate} setStudentFocus={setStudentFocus} />
-        <TopEarners earners={dashboard.leaderboard.slice(0, 5)} range={range} setRange={setRange} navigate={navigate} />
-        <CalendarWidget
-          events={calendarEvents}
-          onNavigate={date => navigate("calendar", { focusDate: date })}
-        />
         <RecentTasks tasks={db.tasks.slice(-4).reverse()} navigate={navigate} />
         <Insights dashboard={dashboard} />
       </section>
-      <MoneyTykesTipBanner tip={currentTip} />
-    </>
-  );
-}
 
-function StatsGrid({ dashboard }) {
-  const stats = [
-    ["Students", dashboard.studentCount, Users],
-    ["Total Points", formatPoints(dashboard.totalEarned), Trophy],
-    ["Completion", `${dashboard.completionRate}%`, Check],
-    ["Active Streaks", dashboard.activeStreaks, Flame]
-  ];
-  return (
-    <section className="stats-grid" aria-label="Class statistics">
-      {stats.map(([label, value, Icon], index) => (
-        <article className="stat-card stagger-in" style={{ "--delay": `${index * 55}ms` }} key={label}>
-          <span className="stat-icon"><Icon /></span>
-          <p>{label}</p>
-          <strong>{value}</strong>
-        </article>
-      ))}
-    </section>
+      <MoneyTykesTipBanner tip={currentTip} />
+    </div>
   );
 }
 
@@ -737,7 +804,7 @@ function StudentOverview({ db, search, setSearch, status, setStatus, navigate, s
           <option value="inactive">Inactive</option>
         </select>
       </div>
-      <StudentTable students={students} onView={student => openStudent(student, "view")} onEdit={student => openStudent(student, "edit")} />
+      <StudentTable students={students} onView={student => openStudent(student, "view")} linkNamesOnly />
     </article>
   );
 }
@@ -1457,23 +1524,34 @@ function PageHeading({ eyebrow, title }) {
   return <div className="page-heading"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2></div></div>;
 }
 
-function StudentTable({ students, detailed = false, onView, onEdit, onDelete }) {
+function StudentTable({ students, detailed = false, onView, onEdit, onDelete, linkNamesOnly = false }) {
   if (!students.length) return <EmptyState title="No students yet" text="Add students to begin tracking progress." />;
   return (
-    <div className="student-table">
+    <div className={`student-table ${linkNamesOnly ? "name-links" : ""}`}>
       {students.map(student => (
         <div className="student-row" key={student.id}>
           <div className="student-person">
             <span className="avatar initials">{student.photo ? <img src={student.photo} alt="" /> : initials(student)}</span>
-            <div><strong>{student.first} {student.last}</strong><span>{student.schoolName || student.teacherName || student.classLabel || "Student profile"}</span></div>
+            <div>
+              {linkNamesOnly ? (
+                <button type="button" className="student-name-link" onClick={() => onView?.(student)}>
+                  {student.first} {student.last}
+                </button>
+              ) : (
+                <strong>{student.first} {student.last}</strong>
+              )}
+              <span>{student.schoolName || student.teacherName || student.classLabel || "Student profile"}</span>
+            </div>
           </div>
           <span className="student-class">{student.classLabel || "Standard / Form"}</span>
           <strong className="points-value student-balance">{formatPoints(student.balance || 0)}</strong>
-          <div className="student-actions">
-            <button className="student-action-button profile" type="button" onClick={() => onView?.(student)}>View Profile</button>
-            <button className="student-action-button edit" type="button" onClick={() => onEdit?.(student)}><Pencil /> Edit</button>
-            {detailed && <button className="student-action-button delete" type="button" onClick={() => onDelete?.(student)}>Delete</button>}
-          </div>
+          {!linkNamesOnly && (
+            <div className="student-actions">
+              <button className="student-action-button profile" type="button" onClick={() => onView?.(student)}>View Profile</button>
+              <button className="student-action-button edit" type="button" onClick={() => onEdit?.(student)}><Pencil /> Edit</button>
+              {detailed && <button className="student-action-button delete" type="button" onClick={() => onDelete?.(student)}>Delete</button>}
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -1516,7 +1594,16 @@ function EarnersList({ earners }) {
 }
 
 function TaskRow({ task }) {
-  return <div className="task-row"><span className="task-dot" /><div><strong>{task.title}</strong><span>{task.category} - Due {formatDate(task.due)}</span></div><em>{formatPoints(task.reward)}</em></div>;
+  return (
+    <div className="task-row">
+      <span className="task-dot" />
+      <div className="task-row-body">
+        <strong className="task-title">{task.title}</strong>
+        <span className="task-meta">{task.category} · Due {formatDate(task.due)}</span>
+      </div>
+      <em className="task-reward">{formatPoints(task.reward)}</em>
+    </div>
+  );
 }
 
 function Insight({ title, value }) {
