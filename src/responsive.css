@@ -108,6 +108,21 @@ a,
     transform: translateX(-50%);
   }
 
+  .react-app.theme-light .mobile-tabbar {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+  }
+
+  .react-app.theme-light .mobile-tab {
+    color: #64748b;
+  }
+
+  .react-app.theme-light .mobile-tab.active {
+    color: #0369a1;
+    background: rgba(14, 165, 233, 0.12);
+  }
+
   .mobile-tab {
     display: grid;
     place-items: center;
@@ -328,8 +343,17 @@ a,
     flex-direction: column;
   }
 
-  .create-lesson-actions .primary-action,
-  .create-lesson-actions .secondary-action {
+  .create-lesson-actions .primary-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .create-lesson-actions .secondary-action.compact {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .lesson-filter-bar .lesson-create-link {
     width: 100%;
     justify-content: center;
   }
@@ -577,4 +601,300 @@ a,
 
 .task-row .task-reward {
   text-align: right;
+}
+
+/* ============================================================
+   Cross-device layout — desktop, tablet, mobile
+   ============================================================ */
+
+/* Desktop (1200px+) */
+@media (min-width: 1200px) {
+  .react-app .dashboard {
+    padding: 28px 32px;
+  }
+
+  .react-app .view {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+  }
+
+  .create-lessons-page,
+  .lessons-library {
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  .create-lesson-form-only {
+    max-width: 760px;
+  }
+
+  .content-grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  }
+
+  .dashboard-stats-row,
+  .dashboard-stats-row-two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quick-action-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .lesson-stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .lesson-filter-bar {
+    grid-template-columns: minmax(160px, 0.45fr) minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .lesson-filter-bar .lesson-create-link {
+    width: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Tablet landscape (1024px – 1180px) */
+@media (min-width: 1024px) and (max-width: 1180px) {
+  .react-app .dashboard {
+    padding: 22px 24px;
+  }
+
+  .dashboard-hero-row {
+    grid-template-columns: minmax(0, 1.4fr) minmax(220px, 0.8fr);
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lesson-card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Tablet portrait (768px – 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .react-app .dashboard {
+    padding: 18px 20px;
+  }
+
+  .dashboard-hero-row {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-stats-row,
+  .dashboard-stats-row-two {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-split-row {
+    grid-template-columns: 1fr;
+  }
+
+  .content-grid,
+  .quick-action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lesson-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lesson-filter-bar {
+    grid-template-columns: minmax(140px, 0.55fr) minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .lesson-filter-bar .lesson-create-link {
+    width: auto;
+    justify-self: end;
+  }
+
+  .create-lessons-toolbar {
+    justify-content: flex-end;
+  }
+
+  .student-tools {
+    grid-template-columns: minmax(0, 1fr) 170px;
+  }
+
+  .topbar-search {
+    max-width: none;
+  }
+
+  .topbar-meta .eyebrow {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Mobile (max 767px) */
+@media (max-width: 767px) {
+  .react-app.theme-light .topbar {
+    background: rgba(255, 255, 255, 0.96);
+    border-bottom-color: var(--mt-border-default, #e2e8f0);
+  }
+
+  .react-app.theme-v2 .topbar {
+    background: rgba(15, 23, 42, 0.96);
+  }
+
+  .dashboard-hero-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .dashboard-main {
+    gap: 14px;
+  }
+
+  .dashboard-split-row,
+  .content-grid,
+  .quick-action-grid,
+  .insight-grid,
+  .management-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .welcome-banner {
+    min-height: 128px;
+    padding: 18px 16px;
+  }
+
+  .welcome-banner-copy {
+    max-width: 100%;
+    padding-right: 0;
+  }
+
+  .welcome-banner-art {
+    height: 84px;
+    right: 4px;
+  }
+
+  .date-card.panel {
+    min-height: auto;
+    padding: 16px;
+  }
+
+  .dash-card {
+    padding: 16px;
+  }
+
+  .create-lessons-toolbar {
+    justify-content: stretch;
+    margin-bottom: 10px;
+  }
+
+  .create-lessons-library-link {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .create-lesson-form-only {
+    max-width: none;
+  }
+
+  .lesson-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .lesson-stat-card {
+    padding: 12px;
+  }
+
+  .student-tools {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .student-table.name-links .student-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 12px 6px;
+  }
+
+  .student-table.name-links .student-class {
+    display: none;
+  }
+
+  .student-person {
+    min-width: 0;
+  }
+
+  .student-name-link {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  .task-row {
+    grid-template-columns: 12px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 12px 10px;
+  }
+
+  .task-row .task-reward {
+    font-size: 0.82rem;
+  }
+
+  .section-heading {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .section-heading h2 {
+    font-size: 1rem;
+  }
+
+  .stacked-form textarea {
+    min-height: 140px;
+  }
+
+  .lesson-status-toggle {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .lesson-youtube-preview {
+    max-width: 100%;
+  }
+
+  .lesson-empty {
+    padding: 24px 16px;
+  }
+
+  .lesson-empty .primary-action {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 390px) {
+  .lesson-stats-grid,
+  .dashboard-stats-row,
+  .quick-action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-banner h2 {
+    font-size: 1.1rem;
+  }
+
+  .topbar-icon-button {
+    width: 34px;
+    height: 34px;
+  }
 }

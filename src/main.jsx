@@ -52,7 +52,6 @@ import DateCard from "./components/DateCard";
 import WelcomeBanner from "./components/WelcomeBanner";
 import Topbar from "./components/Topbar";
 import AttendanceStatCard from "./components/dashboard/AttendanceStatCard";
-import HelpRequestsCard from "./components/dashboard/HelpRequestsCard";
 import UpcomingEventsCard from "./components/dashboard/UpcomingEventsCard";
 import LeaderboardCard from "./components/dashboard/LeaderboardCard";
 import LessonActivitiesCard from "./components/dashboard/LessonActivitiesCard";
@@ -732,13 +731,12 @@ function Dashboard(props) {
         <DateCard panel />
       </section>
 
-      <section className="dashboard-stats-row" aria-label="Class statistics">
+      <section className="dashboard-stats-row dashboard-stats-row-two" aria-label="Class statistics">
         <AttendanceStatCard
           className={db.className}
           studentCount={dashboard.studentCount}
           onNavigate={() => navigate("attendance")}
         />
-        <HelpRequestsCard tasks={db.tasks} />
         <UpcomingEventsCard
           events={calendarEvents}
           onNavigate={date => navigate("calendar", date ? { focusDate: date } : {})}

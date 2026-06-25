@@ -4568,6 +4568,34 @@
 }
 
 /* Create Lessons */
+.create-lessons-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+
+.create-lessons-library-link {
+  width: auto;
+  min-height: 36px;
+  padding: 7px 12px;
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+.lesson-create-link {
+  width: auto;
+  min-height: 36px;
+  padding: 7px 12px;
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+.create-lessons-page,
+.lessons-library {
+  width: 100%;
+  min-width: 0;
+}
+
 .create-lessons-layout {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);

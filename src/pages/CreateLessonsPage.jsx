@@ -90,14 +90,9 @@ export default function CreateLessonsPage({ db, setToast, navigate }) {
 
   return (
     <section className="create-lessons-page">
-      <div className="page-heading">
-        <div>
-          <p className="eyebrow">Curriculum</p>
-          <h2>Create Lessons</h2>
-          <p className="topbar-subtitle">Lessons you save here appear in the Lessons library.</p>
-        </div>
-        <button className="secondary-action" type="button" onClick={() => navigate("lessons")}>
-          <Play size={16} /> View Lessons Library
+      <div className="create-lessons-toolbar">
+        <button className="secondary-action compact create-lessons-library-link" type="button" onClick={() => navigate("lessons")}>
+          <Play size={14} /> View Lessons Library
         </button>
       </div>
 
@@ -168,8 +163,8 @@ export default function CreateLessonsPage({ db, setToast, navigate }) {
             <button className="primary-action teal-action" type="submit">
               <Play size={16} /> Save Lesson
             </button>
-            <button className="secondary-action" type="button" onClick={() => navigate("lessons")}>
-              <Check size={16} /> Go to Lessons Library
+            <button className="secondary-action compact" type="button" onClick={() => navigate("lessons")}>
+              <Check size={14} /> Go to Lessons Library
             </button>
           </div>
         </form>

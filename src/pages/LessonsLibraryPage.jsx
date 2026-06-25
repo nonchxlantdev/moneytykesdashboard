@@ -88,8 +88,8 @@ export default function LessonsLibraryPage({ setToast, navigate }) {
           <Search />
           <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search lessons..." />
         </label>
-        <button className="secondary-action" type="button" onClick={() => navigate("create-lessons")}>
-          <Pencil size={16} /> Create Lesson
+        <button className="secondary-action compact lesson-create-link" type="button" onClick={() => navigate("create-lessons")}>
+          <Pencil size={14} /> Create Lesson
         </button>
       </div>
 

@@ -13,6 +13,10 @@
   gap: 16px;
 }
 
+.dashboard-stats-row-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .dashboard-split-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -452,8 +456,8 @@
     grid-template-columns: 1fr 1fr;
   }
 
-  .dashboard-stats-row .upcoming-events-card {
-    grid-column: 1 / -1;
+  .dashboard-stats-row-two {
+    grid-template-columns: 1fr;
   }
 }
 
