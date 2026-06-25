@@ -181,7 +181,7 @@ export default function RewardsPage({ db, setToast, update }) {
 
   return (
     <section className="rewards-dashboard" aria-label="Rewards dashboard">
-      <div className="page-heading">
+      <div className="page-heading page-heading-hide-mobile">
         <div>
           <p className="eyebrow">Motivation</p>
           <h2>Rewards Dashboard</h2>

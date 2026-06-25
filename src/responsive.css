@@ -652,6 +652,34 @@ a,
     min-height: 140px;
   }
 
+  .topbar-meta-home {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+  }
+
+  .topbar-meta-home .eyebrow {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .topbar-mobile-tab-view {
+    margin-bottom: 8px;
+  }
+
+  .topbar-mobile-tab-view .topbar-main {
+    padding-bottom: 0;
+  }
+
+  .page-heading-hide-mobile {
+    display: none;
+  }
+
   /* Prevent iOS zoom on focus */
   input,
   select,
@@ -964,6 +992,13 @@ a,
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+}
+
+/* School context only on Home — hidden on tablet/desktop topbar */
+@media (min-width: 768px) {
+  .topbar-meta-home {
+    display: none;
   }
 }
 

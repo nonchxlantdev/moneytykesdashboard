@@ -889,7 +889,7 @@ function Students({ db, dashboard, update, studentFocus, setStudentFocus }) {
 
   return (
     <div className="students-dashboard-screen">
-      <PageHeading eyebrow="Class Roster" title="Students Dashboard" />
+      <PageHeading eyebrow="Class Roster" title="Students Dashboard" hideOnMobile />
       <div className="management-grid">
         <StudentForm db={db} update={update} editingStudent={editingStudent} onCancelEdit={closeEdit} />
         <PointsForm students={db.students} update={update} />
@@ -1518,8 +1518,12 @@ function Field({ label, value, onChange, type = "text", required = false, placeh
   );
 }
 
-function PageHeading({ eyebrow, title }) {
-  return <div className="page-heading"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2></div></div>;
+function PageHeading({ eyebrow, title, hideOnMobile = false }) {
+  return (
+    <div className={`page-heading ${hideOnMobile ? "page-heading-hide-mobile" : ""}`}>
+      <div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2></div>
+    </div>
+  );
 }
 
 function StudentTable({ students, detailed = false, onView, onEdit, onDelete, linkNamesOnly = false }) {

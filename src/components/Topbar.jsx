@@ -22,6 +22,9 @@ const PAGE_SUBTITLES = {
   "create-lessons": "Lessons you save here appear in the Lessons library."
 };
 
+/** Bottom tab views — no duplicate title in the mobile topbar */
+const MOBILE_TAB_VIEWS = new Set(["students", "attendance", "rewards"]);
+
 /**
  * App topbar — modeled on update design.json, preserves logout + page context.
  * @param {{
@@ -37,14 +40,16 @@ const PAGE_SUBTITLES = {
 export default function Topbar({ view, db, search, setSearch, onOpenMenu, menuOpen = false, onLogout, setToast }) {
   const pageTitle = PAGE_TITLES[view] ?? `Welcome back, ${db.teacher.first}`;
   const pageSubtitle = PAGE_SUBTITLES[view];
-  const showMeta = view !== "dashboard";
+  const isMobileTabView = MOBILE_TAB_VIEWS.has(view);
+  const showPageMeta = view !== "dashboard" && !isMobileTabView;
+  const showHomeMeta = view === "dashboard";
 
   function notifySoon(label) {
     setToast(`${label} coming soon.`);
   }
 
   return (
-    <header className="topbar app-entrance">
+    <header className={`topbar app-entrance ${isMobileTabView ? "topbar-mobile-tab-view" : ""}`}>
       <div className="topbar-main">
         <button className="topbar-menu-button mobile-menu" type="button" aria-label={menuOpen ? "Close menu" : "Open menu"} onClick={onOpenMenu}>
           {menuOpen ? <IconX size={20} stroke={ICON_STROKE} /> : <IconMenu2 size={20} stroke={ICON_STROKE} />}
@@ -79,7 +84,13 @@ export default function Topbar({ view, db, search, setSearch, onOpenMenu, menuOp
         </div>
       </div>
 
-      {showMeta && (
+      {showHomeMeta && (
+        <div className="topbar-meta topbar-meta-home">
+          <p className="eyebrow">{db.school} · {db.className}</p>
+        </div>
+      )}
+
+      {showPageMeta && (
         <div className="topbar-meta">
           <p className="eyebrow">{db.school} · {db.className}</p>
           <h1>{pageTitle}</h1>
