@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "pages:sync": "npm run build && node scripts/sync-docs.mjs"
   },
   "dependencies": {
     "@tabler/icons-react": "^3.44.0",
