@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Bold, Italic, List, Play, Check, BookOpen, Plus, X, Search, Pencil } from "lucide-react";
+import { Bold, Italic, List, Play, Check, BookOpen, Plus, X, Search, Pencil, Trash2 } from "lucide-react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import LessonCardMenu from "../components/LessonCardMenu";
@@ -129,6 +129,13 @@ export default function CreateLessonsPage({ db, setToast, navigate }) {
     }
     setOpenMenuId(null);
     setToast("Lesson deleted.");
+  }
+
+  function deleteEditingLesson() {
+    const lesson = lessons.find(item => item.id === editingId);
+    if (lesson) {
+      deleteLesson(lesson);
+    }
   }
 
   function submitLesson(event) {
@@ -363,36 +370,48 @@ export default function CreateLessonsPage({ db, setToast, navigate }) {
               <input type="text" value={form.tags} onChange={event => setForm({ ...form, tags: event.target.value })} />
             </label>
 
-            <div className="lesson-status-toggle">
-              <span>Status</span>
-              {["Draft", "Published"].map(status => (
-                <button
-                  key={status}
-                  type="button"
-                  className={form.status === status ? "active" : ""}
-                  onClick={() => setForm({ ...form, status })}
-                >
-                  {status}
-                </button>
-              ))}
+            <div className="field-label lesson-status-field">
+              <span className="lesson-status-label">Status</span>
+              <div className="lesson-status-segmented" role="group" aria-label="Lesson status">
+                {["Draft", "Published"].map(status => (
+                  <button
+                    key={status}
+                    type="button"
+                    className={form.status === status ? "active" : ""}
+                    aria-pressed={form.status === status}
+                    onClick={() => setForm({ ...form, status })}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+              <p className="lesson-status-hint">
+                {form.status === "Published" ? "Visible in your lessons library for class use." : "Saved privately until you publish."}
+              </p>
             </div>
 
-            <div className="create-lesson-actions">
-              <button className="primary-action teal-action" type="submit">
-                {isEditing ? <Check size={16} /> : <Play size={16} />}
-                {isEditing ? "Update Lesson" : "Save Lesson"}
-              </button>
+            <footer className="lesson-studio-footer">
+              <div className="lesson-studio-footer-actions">
+                <button className="primary-action teal-action lesson-studio-save" type="submit">
+                  {isEditing ? <Check size={16} /> : <Play size={16} />}
+                  {isEditing ? "Update Lesson" : "Save Lesson"}
+                </button>
+                {isEditing ? (
+                  <button className="secondary-action lesson-studio-cancel" type="button" onClick={cancelEditing}>
+                    <X size={14} /> Cancel
+                  </button>
+                ) : !isCompactLayout ? (
+                  <button className="secondary-action lesson-studio-cancel" type="button" onClick={() => navigate("lessons")}>
+                    <Check size={14} /> Go to Library
+                  </button>
+                ) : null}
+              </div>
               {isEditing && (
-                <button className="secondary-action compact" type="button" onClick={cancelEditing}>
-                  <X size={14} /> Cancel
+                <button className="lesson-studio-delete" type="button" onClick={deleteEditingLesson}>
+                  <Trash2 size={15} /> Delete Lesson
                 </button>
               )}
-              {!isCompactLayout && (
-                <button className="secondary-action compact" type="button" onClick={() => navigate("lessons")}>
-                  <Check size={14} /> Go to Lessons Library
-                </button>
-              )}
-            </div>
+            </footer>
           </form>
         </article>
       </div>

@@ -674,21 +674,25 @@ a,
     max-width: 100%;
   }
 
-  .lesson-status-toggle {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 100%;
-    gap: 8px;
-    padding: 6px;
-  }
-
-  .lesson-status-toggle span {
-    grid-column: 1 / -1;
-  }
-
-  .lesson-status-toggle button {
-    justify-content: center;
+  .lesson-status-segmented button {
     min-height: 44px;
+  }
+
+  .lesson-studio-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lesson-studio-footer-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .lesson-studio-save,
+  .lesson-studio-cancel,
+  .lesson-studio-delete {
+    width: 100%;
+    justify-content: center;
   }
 
   .create-lesson-form-card textarea {
