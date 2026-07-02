@@ -1,0 +1,712 @@
+/**
+ * MoneyTykes Theme V2 — dark dashboard with teal primary.
+ * Reference: DEPLOYMENT_NOTES.md
+ * Revert: see THEME_REVERT.md
+ */
+
+.react-app.theme-v2 {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --bg-card-hover: #263348;
+  --bg-elevated: #334155;
+  --accent-teal: #0ea5e9;
+  --accent-teal-deep: #0f766e;
+  --accent-teal-soft: rgba(14, 165, 233, 0.12);
+  --accent-purple: #8b5cf6;
+  --accent-green: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-accent: rgba(14, 165, 233, 0.35);
+  --shadow-v2: 0 18px 40px rgba(2, 6, 23, 0.45);
+  --ink: var(--text-primary);
+  --muted: var(--text-secondary);
+  --line: var(--border-default);
+  --panel: var(--bg-card);
+  --soft: #172033;
+  --purple: var(--accent-teal);
+  --purple-2: var(--accent-teal-deep);
+  --green: var(--accent-green);
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2,
+body:has(.react-app.theme-v2) {
+  background:
+    radial-gradient(circle at 12% -8%, rgba(14, 165, 233, 0.14), transparent 34%),
+    radial-gradient(circle at 88% 0%, rgba(139, 92, 246, 0.12), transparent 28%),
+    linear-gradient(180deg, #0b1220 0%, #0f172a 48%, #111827 100%);
+}
+
+.app-shell.react-app.theme-v2 {
+  background: transparent;
+}
+
+/* Sidebar */
+.react-app.theme-v2 .sidebar {
+  background:
+    linear-gradient(180deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%);
+  border-right: 1px solid var(--border-default);
+  box-shadow: 12px 0 40px rgba(2, 6, 23, 0.35);
+}
+
+.react-app.theme-v2 .nav-item {
+  color: var(--text-secondary);
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+}
+
+.react-app.theme-v2 .nav-item:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  transform: none;
+}
+
+.react-app.theme-v2 .nav-item.active {
+  color: var(--accent-teal);
+  background: var(--accent-teal-soft);
+  border-left-color: var(--accent-teal);
+  box-shadow: none;
+}
+
+.react-app.theme-v2 .nav-item.active svg,
+.react-app.theme-v2 .nav-item:hover svg {
+  color: var(--accent-teal);
+}
+
+.react-app.theme-v2 .sidebar-collapse-button {
+  color: var(--accent-teal);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border-default);
+}
+
+.react-app.theme-v2 .mt-sidebar-action-card {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border-default);
+}
+
+.react-app.theme-v2 .mt-sidebar-profile-card {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border-default);
+}
+
+.react-app.theme-v2 .mt-sidebar-profile-role {
+  color: var(--text-muted);
+}
+
+/* Topbar — design reference overrides */
+.react-app.theme-v2 .topbar {
+  background: var(--mt-bg-app);
+}
+
+.react-app.theme-v2 .topbar-logout-button {
+  color: var(--mt-text-primary);
+  background: transparent;
+  border: 1px solid var(--mt-border-default);
+}
+
+.react-app.theme-v2 .topbar-logout-button:hover {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent-teal), var(--accent-teal-deep));
+  border-color: transparent;
+}
+
+.react-app.theme-v2 .page-heading .eyebrow {
+  color: var(--accent-teal);
+}
+
+.react-app.theme-v2 .page-heading h2,
+.react-app.theme-v2 .section-heading h2,
+.react-app.theme-v2 .topbar-meta h1 {
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .topbar-subtitle {
+  color: var(--text-secondary);
+}
+
+/* Welcome hero row */
+.react-app.theme-v2 .section-panel,
+.react-app.theme-v2 .stat-card,
+.react-app.theme-v2 .tip-bar,
+.react-app.theme-v2 .insight-card,
+.react-app.theme-v2 .quick-actions,
+.react-app.theme-v2 .student-overview,
+.react-app.theme-v2 .calendar-widget,
+.react-app.theme-v2 .rewards-create-card,
+.react-app.theme-v2 .rewards-bank-card,
+.react-app.theme-v2 .rewards-award-card,
+.react-app.theme-v2 .rewards-leaderboard-card,
+.react-app.theme-v2 .attendance-list-card,
+.react-app.theme-v2 .attendance-report-card,
+.react-app.theme-v2 .lesson-stat-card,
+.react-app.theme-v2 .lesson-card,
+.react-app.theme-v2 .create-lesson-form-card,
+.react-app.theme-v2 .financial-zone-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  box-shadow: var(--shadow-v2);
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .section-heading h2::before {
+  background: linear-gradient(180deg, var(--accent-teal), var(--accent-teal-deep));
+}
+
+.react-app.theme-v2 .stat-card p,
+.react-app.theme-v2 .lesson-stat-card small,
+.react-app.theme-v2 .stat-meta {
+  color: var(--text-secondary);
+}
+
+.react-app.theme-v2 .stat-card strong,
+.react-app.theme-v2 .lesson-stat-card strong {
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .stat-icon,
+.react-app.theme-v2 .challenge-badge,
+.react-app.theme-v2 .tip-icon,
+.react-app.theme-v2 .card-heading-icon,
+.react-app.theme-v2 .lesson-stat-icon,
+.react-app.theme-v2 .action-icon {
+  background: linear-gradient(135deg, var(--accent-teal), var(--accent-teal-deep));
+  color: #fff;
+}
+
+/* Welcome hero row */
+.dashboard-hero-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(240px, 1fr);
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.welcome-banner {
+  position: relative;
+  overflow: hidden;
+  min-height: 148px;
+  padding: 22px 24px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0f766e 0%, #0ea5e9 42%, #8b5cf6 100%);
+  box-shadow: 0 20px 48px rgba(14, 165, 233, 0.22);
+}
+
+.welcome-banner-copy {
+  position: relative;
+  z-index: 2;
+  max-width: 62%;
+}
+
+.welcome-banner-eyebrow {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.welcome-banner h2 {
+  margin: 0 0 8px;
+  font-size: clamp(1.2rem, 2.4vw, 1.65rem);
+  line-height: 1.15;
+  color: #fff;
+}
+
+.welcome-banner-subtitle {
+  margin: 0 0 14px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.92rem;
+}
+
+.welcome-banner-cta {
+  padding: 8px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.welcome-banner-cta:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.welcome-banner-art {
+  position: absolute;
+  right: 8px;
+  bottom: 0;
+  height: 118px;
+  width: auto;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.welcome-banner-dots {
+  position: absolute;
+  left: 24px;
+  bottom: 12px;
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+
+.welcome-banner-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.welcome-banner-dots span.active {
+  background: #fff;
+}
+
+.react-app.theme-v2 .date-card.panel,
+.react-app.theme-v2 .date-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-left: 4px solid var(--accent-teal);
+  box-shadow: var(--shadow-v2);
+}
+
+.date-card.panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 148px;
+  padding: 20px;
+}
+
+.react-app.theme-v2 .date-card-day {
+  color: var(--accent-teal);
+}
+
+.react-app.theme-v2 .date-card-date {
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .date-card-time,
+.react-app.theme-v2 .topbar-date-compact {
+  color: var(--text-muted);
+}
+
+.react-app.theme-v2 .dash-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-v2);
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .dash-card-title,
+.react-app.theme-v2 .dash-list-name,
+.react-app.theme-v2 .dash-list-points,
+.react-app.theme-v2 .dash-stat-value,
+.react-app.theme-v2 .dash-event-copy strong,
+.react-app.theme-v2 .lesson-activities-center strong {
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .dash-stat-label,
+.react-app.theme-v2 .dash-card-footnote,
+.react-app.theme-v2 .dash-list-meta,
+.react-app.theme-v2 .dash-rank {
+  color: var(--text-secondary);
+}
+
+.react-app.theme-v2 .dash-list-item,
+.react-app.theme-v2 .dash-event-item {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border-default);
+}
+
+.react-app.theme-v2 .dash-card-select {
+  color: var(--text-primary);
+  background: rgba(15, 23, 42, 0.5);
+  border-color: var(--border-default);
+}
+
+.react-app.theme-v2 .performance-chart-tabs {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.react-app.theme-v2 .performance-chart-tabs button {
+  color: var(--text-secondary);
+}
+
+.react-app.theme-v2 .performance-chart-tabs button.active {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .topbar-date-compact {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+}
+
+.react-app.theme-v2 .topbar-date-compact strong {
+  color: var(--accent-teal);
+}
+
+/* Quick actions */
+.react-app.theme-v2 .quick-action {
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .quick-action small {
+  color: var(--text-secondary);
+}
+
+.react-app.theme-v2 .quick-action span {
+  background: linear-gradient(135deg, var(--accent-teal), var(--accent-teal-deep));
+  box-shadow: 0 0 0 5px rgba(14, 165, 233, 0.14);
+}
+
+/* Forms */
+.react-app.theme-v2 .stacked-form label,
+.react-app.theme-v2 .field-label {
+  color: var(--text-secondary);
+}
+
+.react-app.theme-v2 input,
+.react-app.theme-v2 select,
+.react-app.theme-v2 textarea,
+.react-app.theme-v2 .student-selector-input,
+.react-app.theme-v2 .search-box input,
+.react-app.theme-v2 .attendance-inline-field input,
+.react-app.theme-v2 .attendance-inline-field select {
+  color: var(--text-primary);
+  background: rgba(15, 23, 42, 0.65);
+  border-color: var(--border-default);
+}
+
+.react-app.theme-v2 input::placeholder,
+.react-app.theme-v2 textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.react-app.theme-v2 select option {
+  color: #0f172a;
+}
+
+.react-app.theme-v2 input:focus,
+.react-app.theme-v2 select:focus,
+.react-app.theme-v2 textarea:focus {
+  border-color: var(--accent-teal);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.18);
+}
+
+/* Buttons */
+.react-app.theme-v2 .primary-action,
+.react-app.theme-v2 .teal-action,
+.react-app.theme-v2 .wide-button {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent-teal), var(--accent-teal-deep));
+  border-color: transparent;
+}
+
+.react-app.theme-v2 .secondary-action,
+.react-app.theme-v2 .link-button {
+  color: var(--accent-teal);
+  background: rgba(14, 165, 233, 0.08);
+  border-color: var(--border-accent);
+}
+
+.react-app.theme-v2 .secondary-action:hover,
+.react-app.theme-v2 .link-button:hover {
+  background: rgba(14, 165, 233, 0.16);
+}
+
+.react-app.theme-v2 .money,
+.react-app.theme-v2 .points-value,
+.react-app.theme-v2 .earners-list em,
+.react-app.theme-v2 .task-row em,
+.react-app.theme-v2 .lesson-reward,
+.react-app.theme-v2 .insight-card strong {
+  color: var(--accent-teal);
+}
+
+/* Tables & lists */
+.react-app.theme-v2 .student-row,
+.react-app.theme-v2 .task-row,
+.react-app.theme-v2 .earners-list li,
+.react-app.theme-v2 .attendance-student-row,
+.react-app.theme-v2 .attendance-report-row,
+.react-app.theme-v2 .rewards-bank-item,
+.react-app.theme-v2 .calendar-widget-item,
+.react-app.theme-v2 .calendar-list-item {
+  background: rgba(15, 23, 42, 0.45);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .student-head {
+  color: var(--text-muted);
+}
+
+.react-app.theme-v2 .attendance-student-row.compact {
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.react-app.theme-v2 .attendance-status-btn {
+  background: var(--bg-card-hover);
+  border-color: var(--border-default);
+  color: var(--text-secondary);
+}
+
+.react-app.theme-v2 .attendance-status-btn.selected {
+  background: var(--accent-teal-soft);
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
+
+.react-app.theme-v2 .attendance-warning.compact {
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.28);
+}
+
+.react-app.theme-v2 .attendance-mode-toggle,
+.react-app.theme-v2 .calendar-view-toggle,
+.react-app.theme-v2 .lesson-status-toggle,
+.react-app.theme-v2 .leaderboard-range-toggle {
+  background: rgba(15, 23, 42, 0.65);
+}
+
+.react-app.theme-v2 .attendance-mode-toggle button.active,
+.react-app.theme-v2 .calendar-view-toggle button.active,
+.react-app.theme-v2 .lesson-status-toggle button.active,
+.react-app.theme-v2 .leaderboard-range-toggle button.active {
+  background: var(--bg-card-hover);
+  color: var(--accent-teal);
+}
+
+/* Rewards */
+.react-app.theme-v2 .reward-icon-choice {
+  background: var(--bg-card-hover);
+  border-color: var(--border-default);
+}
+
+.react-app.theme-v2 .reward-icon-choice.selected {
+  border-color: var(--accent-teal);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.18);
+}
+
+.react-app.theme-v2 .selected-reward-preview {
+  background: rgba(14, 165, 233, 0.1);
+  border-color: var(--border-accent);
+}
+
+.react-app.theme-v2 .rewards-history-modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .rewards-history-head {
+  color: var(--text-muted);
+}
+
+/* Lessons */
+.react-app.theme-v2 .lesson-tabs button {
+  color: var(--text-secondary);
+  background: transparent;
+  border-color: var(--border-default);
+}
+
+.react-app.theme-v2 .lesson-tabs button.active {
+  color: var(--accent-teal);
+  background: var(--accent-teal-soft);
+  border-color: var(--border-accent);
+}
+
+.react-app.theme-v2 .lesson-card-body p,
+.react-app.theme-v2 .lesson-card-heading span {
+  color: var(--text-secondary);
+}
+
+.react-app.theme-v2 .lesson-app-modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+}
+
+.react-app.theme-v2 .lesson-app-header h2,
+.react-app.theme-v2 .lesson-app-plan-heading h3 {
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .lesson-app-plan-card {
+  background: rgba(15, 23, 42, 0.55);
+  border-color: var(--border-default);
+}
+
+.react-app.theme-v2 .lesson-app-content,
+.react-app.theme-v2 .lesson-app-empty-plan {
+  color: var(--text-secondary);
+}
+
+.react-app.theme-v2 .lesson-app-footer {
+  background: var(--bg-card);
+  border-color: var(--border-default);
+}
+
+/* Calendar */
+.react-app.theme-v2 .calendar-cell {
+  background: rgba(15, 23, 42, 0.45);
+  border-color: var(--border-default);
+}
+
+.react-app.theme-v2 .calendar-cell.today {
+  border-color: var(--accent-teal);
+  box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.25);
+}
+
+.react-app.theme-v2 .calendar-weekdays span {
+  color: var(--text-muted);
+}
+
+/* Modals */
+.react-app.theme-v2 .mt-modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .mt-modal-header h3 {
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .mt-empty-state {
+  border-color: var(--border-default);
+  color: var(--text-secondary);
+}
+
+.react-app.theme-v2 .mt-empty-state strong {
+  color: var(--text-primary);
+}
+
+/* Tip banner */
+.react-app.theme-v2 .mt-tip-banner {
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.35), rgba(14, 165, 233, 0.2));
+  border-color: var(--border-accent);
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .tip-spark {
+  color: var(--accent-teal);
+  background: rgba(14, 165, 233, 0.14);
+  border-color: var(--border-accent);
+}
+
+/* Mobile tab bar */
+.react-app.theme-v2 .mobile-tabbar {
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid var(--border-default);
+  box-shadow: 0 18px 44px rgba(2, 6, 23, 0.55);
+  backdrop-filter: blur(12px);
+}
+
+.react-app.theme-v2 .mobile-tab.active {
+  background: var(--accent-teal-soft);
+  color: var(--accent-teal);
+}
+
+/* Toast */
+.react-app.theme-v2 .toast {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-accent);
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .mt-badge {
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.react-app.theme-v2 .mt-badge-teal {
+  color: var(--accent-teal);
+  background: var(--accent-teal-soft);
+}
+
+.react-app.theme-v2 .mt-badge-success {
+  color: var(--accent-green);
+  background: rgba(16, 185, 129, 0.14);
+}
+
+.react-app.theme-v2 .student-selector-list {
+  background: var(--bg-secondary);
+  border-color: var(--border-default);
+}
+
+.react-app.theme-v2 .student-selector-list button:hover,
+.react-app.theme-v2 .student-selector-list button.selected {
+  background: var(--accent-teal-soft);
+}
+
+.react-app.theme-v2 .sidebar-backdrop {
+  background: rgba(2, 6, 23, 0.62);
+}
+
+/* Admin tables */
+.react-app.theme-v2 .mt-admin-table-head,
+.react-app.theme-v2 .mt-admin-table-row {
+  background: rgba(15, 23, 42, 0.45);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.react-app.theme-v2 .mt-admin-table-head {
+  color: var(--text-muted);
+}
+
+@media (max-width: 1024px) {
+  .dashboard-hero-row {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-banner-copy {
+    max-width: 72%;
+  }
+}
+
+@media (max-width: 767px) {
+  .dashboard-hero-row {
+    margin-bottom: 14px;
+  }
+
+  .welcome-banner {
+    min-height: 132px;
+    padding: 18px 16px;
+  }
+
+  .welcome-banner-copy {
+    max-width: 100%;
+    padding-right: 84px;
+  }
+
+  .welcome-banner-art {
+    height: 92px;
+    right: 4px;
+    opacity: 0.95;
+  }
+
+  .welcome-banner-dots {
+    left: 16px;
+  }
+
+  .react-app.theme-v2 .topbar {
+    background: rgba(15, 23, 42, 0.92);
+    border-bottom: 1px solid var(--border-default);
+  }
+}

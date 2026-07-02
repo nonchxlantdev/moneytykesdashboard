@@ -1,0 +1,242 @@
+/**
+ * Light theme — high-contrast readable text on soft surfaces.
+ * Pair with class `theme-light` on `.react-app` (replaces `theme-v2`).
+ */
+
+.react-app.theme-light {
+  --mt-bg-app: #f5f7fb;
+  --mt-bg-sidebar: #ffffff;
+  --mt-bg-card: #ffffff;
+  --mt-bg-card-hover: #f8fafc;
+  --mt-bg-input: #ffffff;
+  --mt-bg-right-panel: #f8fafc;
+  --mt-accent-blue: #0284c7;
+  --mt-accent-purple: #7c3aed;
+  --mt-accent-green: #059669;
+  --mt-accent-amber: #d97706;
+  --mt-accent-red: #dc2626;
+  --mt-text-primary: #0f172a;
+  --mt-text-secondary: #334155;
+  --mt-text-muted: #64748b;
+  --mt-text-link: #0284c7;
+  --mt-border-default: #e2e8f0;
+  --mt-border-hover: #cbd5e1;
+  --mt-border-accent: rgba(2, 132, 199, 0.35);
+  --mt-nav-active-bg: rgba(14, 165, 233, 0.1);
+  --mt-nav-active-border: #0284c7;
+  --mt-nav-active-text: #0369a1;
+  --mt-section-label: #64748b;
+  --mt-shadow-card: 0 8px 24px rgba(15, 23, 42, 0.06);
+  --ink: var(--mt-text-primary);
+  --muted: var(--mt-text-secondary);
+  --line: var(--mt-border-default);
+  --panel: var(--mt-bg-card);
+  --soft: #f1f5f9;
+  color: var(--mt-text-primary);
+}
+
+.react-app.theme-light,
+body:has(.react-app.theme-light) {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.app-shell.react-app.theme-light {
+  background: transparent;
+}
+
+.react-app.theme-light .sidebar {
+  background: #ffffff;
+  border-right: 1px solid var(--mt-border-default);
+  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.04);
+}
+
+.react-app.theme-light .nav-item {
+  color: var(--mt-text-secondary);
+}
+
+.react-app.theme-light .nav-item:hover {
+  color: var(--mt-text-primary);
+  background: #f1f5f9;
+}
+
+.react-app.theme-light .nav-item.active {
+  color: var(--mt-nav-active-text);
+  background: var(--mt-nav-active-bg);
+  border-left-color: var(--mt-nav-active-border);
+}
+
+.react-app.theme-light .topbar {
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid var(--mt-border-default);
+}
+
+.react-app.theme-light .topbar-search input {
+  background: #fff;
+  border-color: var(--mt-border-default);
+  color: var(--mt-text-primary);
+}
+
+.react-app.theme-light .topbar-icon-button {
+  color: var(--mt-text-muted);
+}
+
+.react-app.theme-light .topbar-icon-button:hover {
+  background: #f1f5f9;
+  color: var(--mt-text-secondary);
+}
+
+.react-app.theme-light .section-panel,
+.react-app.theme-light .stat-card,
+.react-app.theme-light .dash-card,
+.react-app.theme-light .tip-bar,
+.react-app.theme-light .insight-card,
+.react-app.theme-light .quick-actions,
+.react-app.theme-light .student-overview {
+  background: #ffffff;
+  border: 1px solid var(--mt-border-default);
+  color: var(--mt-text-primary);
+  box-shadow: var(--mt-shadow-card);
+}
+
+.react-app.theme-light .section-heading h2,
+.react-app.theme-light .dash-card-title,
+.react-app.theme-light .topbar-meta h1,
+.react-app.theme-light .page-heading h2 {
+  color: var(--mt-text-primary);
+}
+
+.react-app.theme-light .dash-card-subtitle,
+.react-app.theme-light .stat-card p,
+.react-app.theme-light .dash-stat-label,
+.react-app.theme-light .dash-list-meta,
+.react-app.theme-light .field-label,
+.react-app.theme-light .topbar-subtitle,
+.react-app.theme-light .dash-card-footnote {
+  color: var(--mt-text-secondary);
+}
+
+.react-app.theme-light .dash-list-item strong,
+.react-app.theme-light .stat-card strong,
+.react-app.theme-light .dash-stat-value,
+.react-app.theme-light .dash-list-name,
+.react-app.theme-light .dash-list-points {
+  color: var(--mt-text-primary);
+}
+
+.react-app.theme-light input,
+.react-app.theme-light select,
+.react-app.theme-light textarea {
+  color: var(--mt-text-primary);
+  background: #fff;
+  border-color: var(--mt-border-default);
+}
+
+.react-app.theme-light .date-card.panel {
+  background: #fff;
+  border: 1px solid var(--mt-border-default);
+  border-left: 4px solid var(--mt-accent-blue);
+}
+
+.react-app.theme-light .date-card-day {
+  color: var(--mt-accent-blue);
+}
+
+.react-app.theme-light .date-card-date {
+  color: var(--mt-text-primary);
+}
+
+.react-app.theme-light .date-card-time,
+.react-app.theme-light .date-card-today-label {
+  color: var(--mt-text-muted);
+}
+
+.react-app.theme-light .mobile-tabbar {
+  background: #ffffff;
+  border: 1px solid var(--mt-border-default);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+}
+
+.react-app.theme-light .mobile-tab {
+  color: var(--mt-text-muted);
+}
+
+.react-app.theme-light .mobile-tab.active {
+  background: var(--mt-nav-active-bg);
+  color: var(--mt-nav-active-text);
+}
+
+@media (max-width: 767px) {
+  .react-app.theme-light .mobile-tabbar {
+    background: #ffffff;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+  }
+
+  .react-app.theme-light .mobile-tab {
+    color: #64748b;
+  }
+
+  .react-app.theme-light .mobile-tab.active {
+    color: #0369a1;
+    background: rgba(14, 165, 233, 0.12);
+  }
+}
+
+.react-app.theme-light .mt-sidebar-action-card,
+.react-app.theme-light .mt-sidebar-profile-card {
+  background: #f8fafc;
+  border-color: var(--mt-border-default);
+  color: var(--mt-text-primary);
+}
+
+.react-app.theme-light .sidebar-theme-toggle {
+  color: var(--mt-text-secondary);
+  background: #f8fafc;
+  border-color: var(--mt-border-default);
+}
+
+.react-app.theme-light .performance-chart-tabs button.active {
+  background: #fff;
+  color: var(--mt-text-primary);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+}
+
+.react-app.theme-light .performance-chart-tabs {
+  background: #e2e8f0;
+}
+
+.react-app.theme-light .student-row,
+.react-app.theme-light .task-row,
+.react-app.theme-light .dash-list-item,
+.react-app.theme-light .dash-event-item {
+  background: #f8fafc;
+  border-color: var(--mt-border-default);
+}
+
+.react-app.theme-light .toast {
+  background: #fff;
+  border-color: var(--mt-border-default);
+  color: var(--mt-text-primary);
+}
+
+.react-app.theme-light .welcome-banner {
+  box-shadow: 0 12px 32px rgba(79, 70, 229, 0.2);
+}
+
+.react-app.theme-light .welcome-banner h2,
+.react-app.theme-light .welcome-banner-subtitle,
+.react-app.theme-light .welcome-highlight {
+  color: #fff;
+}
+
+.react-app.theme-light .dash-card-link {
+  color: #0284c7;
+}
+
+.react-app.theme-light .performance-chart-tabs button {
+  color: var(--mt-text-secondary);
+}
+
+.react-app.theme-light .dash-card-select {
+  background: #fff;
+  color: var(--mt-text-primary);
+}

@@ -1,0 +1,905 @@
+{
+  "dashboard": {
+    "meta": {
+      "name": "MoneyTykes Teacher Dashboard",
+      "framework": "React + Vite",
+      "layout": "fixed-sidebar + scrollable-main + fixed-right-panel",
+      "colorScheme": "dark",
+      "referenceImage": "Dark navy dashboard with purple/teal accents, similar to Classroom UI screenshot"
+    },
+
+    "setup": {
+      "fonts": {
+        "primary": "Inter",
+        "source": "Google Fonts",
+        "indexHtmlLink": "<link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap\" rel=\"stylesheet\">",
+        "cssGlobal": "* { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }",
+        "weights": {
+          "light": 300,
+          "regular": 400,
+          "medium": 500,
+          "semibold": 600,
+          "bold": 700,
+          "extrabold": 800
+        }
+      },
+      "icons": {
+        "library": "Tabler Icons",
+        "version": "latest",
+        "install": "npm install @tabler/icons-react",
+        "importExample": "import { IconDashboard, IconUsers, IconCalendar } from '@tabler/icons-react'",
+        "usageExample": "<IconDashboard size={18} stroke={1.5} />",
+        "globalStroke": 1.5,
+        "globalSize": 18,
+        "style": "outline (never filled)",
+        "iconMap": {
+          "dashboard": "IconLayoutDashboard",
+          "classes": "IconSchool",
+          "students": "IconUsers",
+          "attendance": "IconClipboardCheck",
+          "lessons": "IconPlayerPlay",
+          "calendar": "IconCalendar",
+          "rewards": "IconTrophy",
+          "financialZone": "IconChartPie",
+          "chat": "IconMessage2",
+          "search": "IconSearch",
+          "bell": "IconBell",
+          "grid": "IconLayoutGrid",
+          "message": "IconMessageCircle",
+          "hamburger": "IconMenu2",
+          "close": "IconX",
+          "dots": "IconDots",
+          "arrowRight": "IconArrowRight",
+          "chevronDown": "IconChevronDown",
+          "video": "IconVideo",
+          "assignment": "IconClipboard",
+          "star": "IconStar",
+          "trophy": "IconTrophy",
+          "plus": "IconPlus",
+          "edit": "IconEdit",
+          "trash": "IconTrash",
+          "check": "IconCheck",
+          "darkMode": "IconMoon",
+          "lightMode": "IconSun",
+          "logout": "IconLogout",
+          "settings": "IconSettings",
+          "upload": "IconUpload",
+          "download": "IconDownload",
+          "filter": "IconFilter",
+          "sort": "IconArrowsSort",
+          "eye": "IconEye",
+          "lock": "IconLock",
+          "chart": "IconChartLine",
+          "coin": "IconCoin",
+          "book": "IconBook",
+          "rocket": "IconRocket",
+          "target": "IconTarget",
+          "medal": "IconMedal"
+        }
+      },
+      "cssReset": "*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }",
+      "scrollbar": "scrollbar-width: thin; scrollbar-color: #334155 transparent;",
+      "globalBodyStyle": {
+        "background": "#0F172A",
+        "color": "#F8FAFC",
+        "minHeight": "100vh",
+        "overflow": "hidden"
+      }
+    },
+
+    "designTokens": {
+      "colors": {
+        "bgApp": "#0F172A",
+        "bgSidebar": "#0F172A",
+        "bgCard": "#1E293B",
+        "bgCardHover": "#263348",
+        "bgInput": "#1E293B",
+        "bgRightPanel": "#161F2E",
+        "accentBlue": "#0EA5E9",
+        "accentPurple": "#8B5CF6",
+        "accentGreen": "#10B981",
+        "accentAmber": "#F59E0B",
+        "accentRed": "#EF4444",
+        "accentPink": "#EC4899",
+        "accentIndigo": "#6366F1",
+        "textPrimary": "#F8FAFC",
+        "textSecondary": "#94A3B8",
+        "textMuted": "#64748B",
+        "textLink": "#0EA5E9",
+        "borderDefault": "rgba(255,255,255,0.07)",
+        "borderHover": "rgba(255,255,255,0.14)",
+        "borderAccent": "rgba(14,165,233,0.5)",
+        "navActiveBackground": "rgba(14,165,233,0.1)",
+        "navActiveBorderLeft": "3px solid #0EA5E9",
+        "navActiveText": "#0EA5E9",
+        "sectionLabel": "#475569",
+        "gradientWelcome": "linear-gradient(135deg, #4F46E5 0%, #7C3AED 55%, #A855F7 100%)",
+        "gradientCountdown": "linear-gradient(135deg, #EC4899 0%, #F59E0B 100%)",
+        "overlayModal": "rgba(0,0,0,0.6)"
+      },
+      "spacing": {
+        "sidebarWidth": "220px",
+        "rightPanelWidth": "280px",
+        "topbarHeight": "64px",
+        "cardRadius": "12px",
+        "cardPadding": "20px",
+        "cardGap": "16px",
+        "sectionGap": "20px",
+        "inputHeight": "38px",
+        "buttonHeight": "36px",
+        "avatarSm": "32px",
+        "avatarMd": "40px",
+        "avatarLg": "48px"
+      },
+      "typography": {
+        "fontFamily": "'Inter', system-ui, -apple-system, sans-serif",
+        "sizes": {
+          "xs": "11px",
+          "sm": "12px",
+          "base": "13px",
+          "md": "14px",
+          "lg": "16px",
+          "xl": "18px",
+          "2xl": "22px",
+          "3xl": "28px",
+          "4xl": "36px"
+        },
+        "weights": {
+          "regular": 400,
+          "medium": 500,
+          "semibold": 600,
+          "bold": 700,
+          "extrabold": 800
+        },
+        "roles": {
+          "pageTitle": { "size": "22px", "weight": 700, "color": "#F8FAFC" },
+          "cardTitle": { "size": "16px", "weight": 600, "color": "#F8FAFC" },
+          "cardSubtitle": { "size": "12px", "weight": 400, "color": "#94A3B8" },
+          "navItem": { "size": "14px", "weight": 500, "color": "#94A3B8" },
+          "navItemActive": { "size": "14px", "weight": 600, "color": "#0EA5E9" },
+          "navSectionLabel": { "size": "11px", "weight": 600, "color": "#475569", "letterSpacing": "0.08em", "textTransform": "uppercase" },
+          "statNumber": { "size": "28px", "weight": 700 },
+          "statLabel": { "size": "12px", "weight": 400, "color": "#94A3B8" },
+          "tableHeader": { "size": "12px", "weight": 600, "color": "#64748B", "textTransform": "uppercase", "letterSpacing": "0.05em" },
+          "tableCell": { "size": "13px", "weight": 400, "color": "#F8FAFC" },
+          "badge": { "size": "11px", "weight": 600 },
+          "caption": { "size": "11px", "weight": 400, "color": "#64748B" },
+          "button": { "size": "13px", "weight": 600 },
+          "link": { "size": "13px", "weight": 500, "color": "#0EA5E9" }
+        }
+      },
+      "shadows": {
+        "cardShadow": "0 4px 24px rgba(0,0,0,0.25)",
+        "dropdownShadow": "0 8px 32px rgba(0,0,0,0.4)",
+        "modalShadow": "0 16px 48px rgba(0,0,0,0.5)"
+      },
+      "transitions": {
+        "fast": "all 150ms ease",
+        "default": "all 200ms ease",
+        "slow": "all 300ms ease"
+      },
+      "tabs": {
+        "description": "Segmented tab strip used in Performance chart and other sections",
+        "containerStyle": {
+          "display": "flex",
+          "gap": "2px",
+          "background": "rgba(255,255,255,0.05)",
+          "borderRadius": "8px",
+          "padding": "3px"
+        },
+        "tabStyle": {
+          "padding": "4px 12px",
+          "fontSize": "12px",
+          "fontWeight": 500,
+          "borderRadius": "6px",
+          "color": "#64748B",
+          "cursor": "pointer",
+          "border": "none",
+          "background": "transparent",
+          "transition": "all 150ms ease"
+        },
+        "activeTabStyle": {
+          "background": "#1E293B",
+          "color": "#F8FAFC",
+          "fontWeight": 600,
+          "boxShadow": "0 1px 4px rgba(0,0,0,0.3)"
+        },
+        "hoverTabStyle": {
+          "color": "#94A3B8",
+          "background": "rgba(255,255,255,0.04)"
+        }
+      },
+      "badges": {
+        "description": "Small pill labels used throughout the dashboard",
+        "variants": {
+          "red": { "background": "rgba(239,68,68,0.15)", "color": "#EF4444", "border": "1px solid rgba(239,68,68,0.2)" },
+          "green": { "background": "rgba(16,185,129,0.15)", "color": "#10B981", "border": "1px solid rgba(16,185,129,0.2)" },
+          "blue": { "background": "rgba(14,165,233,0.15)", "color": "#0EA5E9", "border": "1px solid rgba(14,165,233,0.2)" },
+          "amber": { "background": "rgba(245,158,11,0.15)", "color": "#F59E0B", "border": "1px solid rgba(245,158,11,0.2)" },
+          "purple": { "background": "rgba(139,92,246,0.15)", "color": "#8B5CF6", "border": "1px solid rgba(139,92,246,0.2)" },
+          "gray": { "background": "rgba(100,116,139,0.15)", "color": "#94A3B8", "border": "1px solid rgba(100,116,139,0.2)" }
+        },
+        "baseStyle": {
+          "display": "inline-flex",
+          "alignItems": "center",
+          "gap": "4px",
+          "padding": "2px 8px",
+          "borderRadius": "20px",
+          "fontSize": "11px",
+          "fontWeight": 600,
+          "lineHeight": "18px"
+        }
+      },
+      "buttons": {
+        "primary": {
+          "background": "#0EA5E9",
+          "color": "#fff",
+          "border": "none",
+          "borderRadius": "8px",
+          "padding": "8px 16px",
+          "fontSize": "13px",
+          "fontWeight": 600,
+          "cursor": "pointer",
+          "transition": "all 150ms ease",
+          "hover": { "background": "#0284C7" },
+          "active": { "transform": "scale(0.98)" }
+        },
+        "secondary": {
+          "background": "transparent",
+          "color": "#94A3B8",
+          "border": "1px solid rgba(255,255,255,0.1)",
+          "borderRadius": "8px",
+          "padding": "8px 16px",
+          "fontSize": "13px",
+          "fontWeight": 500,
+          "cursor": "pointer",
+          "transition": "all 150ms ease",
+          "hover": { "background": "rgba(255,255,255,0.05)", "color": "#F8FAFC" }
+        },
+        "ghost": {
+          "background": "transparent",
+          "color": "#64748B",
+          "border": "none",
+          "padding": "6px 8px",
+          "borderRadius": "6px",
+          "fontSize": "13px",
+          "cursor": "pointer",
+          "hover": { "background": "rgba(255,255,255,0.06)", "color": "#94A3B8" }
+        },
+        "iconButton": {
+          "background": "transparent",
+          "border": "none",
+          "padding": "6px",
+          "borderRadius": "8px",
+          "color": "#64748B",
+          "cursor": "pointer",
+          "display": "flex",
+          "alignItems": "center",
+          "justifyContent": "center",
+          "hover": { "background": "rgba(255,255,255,0.06)", "color": "#94A3B8" }
+        },
+        "startButton": {
+          "description": "Used in Today's Schedule items",
+          "background": "#0EA5E9",
+          "color": "#fff",
+          "border": "none",
+          "borderRadius": "6px",
+          "padding": "4px 14px",
+          "fontSize": "12px",
+          "fontWeight": 600
+        }
+      },
+      "inputs": {
+        "default": {
+          "background": "#1E293B",
+          "border": "1px solid rgba(255,255,255,0.08)",
+          "borderRadius": "8px",
+          "color": "#F8FAFC",
+          "fontSize": "13px",
+          "padding": "8px 12px",
+          "height": "38px",
+          "outline": "none",
+          "transition": "border 150ms ease",
+          "focus": { "border": "1px solid rgba(14,165,233,0.5)", "boxShadow": "0 0 0 3px rgba(14,165,233,0.1)" },
+          "placeholder": { "color": "#475569" }
+        },
+        "search": {
+          "extends": "default",
+          "paddingLeft": "36px",
+          "width": "320px",
+          "iconLeft": "IconSearch",
+          "iconColor": "#475569",
+          "iconSize": 16
+        }
+      },
+      "avatars": {
+        "initials": {
+          "display": "flex",
+          "alignItems": "center",
+          "justifyContent": "center",
+          "borderRadius": "50%",
+          "fontWeight": 600,
+          "letterSpacing": "-0.01em",
+          "colorPairs": [
+            { "bg": "rgba(14,165,233,0.2)", "color": "#0EA5E9" },
+            { "bg": "rgba(139,92,246,0.2)", "color": "#8B5CF6" },
+            { "bg": "rgba(16,185,129,0.2)", "color": "#10B981" },
+            { "bg": "rgba(245,158,11,0.2)", "color": "#F59E0B" },
+            { "bg": "rgba(239,68,68,0.2)", "color": "#EF4444" },
+            { "bg": "rgba(236,72,153,0.2)", "color": "#EC4899" }
+          ],
+          "sizes": {
+            "sm": { "width": "28px", "height": "28px", "fontSize": "11px" },
+            "md": { "width": "36px", "height": "36px", "fontSize": "13px" },
+            "lg": { "width": "44px", "height": "44px", "fontSize": "16px" }
+          }
+        },
+        "stack": {
+          "description": "Overlapping avatar row like in Today's Schedule",
+          "overlap": "-8px",
+          "border": "2px solid #161F2E",
+          "borderRadius": "50%",
+          "overflowBadge": {
+            "background": "#334155",
+            "color": "#94A3B8",
+            "fontSize": "10px",
+            "fontWeight": 600
+          }
+        }
+      }
+    },
+
+    "layout": {
+      "type": "three-column",
+      "implementation": "CSS Grid: grid-template-columns: 220px 1fr 280px; height: 100vh; overflow: hidden;",
+      "columns": [
+        { "id": "sidebar", "width": "220px", "position": "fixed-left", "overflow": "hidden" },
+        { "id": "main", "width": "1fr", "position": "scrollable", "overflow": "auto" },
+        { "id": "rightPanel", "width": "280px", "position": "fixed-right", "overflow": "auto" }
+      ]
+    },
+
+    "sidebar": {
+      "component": "Sidebar",
+      "file": "src/components/Sidebar/Sidebar.jsx",
+      "style": {
+        "width": "220px",
+        "height": "100vh",
+        "background": "#0F172A",
+        "borderRight": "1px solid rgba(255,255,255,0.06)",
+        "display": "flex",
+        "flexDirection": "column",
+        "padding": "0",
+        "overflow": "hidden"
+      },
+      "header": {
+        "style": { "padding": "20px 16px 16px", "display": "flex", "alignItems": "center", "gap": "10px" },
+        "hamburger": {
+          "icon": "IconMenu2",
+          "size": 20,
+          "stroke": 1.5,
+          "color": "#94A3B8",
+          "hoverColor": "#F8FAFC",
+          "style": { "cursor": "pointer", "padding": "4px", "borderRadius": "6px" }
+        },
+        "appName": {
+          "text": "MoneyTykes",
+          "style": { "fontSize": "17px", "fontWeight": 700, "color": "#F8FAFC", "letterSpacing": "-0.02em" }
+        }
+      },
+      "navSections": [
+        {
+          "label": "MAIN",
+          "labelStyle": { "fontSize": "11px", "fontWeight": 600, "color": "#475569", "letterSpacing": "0.08em", "textTransform": "uppercase", "padding": "16px 16px 6px" },
+          "items": [
+            { "id": "dashboard",     "label": "Dashboard",      "icon": "IconLayoutDashboard", "route": "/dashboard",       "active": true },
+            { "id": "classes",       "label": "Classes",        "icon": "IconSchool",           "route": "/classes",         "badge": { "count": 3, "variant": "red" } },
+            { "id": "students",      "label": "Students",       "icon": "IconUsers",            "route": "/students" },
+            { "id": "attendance",    "label": "Attendance",     "icon": "IconClipboardCheck",   "route": "/attendance" },
+            { "id": "lessons",       "label": "Create Lessons", "icon": "IconPlayerPlay",       "route": "/lessons" },
+            { "id": "calendar",      "label": "Calendar",       "icon": "IconCalendar",         "route": "/calendar" },
+            { "id": "rewards",       "label": "Rewards",        "icon": "IconTrophy",           "route": "/rewards" },
+            { "id": "financialZone", "label": "Financial Zone", "icon": "IconChartPie",         "route": "/financial-zone", "badge": { "text": "Soon", "variant": "amber" } },
+            { "id": "chat",          "label": "Chat",           "icon": "IconMessage2",         "route": "/chat",           "badge": { "count": 15, "variant": "red" } }
+          ],
+          "navItemStyle": {
+            "default": {
+              "display": "flex",
+              "alignItems": "center",
+              "gap": "10px",
+              "padding": "9px 16px",
+              "margin": "1px 8px",
+              "borderRadius": "8px",
+              "fontSize": "14px",
+              "fontWeight": 500,
+              "color": "#94A3B8",
+              "cursor": "pointer",
+              "transition": "all 150ms ease",
+              "borderLeft": "3px solid transparent",
+              "textDecoration": "none"
+            },
+            "hover": {
+              "background": "rgba(255,255,255,0.04)",
+              "color": "#CBD5E1"
+            },
+            "active": {
+              "background": "rgba(14,165,233,0.1)",
+              "color": "#0EA5E9",
+              "fontWeight": 600,
+              "borderLeft": "3px solid #0EA5E9",
+              "borderRadius": "0 8px 8px 0",
+              "marginLeft": "0",
+              "paddingLeft": "13px"
+            },
+            "iconStyle": { "flexShrink": 0, "opacity": 0.8 },
+            "iconActiveStyle": { "opacity": 1 }
+          }
+        }
+      ],
+      "countdownCard": {
+        "description": "Exam countdown card at bottom of sidebar — matches pink-to-amber gradient in screenshot",
+        "style": {
+          "margin": "auto 12px 12px",
+          "padding": "16px",
+          "borderRadius": "12px",
+          "background": "linear-gradient(135deg, #EC4899 0%, #F59E0B 100%)"
+        },
+        "label": { "text": "Next Exam starts", "style": { "fontSize": "12px", "fontWeight": 600, "color": "rgba(255,255,255,0.85)", "marginBottom": "12px" } },
+        "countdown": {
+          "implementation": "Calculate diff from next exam date using setInterval(1000)",
+          "units": ["DAYS", "HOURS", "MINUTES"],
+          "digitStyle": {
+            "background": "rgba(0,0,0,0.25)",
+            "color": "#fff",
+            "borderRadius": "6px",
+            "padding": "6px 8px",
+            "fontSize": "20px",
+            "fontWeight": 700,
+            "minWidth": "36px",
+            "textAlign": "center"
+          },
+          "unitLabelStyle": { "fontSize": "9px", "fontWeight": 600, "color": "rgba(255,255,255,0.7)", "textTransform": "uppercase", "textAlign": "center", "marginTop": "4px" },
+          "separatorStyle": { "color": "rgba(255,255,255,0.5)", "fontSize": "18px", "fontWeight": 700, "alignSelf": "flex-start", "marginTop": "8px" }
+        }
+      },
+      "footer": {
+        "style": { "padding": "12px 16px", "borderTop": "1px solid rgba(255,255,255,0.06)", "display": "flex", "alignItems": "center", "justifyContent": "space-between" },
+        "darkModeToggle": {
+          "type": "icon-toggle",
+          "iconOff": "IconMoon",
+          "iconOn": "IconSun",
+          "size": 18,
+          "color": "#64748B",
+          "hoverColor": "#94A3B8"
+        },
+        "themeSlider": {
+          "description": "Small toggle slider visible in screenshot bottom-left",
+          "type": "range-slider",
+          "style": { "width": "48px", "accentColor": "#0EA5E9" }
+        }
+      }
+    },
+
+    "topbar": {
+      "component": "Topbar",
+      "file": "src/components/Topbar/Topbar.jsx",
+      "style": {
+        "height": "64px",
+        "display": "flex",
+        "alignItems": "center",
+        "justifyContent": "space-between",
+        "padding": "0 24px",
+        "borderBottom": "1px solid rgba(255,255,255,0.06)",
+        "background": "#0F172A",
+        "position": "sticky",
+        "top": 0,
+        "zIndex": 10
+      },
+      "left": {
+        "search": {
+          "type": "input",
+          "placeholder": "Search for students, classes...",
+          "icon": "IconSearch",
+          "iconSize": 16,
+          "iconColor": "#475569",
+          "style": {
+            "background": "#1E293B",
+            "border": "1px solid rgba(255,255,255,0.08)",
+            "borderRadius": "8px",
+            "color": "#F8FAFC",
+            "fontSize": "13px",
+            "padding": "8px 12px 8px 36px",
+            "width": "320px",
+            "height": "38px",
+            "focus": { "border": "1px solid rgba(14,165,233,0.5)", "outline": "none" }
+          }
+        }
+      },
+      "right": {
+        "icons": [
+          { "icon": "IconMessageCircle2", "tooltip": "Messages",      "size": 20, "stroke": 1.5, "color": "#64748B", "hoverColor": "#94A3B8" },
+          { "icon": "IconBell",           "tooltip": "Notifications", "size": 20, "stroke": 1.5, "color": "#64748B", "hoverColor": "#94A3B8", "badge": true },
+          { "icon": "IconLayoutGrid",     "tooltip": "Apps",          "size": 20, "stroke": 1.5, "color": "#64748B", "hoverColor": "#94A3B8" }
+        ],
+        "iconWrapStyle": { "display": "flex", "alignItems": "center", "gap": "4px" },
+        "iconButtonStyle": { "padding": "8px", "borderRadius": "8px", "cursor": "pointer", "position": "relative", "hover": { "background": "rgba(255,255,255,0.06)" } }
+      }
+    },
+
+    "mainContent": {
+      "component": "DashboardMain",
+      "file": "src/pages/Dashboard.jsx",
+      "style": { "padding": "24px", "display": "flex", "flexDirection": "column", "gap": "20px", "overflowY": "auto", "height": "calc(100vh - 64px)" },
+
+      "rows": [
+
+        {
+          "id": "row-welcome-date",
+          "type": "two-column",
+          "style": { "display": "grid", "gridTemplateColumns": "1fr 300px", "gap": "16px" },
+          "columns": [
+            {
+              "id": "welcomeBanner",
+              "component": "WelcomeBanner",
+              "file": "src/components/WelcomeBanner/WelcomeBanner.jsx",
+              "style": {
+                "background": "linear-gradient(135deg, #4F46E5 0%, #7C3AED 55%, #A855F7 100%)",
+                "borderRadius": "12px",
+                "padding": "28px 24px 24px",
+                "minHeight": "160px",
+                "position": "relative",
+                "overflow": "hidden"
+              },
+              "dismissButton": {
+                "icon": "IconX",
+                "size": 16,
+                "style": { "position": "absolute", "top": "12px", "right": "12px", "background": "rgba(255,255,255,0.15)", "border": "none", "borderRadius": "50%", "width": "24px", "height": "24px", "color": "#fff", "cursor": "pointer" }
+              },
+              "content": {
+                "greeting": { "text": "Welcome back, {teacherFirstName}", "style": { "fontSize": "22px", "fontWeight": 800, "color": "#fff", "marginBottom": "6px" } },
+                "subtitle": { "text": "Your {className} class has {count} active students", "style": { "fontSize": "13px", "color": "rgba(255,255,255,0.75)", "marginBottom": "16px" } },
+                "highlight": { "text": "{count} Students", "style": { "color": "#fff", "fontWeight": 700, "textDecoration": "underline" } },
+                "cta": {
+                  "label": "View Analytics",
+                  "style": { "background": "rgba(255,255,255,0.15)", "color": "#fff", "border": "1px solid rgba(255,255,255,0.3)", "borderRadius": "8px", "padding": "8px 18px", "fontSize": "13px", "fontWeight": 600, "cursor": "pointer", "backdropFilter": "blur(4px)" },
+                  "hover": { "background": "rgba(255,255,255,0.22)" }
+                },
+                "pagination": {
+                  "style": { "display": "flex", "gap": "6px", "marginTop": "16px" },
+                  "dotStyle": { "width": "6px", "height": "6px", "borderRadius": "50%", "background": "rgba(255,255,255,0.35)" },
+                  "activeDotStyle": { "width": "18px", "borderRadius": "3px", "background": "#fff" }
+                }
+              },
+              "illustration": {
+                "src": "/Boss & Tyker.png",
+                "style": { "position": "absolute", "right": "0", "bottom": "0", "height": "140px", "pointerEvents": "none" }
+              }
+            },
+            {
+              "id": "dateCard",
+              "component": "DateCard",
+              "file": "src/components/DateCard/DateCard.jsx",
+              "style": {
+                "background": "#1E293B",
+                "borderRadius": "12px",
+                "padding": "24px 20px",
+                "borderLeft": "4px solid #0EA5E9",
+                "display": "flex",
+                "flexDirection": "column",
+                "justifyContent": "center",
+                "gap": "4px"
+              },
+              "content": {
+                "dayLabel": { "text": "TODAY", "style": { "fontSize": "11px", "fontWeight": 600, "color": "#475569", "letterSpacing": "0.1em", "textTransform": "uppercase", "marginBottom": "4px" } },
+                "dayOfWeek": { "dynamic": true, "api": "new Date().toLocaleDateString('en-US', { weekday: 'long' })", "style": { "fontSize": "28px", "fontWeight": 700, "color": "#0EA5E9", "lineHeight": 1.1 } },
+                "fullDate": { "dynamic": true, "api": "new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date())", "style": { "fontSize": "14px", "fontWeight": 500, "color": "#F8FAFC", "marginTop": "4px" } },
+                "time": { "dynamic": true, "live": true, "api": "setInterval updates every 1000ms using Intl.DateTimeFormat with hour/minute/second", "style": { "fontSize": "12px", "color": "#64748B", "marginTop": "6px", "fontVariantNumeric": "tabular-nums" } }
+              }
+            }
+          ]
+        },
+
+        {
+          "id": "row-stats",
+          "type": "three-column",
+          "style": { "display": "grid", "gridTemplateColumns": "1fr 1fr 1fr", "gap": "16px" },
+          "cards": [
+            {
+              "id": "attendanceStat",
+              "component": "AttendanceStatCard",
+              "title": "Attendance",
+              "titleIcon": "IconClipboardCheck",
+              "dropdown": { "label": "Today", "icon": "IconChevronDown", "options": ["Today", "This Week", "This Month"] },
+              "stats": [
+                { "label": "Present", "valueKey": "presentCount", "color": "#10B981", "size": "32px", "weight": 700 },
+                { "label": "Absent",  "valueKey": "absentCount",  "color": "#EF4444", "size": "32px", "weight": 700 }
+              ],
+              "layout": "two-stat-side-by-side",
+              "style": { "background": "#1E293B", "borderRadius": "12px", "padding": "20px" }
+            },
+            {
+              "id": "helpStat",
+              "component": "StatCard",
+              "title": "Help Requests",
+              "stats": [
+                { "label": "Total",  "valueKey": "helpTotal", "color": "#F8FAFC", "size": "32px", "weight": 700 },
+                { "label": "New",    "valueKey": "helpNew",   "color": "#EF4444", "size": "14px", "weight": 500, "prefix": "↓ ", "suffix": " new" }
+              ],
+              "style": { "background": "#1E293B", "borderRadius": "12px", "padding": "20px" }
+            },
+            {
+              "id": "upcomingEvents",
+              "component": "UpcomingEventsCard",
+              "title": "Upcoming Events",
+              "titleIcon": "IconCalendar",
+              "cta": { "label": "View all →", "route": "/calendar", "style": { "fontSize": "12px", "color": "#0EA5E9" } },
+              "list": {
+                "maxItems": 4,
+                "emptyState": { "icon": "IconCalendarOff", "text": "No upcoming events" },
+                "item": {
+                  "typeBadge": { "variants": { "Test": "red", "Quiz": "amber", "Assignment": "blue", "Reminder": "gray" } },
+                  "title": { "style": { "fontSize": "13px", "fontWeight": 500, "color": "#F8FAFC" } },
+                  "className": { "style": { "fontSize": "11px", "color": "#64748B" } },
+                  "relativeTime": { "style": { "fontSize": "11px", "color": "#64748B" } },
+                  "todayHighlight": { "style": { "borderLeft": "2px solid #0EA5E9", "paddingLeft": "8px" }, "dot": { "width": "6px", "height": "6px", "borderRadius": "50%", "background": "#10B981", "animation": "pulse 2s infinite" } }
+                }
+              },
+              "style": { "background": "#1E293B", "borderRadius": "12px", "padding": "20px" }
+            }
+          ]
+        },
+
+        {
+          "id": "row-leaderboard-lessons",
+          "type": "two-column",
+          "style": { "display": "grid", "gridTemplateColumns": "1fr 1fr", "gap": "16px" },
+          "columns": [
+            {
+              "id": "leaderboard",
+              "component": "LeaderboardCard",
+              "file": "src/components/LeaderboardCard/LeaderboardCard.jsx",
+              "title": "Leaderboard",
+              "titleIcon": "IconTrophy",
+              "overflowMenu": { "icon": "IconDots", "options": ["Weekly", "Monthly", "All Time"] },
+              "list": {
+                "maxItems": 5,
+                "item": {
+                  "layout": "flex row, space-between, align-center",
+                  "left": {
+                    "rank": { "style": { "fontSize": "13px", "fontWeight": 600, "color": "#64748B", "width": "20px" } },
+                    "avatar": { "type": "initials", "size": "md" },
+                    "name": { "style": { "fontSize": "14px", "fontWeight": 500, "color": "#F8FAFC" } }
+                  },
+                  "right": {
+                    "change": {
+                      "up":   { "color": "#10B981", "icon": "↑", "fontSize": "12px" },
+                      "down": { "color": "#EF4444", "icon": "↓", "fontSize": "12px" },
+                      "neutral": { "color": "#64748B" }
+                    },
+                    "points": { "style": { "fontSize": "14px", "fontWeight": 700, "color": "#F8FAFC" }, "suffix": "%" }
+                  },
+                  "divider": { "borderBottom": "1px solid rgba(255,255,255,0.04)", "margin": "6px 0" }
+                }
+              },
+              "style": { "background": "#1E293B", "borderRadius": "12px", "padding": "20px" }
+            },
+            {
+              "id": "lessonActivities",
+              "component": "LessonActivitiesCard",
+              "file": "src/components/LessonActivitiesCard/LessonActivitiesCard.jsx",
+              "title": "Lesson Activities",
+              "titleIcon": "IconPlayerPlay",
+              "layout": "left-list + right-donut",
+              "list": {
+                "items": [
+                  { "label": "Not Started", "valueKey": "notStarted", "color": "#64748B" },
+                  { "label": "Completed",   "valueKey": "completed",   "color": "#10B981" },
+                  { "label": "In Progress", "valueKey": "inProgress",  "color": "#F59E0B" }
+                ],
+                "itemStyle": { "display": "flex", "alignItems": "center", "gap": "8px", "marginBottom": "10px" },
+                "dot": { "width": "8px", "height": "8px", "borderRadius": "50%", "flexShrink": 0 },
+                "label": { "fontSize": "13px", "color": "#94A3B8", "flex": 1 },
+                "value": { "fontSize": "14px", "fontWeight": 700, "color": "#F8FAFC" }
+              },
+              "donutChart": {
+                "library": "recharts PieChart",
+                "size": 80,
+                "innerRadius": 28,
+                "outerRadius": 40,
+                "centerLabel": { "line1": { "valueKey": "totalVideos", "fontSize": "16px", "fontWeight": 700, "color": "#F8FAFC" }, "line2": { "text": "Videos", "fontSize": "10px", "color": "#64748B" } }
+              },
+              "style": { "background": "#1E293B", "borderRadius": "12px", "padding": "20px" }
+            }
+          ]
+        },
+
+        {
+          "id": "row-performance",
+          "type": "full-width",
+          "component": "PerformanceChart",
+          "file": "src/components/PerformanceChart/PerformanceChart.jsx",
+          "header": {
+            "style": { "display": "flex", "alignItems": "center", "justifyContent": "space-between", "marginBottom": "16px" },
+            "title": { "text": "Performance", "style": { "fontSize": "16px", "fontWeight": 600, "color": "#F8FAFC" } },
+            "tabs": {
+              "type": "segmented",
+              "options": ["Winter", "Spring", "Summer", "Fall", "All"],
+              "defaultActive": "Spring",
+              "containerStyle": { "display": "flex", "gap": "2px", "background": "rgba(255,255,255,0.05)", "borderRadius": "8px", "padding": "3px" },
+              "tabStyle": { "padding": "4px 12px", "fontSize": "12px", "fontWeight": 500, "borderRadius": "6px", "color": "#64748B", "cursor": "pointer", "border": "none", "background": "transparent" },
+              "activeStyle": { "background": "#1E293B", "color": "#F8FAFC", "fontWeight": 600, "boxShadow": "0 1px 4px rgba(0,0,0,0.3)" }
+            }
+          },
+          "chart": {
+            "library": "recharts",
+            "type": "LineChart",
+            "height": 180,
+            "dataKey": "gpa",
+            "xAxisKey": "month",
+            "line": { "stroke": "#0EA5E9", "strokeWidth": 2.5, "dot": { "fill": "#0EA5E9", "r": 4, "strokeWidth": 0 }, "activeDot": { "r": 6, "fill": "#38BDF8" } },
+            "grid": { "strokeDasharray": "4 4", "stroke": "rgba(255,255,255,0.05)", "vertical": false },
+            "xAxis": { "tick": { "fontSize": 11, "fill": "#64748B" }, "axisLine": false, "tickLine": false },
+            "yAxis": { "domain": [0, 4], "tick": { "fontSize": 11, "fill": "#64748B" }, "axisLine": false, "tickLine": false, "width": 30 },
+            "tooltip": { "contentStyle": { "background": "#1E293B", "border": "1px solid rgba(255,255,255,0.1)", "borderRadius": "8px", "fontSize": "13px" } },
+            "area": { "type": "gradient-fill-below-line", "fillColor": "rgba(14,165,233,0.1)" }
+          },
+          "style": { "background": "#1E293B", "borderRadius": "12px", "padding": "20px" }
+        }
+
+      ]
+    },
+
+    "rightPanel": {
+      "component": "RightPanel",
+      "file": "src/components/RightPanel/RightPanel.jsx",
+      "style": {
+        "width": "280px",
+        "height": "100vh",
+        "background": "#161F2E",
+        "borderLeft": "1px solid rgba(255,255,255,0.06)",
+        "display": "flex",
+        "flexDirection": "column",
+        "overflowY": "auto",
+        "padding": "20px 16px"
+      },
+      "sections": [
+        {
+          "id": "todaysSchedule",
+          "component": "TodaysSchedule",
+          "headerStyle": { "display": "flex", "alignItems": "center", "justifyContent": "space-between", "marginBottom": "16px" },
+          "title": { "text": "Today's Schedule", "style": { "fontSize": "15px", "fontWeight": 600, "color": "#F8FAFC" } },
+          "dropdown": {
+            "label": "Today",
+            "icon": "IconChevronDown",
+            "iconSize": 14,
+            "style": { "display": "flex", "alignItems": "center", "gap": "4px", "fontSize": "13px", "color": "#94A3B8", "cursor": "pointer" }
+          },
+          "viewAll": { "text": "View all →", "route": "/calendar", "style": { "fontSize": "12px", "color": "#0EA5E9" } },
+          "items": {
+            "maxItems": 3,
+            "itemStyle": { "display": "flex", "alignItems": "flex-start", "gap": "12px", "padding": "12px 0", "borderBottom": "1px solid rgba(255,255,255,0.05)" },
+            "icon": {
+              "type": "colored-square",
+              "style": { "width": "40px", "height": "40px", "borderRadius": "8px", "display": "flex", "alignItems": "center", "justifyContent": "center", "flexShrink": 0 },
+              "colors": ["#0EA5E9", "#8B5CF6", "#10B981", "#F59E0B", "#EC4899"]
+            },
+            "details": {
+              "title": { "style": { "fontSize": "13px", "fontWeight": 600, "color": "#F8FAFC", "marginBottom": "3px" } },
+              "time":  { "style": { "fontSize": "11px", "color": "#64748B", "marginBottom": "6px" } },
+              "meta": {
+                "type": "icon-pill-row",
+                "pills": [
+                  { "icon": "IconVideo",     "iconSize": 11, "valueKey": "videoCount",      "suffix": " Videos",      "style": { "fontSize": "11px", "color": "#64748B" } },
+                  { "icon": "IconClipboard", "iconSize": 11, "valueKey": "assignmentCount", "suffix": " Assignments", "style": { "fontSize": "11px", "color": "#64748B" } }
+                ]
+              }
+            },
+            "right": {
+              "startButton": { "label": "Start", "style": { "background": "#0EA5E9", "color": "#fff", "border": "none", "borderRadius": "6px", "padding": "4px 14px", "fontSize": "12px", "fontWeight": 600, "cursor": "pointer", "whiteSpace": "nowrap" } },
+              "avatarStack": {
+                "type": "overlapping-avatars",
+                "maxVisible": 3,
+                "size": "24px",
+                "border": "2px solid #161F2E",
+                "overflowBadge": { "background": "#334155", "color": "#94A3B8", "fontSize": "10px" }
+              }
+            }
+          }
+        },
+        {
+          "id": "activityFeed",
+          "component": "ClassActivityFeed",
+          "style": { "marginTop": "24px" },
+          "headerStyle": { "display": "flex", "alignItems": "center", "justifyContent": "space-between", "marginBottom": "16px" },
+          "title": { "text": "Class Activity Feed", "style": { "fontSize": "15px", "fontWeight": 600, "color": "#F8FAFC" } },
+          "overflowMenu": { "icon": "IconDots", "size": 18, "color": "#64748B" },
+          "items": {
+            "maxItems": 6,
+            "itemStyle": { "display": "flex", "alignItems": "flex-start", "gap": "10px", "padding": "10px 0", "borderBottom": "1px solid rgba(255,255,255,0.04)", "position": "relative" },
+            "avatar": { "type": "initials", "size": "sm" },
+            "content": {
+              "message": {
+                "pattern": "{studentName} {action}",
+                "nameStyle": { "fontWeight": 600, "color": "#F8FAFC", "fontSize": "13px" },
+                "actionStyle": { "fontWeight": 400, "color": "#94A3B8", "fontSize": "13px" }
+              },
+              "timestamp": { "style": { "fontSize": "11px", "color": "#475569", "marginTop": "3px" }, "format": "relative" }
+            },
+            "indicator": { "type": "dot", "style": { "position": "absolute", "top": "14px", "right": "0", "width": "7px", "height": "7px", "borderRadius": "50%", "background": "#F59E0B" } },
+            "replyButton": {
+              "showWhen": "isUnread === true",
+              "style": { "display": "inline-block", "marginTop": "8px", "background": "#0EA5E9", "color": "#fff", "border": "none", "borderRadius": "6px", "padding": "5px 16px", "fontSize": "12px", "fontWeight": 600, "cursor": "pointer" }
+            }
+          },
+          "footer": { "text": "View all activities →", "route": "/activity", "style": { "display": "block", "textAlign": "center", "color": "#0EA5E9", "fontSize": "12px", "fontWeight": 500, "padding": "12px 0 0", "cursor": "pointer" } }
+        }
+      ]
+    },
+
+    "pages": {
+      "attendance": {
+        "file": "src/pages/Attendance/Attendance.jsx",
+        "route": "/attendance",
+        "title": "Attendance",
+        "sections": ["ClassSelector", "DatePicker", "StudentAttendanceList", "SaveButton", "AttendanceReport"]
+      },
+      "lessons": {
+        "file": "src/pages/Lessons/Lessons.jsx",
+        "route": "/lessons",
+        "title": "Create Lessons",
+        "sections": ["CreateLessonForm", "LessonsLibraryGrid", "LessonDetailSideBySide"]
+      },
+      "calendar": {
+        "file": "src/pages/Calendar/Calendar.jsx",
+        "route": "/calendar",
+        "title": "Calendar",
+        "sections": ["MonthlyView", "CreateEventModal", "ListViewToggle"]
+      },
+      "rewards": {
+        "file": "src/pages/Rewards/Rewards.jsx",
+        "route": "/rewards",
+        "title": "Rewards",
+        "sections": ["RewardsBank", "AwardPointsPanel", "StudentLeaderboard", "PointHistoryLog"]
+      },
+      "financialZone": {
+        "file": "src/pages/FinancialZone/FinancialZone.jsx",
+        "route": "/financial-zone",
+        "title": "Financial Zone",
+        "sections": ["ComingSoonScreen"]
+      }
+    },
+
+    "sharedComponents": [
+      { "name": "Modal",           "file": "src/components/Modal/Modal.jsx" },
+      { "name": "Badge",           "file": "src/components/Badge/Badge.jsx" },
+      { "name": "Avatar",          "file": "src/components/Avatar/Avatar.jsx" },
+      { "name": "AvatarStack",     "file": "src/components/Avatar/AvatarStack.jsx" },
+      { "name": "StatCard",        "file": "src/components/StatCard/StatCard.jsx" },
+      { "name": "DateCard",        "file": "src/components/DateCard/DateCard.jsx" },
+      { "name": "SegmentedTabs",   "file": "src/components/SegmentedTabs/SegmentedTabs.jsx" },
+      { "name": "OverflowMenu",    "file": "src/components/OverflowMenu/OverflowMenu.jsx" },
+      { "name": "EmptyState",      "file": "src/components/EmptyState/EmptyState.jsx" },
+      { "name": "ProgressBar",     "file": "src/components/ProgressBar/ProgressBar.jsx" },
+      { "name": "StudentSelector", "file": "src/components/StudentSelector/StudentSelector.jsx" }
+    ],
+
+    "hooks": [
+      { "name": "useLocalStorage",    "file": "src/hooks/useLocalStorage.js" },
+      { "name": "useLiveClock",       "file": "src/hooks/useLiveClock.js",       "description": "setInterval 1000ms, returns { dayOfWeek, fullDate, time }" },
+      { "name": "useCountdown",       "file": "src/hooks/useCountdown.js",        "description": "Countdown to exam date, returns { days, hours, minutes, seconds }" },
+      { "name": "useStudents",        "file": "src/hooks/useStudents.js" },
+      { "name": "useAttendance",      "file": "src/hooks/useAttendance.js" },
+      { "name": "useCalendarEvents",  "file": "src/hooks/useCalendarEvents.js" },
+      { "name": "useRewards",         "file": "src/hooks/useRewards.js" }
+    ],
+
+    "localStorageSchema": {
+      "attendance":    { "key": "attendance_{classId}_{YYYY-MM-DD}", "value": "[{ studentId, studentName, status, note, timestamp }]" },
+      "lessons":       { "key": "lessons",                           "value": "[{ id, title, subject, youtubeUrl, description, tags, status, completedAt, createdAt }]" },
+      "rewardsBank":   { "key": "rewards_bank",                      "value": "[{ id, name, pointValue, icon, description, category }]" },
+      "studentPoints": { "key": "student_points_{studentId}",        "value": "{ totalPoints, weekPoints, monthPoints }" },
+      "pointsLog":     { "key": "points_log_{studentId}",            "value": "[{ date, rewardId, rewardName, points, teacherNote, awardedAt }]" },
+      "calendarEvents":{ "key": "calendar_events",                   "value": "[{ id, title, type, classId, date, time, notes, createdAt }]" }
+    }
+  }
+}
