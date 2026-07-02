@@ -5241,41 +5241,8 @@
 }
 
 @media (max-width: 1024px) {
-  .create-lessons-layout,
   .lesson-detail-layout {
     grid-template-columns: 1fr;
-  }
-
-  .create-lessons-library-panel {
-    max-height: none;
-  }
-
-  .create-lessons-library-panel .created-lessons-grid,
-  .studio-lesson-list {
-    max-height: none;
-  }
-
-  .studio-lesson-row {
-    grid-template-columns: 96px minmax(0, 1fr);
-    grid-template-areas:
-      "thumb details"
-      "actions actions";
-    gap: 8px 10px;
-  }
-
-  .studio-lesson-thumb {
-    grid-area: thumb;
-    width: 96px;
-  }
-
-  .studio-lesson-details {
-    grid-area: details;
-  }
-
-  .studio-lesson-actions {
-    grid-area: actions;
-    justify-content: flex-end;
-    padding-top: 2px;
   }
 
   .created-lessons-grid {

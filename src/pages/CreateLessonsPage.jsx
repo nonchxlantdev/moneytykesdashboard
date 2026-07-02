@@ -51,7 +51,7 @@ export default function CreateLessonsPage({ db, setToast, navigate }) {
   const [openMenuId, setOpenMenuId] = useState(null);
   const [previewLesson, setPreviewLesson] = useState(null);
   const [compactPanel, setCompactPanel] = useState("library");
-  const isCompactLayout = useMediaQuery("(max-width: 1023px)");
+  const isCompactLayout = useMediaQuery("(max-width: 1180px)");
 
   const subjects = useMemo(() => {
     const fromDb = new Set([db.className, ...db.students.map(s => s.classLabel).filter(Boolean)]);

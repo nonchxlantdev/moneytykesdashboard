@@ -1120,7 +1120,16 @@ a,
   }
 
   .lesson-card-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .create-lessons-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .compact-panel-library .studio-lesson-list {
+    max-height: min(58dvh, 520px);
   }
 }
 
@@ -1183,23 +1192,10 @@ a,
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
-  .create-lessons-layout {
-    grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1.18fr);
-    gap: 16px;
-  }
-
-  .create-lessons-library-panel {
-    max-height: calc(100dvh - 240px);
-  }
-
-  .studio-lesson-list {
-    max-height: calc(100dvh - 360px);
-  }
 }
 
 /* Create Lessons — tablet + mobile studio layout */
-@media (max-width: 1023px) {
+@media (max-width: 1180px) {
   .create-lessons-mobile-tabs {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1274,7 +1270,7 @@ a,
   }
 }
 
-@media (min-width: 768px) and (max-width: 1023px) {
+@media (min-width: 768px) and (max-width: 1180px) {
   .studio-lesson-row {
     grid-template-columns: 104px minmax(0, 1fr) auto;
     grid-template-areas: none;
@@ -1290,6 +1286,14 @@ a,
 
   .studio-lesson-details {
     grid-area: auto;
+  }
+
+  .studio-lesson-details h3 {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .studio-lesson-actions {
