@@ -4,7 +4,7 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 import Badge from "../components/Badge";
 import LessonCardMenu from "../components/LessonCardMenu";
 import LessonDetailModal from "../components/LessonDetailModal";
-import { CREATED_LESSONS_KEY, LESSON_STUDIO_EDIT_KEY, mapCreatedLessonForLibrary } from "../utils/lessonsStorage";
+import { CREATED_LESSONS_KEY, LESSON_STUDIO_EDIT_KEY, formatLessonStatus, mapCreatedLessonForLibrary } from "../utils/lessonsStorage";
 import { formatPoints } from "../utils/points";
 
 /**
@@ -34,7 +34,7 @@ export default function LessonsLibraryPage({ setToast, navigate }) {
     total: lessons.length,
     published: lessons.filter(lesson => lesson.status === "Published").length,
     completed: lessons.filter(lesson => lesson.status === "Completed").length,
-    drafts: lessons.filter(lesson => lesson.status === "Draft").length
+    drafts: lessons.filter(lesson => lesson.status === "Draft" || lesson.status === "Inactive").length
   }), [lessons]);
 
   const filteredLessons = lessons.filter(lesson => {
@@ -42,7 +42,7 @@ export default function LessonsLibraryPage({ setToast, navigate }) {
     const matchesTab = activeTab === "All Lessons"
       || (activeTab === "Favorites" ? favorites.includes(lesson.id) : lesson.libraryStatus === activeTab || lesson.status === activeTab)
       || (activeTab === "Published" && lesson.status === "Published")
-      || (activeTab === "Draft" && lesson.status === "Draft");
+      || (activeTab === "Inactive" && (lesson.status === "Draft" || lesson.status === "Inactive"));
     const matchesSubject = subjectFilter === "All Subjects" || lesson.subject === subjectFilter;
     return matchesQuery && matchesTab && matchesSubject;
   });
@@ -91,7 +91,7 @@ export default function LessonsLibraryPage({ setToast, navigate }) {
           { label: "Total Lessons", value: stats.total, meta: "In your library", icon: BookOpen },
           { label: "Published", value: stats.published, meta: "Ready for class", icon: Users },
           { label: "Completed", value: stats.completed, meta: "Finished lessons", icon: Check },
-          { label: "Drafts", value: stats.drafts, meta: "Still in progress", icon: Pencil }
+          { label: "Inactive", value: stats.drafts, meta: "Not published yet", icon: Pencil }
         ].map(({ label, value, meta, icon: Icon }) => (
           <article className="lesson-stat-card" key={label}>
             <span className="lesson-stat-icon"><Icon /></span>
@@ -115,7 +115,7 @@ export default function LessonsLibraryPage({ setToast, navigate }) {
       </div>
 
       <div className="lesson-tabs" role="tablist" aria-label="Lesson status">
-        {["All Lessons", "Published", "Completed", "Draft", "Favorites"].map(tab => (
+        {["All Lessons", "Published", "Completed", "Inactive", "Favorites"].map(tab => (
           <button
             className={activeTab === tab ? "active" : ""}
             type="button"
@@ -159,7 +159,7 @@ export default function LessonsLibraryPage({ setToast, navigate }) {
               <div className="lesson-card-body">
                 <div className="lesson-card-heading">
                   <span>{lesson.subject}</span>
-                  <Badge tone={lesson.status === "Completed" ? "success" : "teal"}>{lesson.status}</Badge>
+                  <Badge tone={lesson.status === "Completed" ? "success" : "teal"}>{formatLessonStatus(lesson.status)}</Badge>
                 </div>
                 <h2>{lesson.title}</h2>
                 <p>{lesson.description ? lesson.description.slice(0, 80) : lesson.subject}</p>

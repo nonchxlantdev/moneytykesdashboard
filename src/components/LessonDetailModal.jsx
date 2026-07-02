@@ -1,6 +1,7 @@
 import { BookOpen, Check, Play, X } from "lucide-react";
 import Badge from "./Badge";
 import { formatLessonText, youtubeEmbedUrl } from "../utils/youtube";
+import { formatLessonStatus } from "../utils/lessonsStorage";
 
 /**
  * App-style lesson detail modal with video hero and lesson plan.
@@ -50,7 +51,7 @@ export default function LessonDetailModal({ lesson, onClose, onMarkComplete }) {
             <h2 id="lesson-app-title">{lesson.title}</h2>
             <div className="lesson-app-badges">
               <Badge tone="teal">{lesson.subject}</Badge>
-              <Badge tone={isCompleted ? "success" : "default"}>{lesson.status}</Badge>
+              <Badge tone={isCompleted ? "success" : "default"}>{formatLessonStatus(lesson.status)}</Badge>
               {lesson.tags?.slice(0, 2).map(tag => (
                 <span className="lesson-app-tag" key={tag}>{tag}</span>
               ))}

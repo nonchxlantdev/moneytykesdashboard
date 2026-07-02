@@ -1,6 +1,11 @@
 export const CREATED_LESSONS_KEY = "created_lessons";
 export const LESSON_STUDIO_EDIT_KEY = "lesson_studio_edit_id";
 
+export function formatLessonStatus(status) {
+  if (status === "Draft") return "Inactive";
+  return status || "Inactive";
+}
+
 /**
  * Normalize a teacher-created lesson for the library grid.
  * @param {object} lesson
@@ -14,7 +19,7 @@ export function mapCreatedLessonForLibrary(lesson) {
     duration: "—",
     reward: 0,
     isCreated: true,
-    libraryStatus: lesson.status === "Completed" ? "Completed" : lesson.status === "Published" ? "Published" : "Draft"
+    libraryStatus: lesson.status === "Completed" ? "Completed" : lesson.status === "Published" ? "Published" : "Inactive"
   };
 }
 

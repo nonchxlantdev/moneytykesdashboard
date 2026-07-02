@@ -4,7 +4,7 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import LessonCardMenu from "../components/LessonCardMenu";
 import LessonDetailModal from "../components/LessonDetailModal";
-import { CREATED_LESSONS_KEY, LESSON_STUDIO_EDIT_KEY, mapCreatedLessonForLibrary } from "../utils/lessonsStorage";
+import { CREATED_LESSONS_KEY, LESSON_STUDIO_EDIT_KEY, formatLessonStatus, mapCreatedLessonForLibrary } from "../utils/lessonsStorage";
 import { isValidYoutubeUrl, youtubeThumbnail } from "../utils/youtube";
 
 const SUBJECTS = [
@@ -23,8 +23,12 @@ const emptyLesson = {
   youtubeUrl: "",
   description: "",
   tags: "",
-  status: "Draft"
+  status: "Inactive"
 };
+
+function normalizeStatus(status) {
+  return status === "Draft" ? "Inactive" : status || "Inactive";
+}
 
 function lessonToForm(lesson) {
   return {
@@ -33,7 +37,7 @@ function lessonToForm(lesson) {
     youtubeUrl: lesson.youtubeUrl || "",
     description: lesson.description || "",
     tags: (lesson.tags || []).join(", "),
-    status: lesson.status === "Completed" ? "Published" : lesson.status || "Draft"
+    status: lesson.status === "Completed" ? "Published" : normalizeStatus(lesson.status)
   };
 }
 
@@ -181,7 +185,7 @@ export default function CreateLessonsPage({ db, setToast, navigate }) {
     setLessons(current => [lesson, ...current]);
     setForm(emptyLesson);
     setUrlError("");
-    setToast(form.status === "Published" ? "Lesson published to your library." : "Lesson saved as draft.");
+    setToast(form.status === "Published" ? "Lesson published to your library." : "Lesson saved as inactive.");
     if (isCompactLayout) {
       setCompactPanel("library");
     }
@@ -267,7 +271,7 @@ export default function CreateLessonsPage({ db, setToast, navigate }) {
                       <p className="studio-lesson-subline">
                         <span>{lesson.subject}</span>
                         <span className="studio-lesson-dot">·</span>
-                        <span>{lesson.status}</span>
+                        <span>{formatLessonStatus(lesson.status)}</span>
                         {active && (
                           <>
                             <span className="studio-lesson-dot">·</span>
@@ -316,11 +320,23 @@ export default function CreateLessonsPage({ db, setToast, navigate }) {
         <article className="section-panel create-lesson-form-card">
           <div className="section-heading create-lesson-studio-heading">
             <h2>{isEditing ? "Edit Lesson" : "Lesson Studio"}</h2>
-            {isEditing && (
-              <button className="secondary-action compact" type="button" onClick={cancelEditing}>
-                <Plus size={14} /> New Lesson
-              </button>
-            )}
+            <div className="lesson-studio-heading-actions">
+              {isEditing && (
+                <button
+                  className="lesson-studio-delete-icon"
+                  type="button"
+                  aria-label="Delete lesson"
+                  onClick={deleteEditingLesson}
+                >
+                  <Trash2 size={18} />
+                </button>
+              )}
+              {isEditing && (
+                <button className="secondary-action compact" type="button" onClick={cancelEditing}>
+                  <Plus size={14} /> New Lesson
+                </button>
+              )}
+            </div>
           </div>
 
           <form className="stacked-form" onSubmit={submitLesson}>
@@ -373,12 +389,12 @@ export default function CreateLessonsPage({ db, setToast, navigate }) {
             <div className="field-label lesson-status-field">
               <span className="lesson-status-label">Status</span>
               <div className="lesson-status-segmented" role="group" aria-label="Lesson status">
-                {["Draft", "Published"].map(status => (
+                {["Inactive", "Published"].map(status => (
                   <button
                     key={status}
                     type="button"
-                    className={form.status === status ? "active" : ""}
-                    aria-pressed={form.status === status}
+                    className={normalizeStatus(form.status) === status ? "active" : ""}
+                    aria-pressed={normalizeStatus(form.status) === status}
                     onClick={() => setForm({ ...form, status })}
                   >
                     {status}
@@ -386,7 +402,7 @@ export default function CreateLessonsPage({ db, setToast, navigate }) {
                 ))}
               </div>
               <p className="lesson-status-hint">
-                {form.status === "Published" ? "Visible in your lessons library for class use." : "Saved privately until you publish."}
+                {form.status === "Published" ? "Visible in your lessons library for class use." : "Hidden from class until you publish."}
               </p>
             </div>
 
@@ -406,11 +422,6 @@ export default function CreateLessonsPage({ db, setToast, navigate }) {
                   </button>
                 ) : null}
               </div>
-              {isEditing && (
-                <button className="lesson-studio-delete" type="button" onClick={deleteEditingLesson}>
-                  <Trash2 size={15} /> Delete Lesson
-                </button>
-              )}
             </footer>
           </form>
         </article>

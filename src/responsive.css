@@ -689,8 +689,7 @@ a,
   }
 
   .lesson-studio-save,
-  .lesson-studio-cancel,
-  .lesson-studio-delete {
+  .lesson-studio-cancel {
     width: 100%;
     justify-content: center;
   }
