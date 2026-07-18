@@ -16,6 +16,7 @@ const emptyEvent = {
   classId: "",
   date: "",
   time: "09:00",
+  location: "",
   notes: ""
 };
 
@@ -63,6 +64,7 @@ export default function CalendarPage({ db, setToast, focusDate, onFocusHandled }
       classId: event.classId,
       date: event.date,
       time: event.time,
+      location: event.location || "",
       notes: event.notes || ""
     });
     setModalOpen(true);
@@ -81,6 +83,7 @@ export default function CalendarPage({ db, setToast, focusDate, onFocusHandled }
       classId: form.classId,
       date: form.date,
       time: form.time,
+      location: form.location.trim(),
       notes: form.notes.trim(),
       createdAt: editingEvent?.createdAt || new Date().toISOString()
     };
@@ -214,6 +217,15 @@ export default function CalendarPage({ db, setToast, focusDate, onFocusHandled }
               <input type="time" value={form.time} onChange={event => setForm({ ...form, time: event.target.value })} />
             </label>
           </div>
+          <label className="field-label">
+            Location
+            <input
+              type="text"
+              value={form.location}
+              onChange={event => setForm({ ...form, location: event.target.value })}
+              placeholder="Online, School Hall, Classroom…"
+            />
+          </label>
           <label className="field-label">
             Notes
             <textarea rows={3} value={form.notes} onChange={event => setForm({ ...form, notes: event.target.value })} />

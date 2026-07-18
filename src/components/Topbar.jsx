@@ -1,20 +1,18 @@
-import { IconBell, IconLayoutGrid, IconLogout, IconMenu2, IconMessageCircle, IconSearch, IconX } from "@tabler/icons-react";
-import { ICON_SIZE, ICON_STROKE } from "../config/navigation";
+import { IconMenu2, IconX } from "@tabler/icons-react";
+import { ICON_STROKE } from "../config/navigation";
 
 const PAGE_TITLES = {
   admin: "Admin",
   dashboard: null,
   students: "Students",
-  lessons: "Lessons Library",
-  "create-lessons": "Create Lessons",
+  "add-student": "Add student",
+  lessons: "Lessons library",
+  "create-lessons": "Create lessons",
   attendance: "Attendance",
   calendar: "Calendar",
   rewards: "Rewards",
   leaderboard: "Leaderboard",
-  reports: "Reports",
-  "financial-zone": "Financial Zone",
-  game: "Money Moves Live",
-  settings: "Class Settings"
+  game: "Money Moves Live"
 };
 
 const PAGE_SUBTITLES = {
@@ -22,65 +20,29 @@ const PAGE_SUBTITLES = {
   "create-lessons": "Build lessons in the studio, edit from your library, or manage them with the options menu."
 };
 
-/** Bottom tab views — no duplicate title in the mobile topbar */
 const MOBILE_TAB_VIEWS = new Set(["students", "attendance", "rewards"]);
 
 /**
- * App topbar — modeled on update design.json, preserves logout + page context.
- * @param {{
- *   view: string,
- *   db: object,
- *   search: string,
- *   setSearch: (value: string) => void,
- *   onOpenMenu: () => void,
- *   onLogout: () => void,
- *   setToast: (msg: string) => void
- * }} props
+ * Minimal top bar — mobile menu toggle + page title only.
+ * (Search box and date were pulled out for now — see git history to restore.)
  */
-export default function Topbar({ view, db, search, setSearch, onOpenMenu, menuOpen = false, onLogout, setToast }) {
+export default function Topbar({
+  view,
+  db,
+  onOpenMenu,
+  menuOpen = false
+}) {
   const pageTitle = PAGE_TITLES[view] ?? `Welcome back, ${db.teacher.first}`;
   const pageSubtitle = PAGE_SUBTITLES[view];
   const isMobileTabView = MOBILE_TAB_VIEWS.has(view);
   const showPageMeta = view !== "dashboard" && !isMobileTabView;
 
-  function notifySoon(label) {
-    setToast(`${label} coming soon.`);
-  }
-
   return (
-    <header className={`topbar app-entrance ${isMobileTabView ? "topbar-mobile-tab-view" : ""}`}>
+    <header className={`topbar topbar-minimal app-entrance ${isMobileTabView ? "topbar-mobile-tab-view" : ""}`}>
       <div className="topbar-main">
         <button className="topbar-menu-button mobile-menu" type="button" aria-label={menuOpen ? "Close menu" : "Open menu"} onClick={onOpenMenu}>
           {menuOpen ? <IconX size={20} stroke={ICON_STROKE} /> : <IconMenu2 size={20} stroke={ICON_STROKE} />}
         </button>
-
-        <label className="topbar-search">
-          <IconSearch size={16} stroke={ICON_STROKE} className="topbar-search-icon" aria-hidden="true" />
-          <input
-            type="search"
-            value={search}
-            placeholder="Search for students, classes..."
-            onChange={event => setSearch(event.target.value)}
-            aria-label="Search for students and classes"
-          />
-        </label>
-
-        <div className="topbar-actions">
-          <button type="button" className="topbar-icon-button" title="Messages" aria-label="Messages" onClick={() => notifySoon("Messages")}>
-            <IconMessageCircle size={20} stroke={ICON_STROKE} />
-          </button>
-          <button type="button" className="topbar-icon-button has-badge" title="Notifications" aria-label="Notifications" onClick={() => notifySoon("Notifications")}>
-            <IconBell size={20} stroke={ICON_STROKE} />
-            <span className="topbar-icon-badge" aria-hidden="true" />
-          </button>
-          <button type="button" className="topbar-icon-button" title="Apps" aria-label="Apps" onClick={() => notifySoon("Apps")}>
-            <IconLayoutGrid size={20} stroke={ICON_STROKE} />
-          </button>
-          <button className="topbar-logout-button logout-button" type="button" onClick={onLogout}>
-            <IconLogout size={ICON_SIZE} stroke={ICON_STROKE} />
-            <span>Log Out</span>
-          </button>
-        </div>
       </div>
 
       {showPageMeta && (

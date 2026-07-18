@@ -1,0 +1,112 @@
+.favorite-star-btn {
+  position: relative;
+  overflow: visible;
+}
+
+.favorite-star-btn.active {
+  color: #e5a800;
+  border-color: color-mix(in srgb, #ffc928 55%, transparent);
+  background: color-mix(in srgb, #ffc928 22%, #fff);
+}
+
+.favorite-star-btn.shake .star-shake-icon {
+  animation: favorite-star-shake 0.5s ease;
+  transform-origin: center;
+}
+
+.favorite-star-btn .star-break {
+  position: relative;
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.favorite-star-btn .star-half {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.favorite-star-btn .star-half.left {
+  clip-path: inset(0 50% 0 0);
+  animation: favorite-star-break-left 0.48s ease forwards;
+}
+
+.favorite-star-btn .star-half.right {
+  clip-path: inset(0 0 0 50%);
+  animation: favorite-star-break-right 0.48s ease forwards;
+}
+
+.favorite-star-btn.with-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-height: 40px;
+  padding: 0 14px;
+  gap: 7px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, #ffc928 45%, transparent);
+  background: #fff;
+  color: var(--mt-ink-secondary, #5a6b68);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.favorite-star-btn.with-label.active {
+  background: color-mix(in srgb, #ffc928 20%, #fff);
+  border-color: #ffc928;
+  color: #e5a800;
+}
+
+.favorite-star-btn.with-label .star-break {
+  width: 17px;
+  height: 17px;
+}
+
+@keyframes favorite-star-shake {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  15% {
+    transform: rotate(-16deg) scale(1.2);
+  }
+  30% {
+    transform: rotate(14deg) scale(1.15);
+  }
+  45% {
+    transform: rotate(-12deg) scale(1.1);
+  }
+  60% {
+    transform: rotate(10deg) scale(1.08);
+  }
+  75% {
+    transform: rotate(-6deg) scale(1.04);
+  }
+}
+
+@keyframes favorite-star-break-left {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-11px, 8px) rotate(-42deg);
+    opacity: 0;
+  }
+}
+
+@keyframes favorite-star-break-right {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(11px, 8px) rotate(42deg);
+    opacity: 0;
+  }
+}

@@ -1,0 +1,102 @@
+/**
+ * Shared StatCard — theme tokens only.
+ */
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--mt-card, #fff);
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 14%, transparent);
+  box-shadow: 0 8px 20px rgba(28, 43, 42, 0.04);
+}
+
+.stat-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--icon-accent) 14%, transparent);
+  color: var(--icon-accent);
+  flex-shrink: 0;
+}
+
+.stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.stat-value {
+  margin-top: 2px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--mt-ink, #1c2b2a);
+  line-height: 1.1;
+}
+
+.stat-foot {
+  margin-top: 2px;
+  font-size: 0.75rem;
+  font-style: normal;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+/* Tones */
+.stat-card.total .stat-value {
+  color: color-mix(in srgb, var(--icon-accent) 62%, #000);
+}
+
+.stat-card.total .stat-icon {
+  background: color-mix(in srgb, var(--icon-accent) 18%, transparent);
+  color: color-mix(in srgb, var(--icon-accent) 62%, #000);
+}
+
+.stat-card.published .stat-value,
+.stat-card.attendance .stat-value {
+  color: var(--icon-accent);
+}
+
+.stat-card.published .stat-icon,
+.stat-card.attendance .stat-icon {
+  background: color-mix(in srgb, var(--sidebar-active-bg) 16%, transparent);
+  color: var(--sidebar-active-bg);
+}
+
+.stat-card.completed .stat-value,
+.stat-card.points .stat-value {
+  color: color-mix(in srgb, var(--gold-accent) 45%, #5a3718);
+}
+
+.stat-card.completed .stat-icon,
+.stat-card.points .stat-icon {
+  background: color-mix(in srgb, var(--gold-accent) 28%, transparent);
+  color: color-mix(in srgb, var(--gold-accent) 55%, #5a3718);
+}
+
+.stat-card.inactive .stat-value {
+  color: #6b7280;
+}
+
+.stat-card.inactive .stat-icon {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+@media (max-width: 720px) {
+  .stats-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

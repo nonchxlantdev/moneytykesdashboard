@@ -190,7 +190,7 @@ export default function RewardsPage({ db, setToast, update }) {
 
       <div className="rewards-grid-top">
         <article className="section-panel rewards-create-card">
-          <div className="section-heading"><h2>Create Reward</h2></div>
+          <div className="section-heading"><h2>Create reward</h2></div>
           <form className="stacked-form rewards-create-form" onSubmit={createReward}>
             <label className="field-label">
               Reward Name
@@ -283,7 +283,7 @@ export default function RewardsPage({ db, setToast, update }) {
                     <strong>{reward.name}</strong>
                     <small>{reward.category}</small>
                   </span>
-                  <em>+{reward.pointValue} pts</em>
+                  <em className="mt-data-num">+{reward.pointValue} pts</em>
                 </button>
               ))}
             </div>
@@ -300,7 +300,7 @@ export default function RewardsPage({ db, setToast, update }) {
       <div className="rewards-grid-bottom">
         <article className="section-panel rewards-award-card">
           <div className="section-heading">
-            <h2>Award Points</h2>
+            <h2>Award points</h2>
             <button
               type="button"
               className={`bulk-toggle ${bulkMode ? "active" : ""}`}
@@ -421,7 +421,7 @@ export default function RewardsPage({ db, setToast, update }) {
                     <span className="leaderboard-name">{student.first} {student.last}</span>
                   </button>
                   <div className="leaderboard-points">
-                    <strong>{student.rangePoints} pts</strong>
+                    <strong className="mt-data-num">{student.rangePoints} pts</strong>
                     <span className="leaderboard-bar">
                       <span style={{ width: `${(student.rangePoints / maxLeaderboardPoints) * 100}%` }} />
                     </span>

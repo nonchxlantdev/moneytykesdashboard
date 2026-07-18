@@ -1,0 +1,182 @@
+/**
+ * MoneyTykes v2 design tokens
+ * Shell defaults align with Teal + Gold; live themes override via [data-theme].
+ */
+
+:root {
+  /* —— Fonts —— */
+  --font-display: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* —— Shell (Teal + Gold defaults) —— */
+  --sidebar-bg: #0b4b4e;
+  --sidebar-active-bg: #1d8180;
+  --sidebar-active-text: #ffffff;
+  --header-bg: #123e35;
+  --header-text: #e8f4f3;
+  --right-panel-bg: #d8eae4;
+  --icon-accent: #359392;
+  --gold-accent: #f6cc69;
+  --sidebar-text: #e8f4f3;
+  --wood-accent: #8a5a35;
+  --header-bg-2: color-mix(in srgb, var(--header-bg) 82%, #000);
+
+  --mt-sidebar-bg: var(--sidebar-bg);
+  --mt-sidebar-bg-top: var(--sidebar-bg);
+  --mt-sidebar-bg-bottom: var(--sidebar-bg);
+  --mt-sidebar-edge: var(--sidebar-bg);
+  --mt-sidebar-text: var(--sidebar-text);
+  --mt-sidebar-muted: rgba(232, 244, 243, 0.82);
+  --mt-sidebar-hover: rgba(255, 255, 255, 0.1);
+  --mt-sidebar-active-bg: var(--sidebar-active-bg);
+  --mt-sidebar-active-text: var(--sidebar-active-text);
+  --mt-sidebar-border: rgba(255, 255, 255, 0.1);
+  --mt-sidebar-width: 210px;
+  --mt-sidebar-collapsed: 72px;
+  --mt-sidebar-chalk: var(--sidebar-text);
+  --mt-sidebar-toggle-ink: var(--sidebar-bg);
+
+  /* Wood frame — chalkboard ledge (kept warmer brown, separate from sidebar orange) */
+  --mt-wood-light: #8a5a35;
+  --mt-wood-mid: #7a4c2a;
+  --mt-wood-deep: #6f4520;
+  --mt-wood-shadow: #5a3718;
+
+  /* Handwritten accents (sidebar section labels + chalkboard feel) */
+  --font-hand: "Caveat", "Segoe Print", "Comic Sans MS", cursive;
+
+  /* —— Canvas —— */
+  --mt-canvas: #f5f4ef;
+  --mt-card: #ffffff;
+  --mt-card-border: rgba(28, 43, 42, 0.08);
+  --mt-card-offwhite: #faf9f6;
+  --mt-rail-bg: var(--right-panel-bg);
+  --mt-ink: #1c2b2a;
+  --mt-ink-secondary: #5a6b68;
+  --mt-ink-muted: #8a9693;
+
+  /* —— Brand —— */
+  --mt-primary: var(--icon-accent);
+  --mt-primary-strong: var(--icon-accent);
+  --mt-primary-soft: rgba(53, 147, 146, 0.12);
+  --mt-primary-border: rgba(53, 147, 146, 0.28);
+  --mt-primary-focus: rgba(10, 171, 181, 0.22);
+
+  /* Achievement / earn (warm — sparingly) */
+  --mt-achieve: #e8a317;
+  --mt-achieve-strong: #c8870a;
+  --mt-achieve-soft: rgba(232, 163, 23, 0.14);
+  --mt-achieve-border: rgba(232, 163, 23, 0.35);
+  --mt-achieve-orange: #ff6b1a;
+
+  /* Status set (app-wide — no ad hoc per screen) */
+  --mt-status-success: #059669;
+  --mt-status-success-soft: rgba(5, 150, 105, 0.12);
+  --mt-status-pending: #d97706;
+  --mt-status-pending-soft: rgba(217, 119, 6, 0.12);
+  --mt-status-danger: #e11d48;
+  --mt-status-danger-soft: rgba(225, 29, 72, 0.12);
+  --mt-status-info: #2563eb;
+  --mt-status-info-soft: rgba(37, 99, 235, 0.12);
+  --mt-status-neutral: #64748b;
+  --mt-status-neutral-soft: rgba(100, 116, 139, 0.12);
+
+  /* Category accents (per-subject progress, badges, event date cycling) */
+  --mt-cat-rose: #ec4899;
+  --mt-cat-rose-soft: rgba(236, 72, 153, 0.14);
+  --mt-cat-violet: #8b5cf6;
+  --mt-cat-violet-soft: rgba(139, 92, 246, 0.14);
+  --mt-cat-teal: var(--mt-primary);
+  --mt-cat-teal-soft: var(--mt-primary-soft);
+  --mt-cat-green: var(--mt-status-success);
+  --mt-cat-green-soft: var(--mt-status-success-soft);
+  --mt-cat-amber: var(--mt-achieve);
+  --mt-cat-amber-soft: var(--mt-achieve-soft);
+
+  /* Promo banner gradient (purple, replaces teal tip banner) */
+  --mt-gradient-promo: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #a855f7 100%);
+
+  /* —— Type scale —— */
+  --mt-text-xl: 1.5rem;
+  --mt-text-lg: 1.25rem;
+  --mt-text-md: 1.0625rem;
+  --mt-text-base: 0.9375rem;
+  --mt-text-sm: 0.8125rem;
+  --mt-text-xs: 0.6875rem;
+  --mt-weight-regular: 400;
+  --mt-weight-medium: 500;
+  --mt-weight-semibold: 600;
+  --mt-leading-tight: 1.2;
+  --mt-leading-snug: 1.35;
+  --mt-leading-normal: 1.5;
+
+  /* —— Spacing & radius —— */
+  --mt-space-1: 4px;
+  --mt-space-2: 8px;
+  --mt-space-3: 12px;
+  --mt-space-4: 16px;
+  --mt-space-5: 20px;
+  --mt-space-6: 24px;
+  --mt-space-8: 32px;
+  --mt-radius-sm: 8px;
+  --mt-radius-md: 12px;
+  --mt-radius-lg: 14px;
+  --mt-radius-xl: 16px;
+  --mt-control-height: 44px;
+  --mt-control-height-sm: 36px;
+  --mt-card-radius: var(--mt-radius-lg);
+  --mt-card-padding: 20px;
+  --mt-shadow-card: none;
+
+  /* —— Layout —— */
+  --mt-page-max: 1180px;
+  --mt-settings-max: 640px;
+  --mt-topbar-height: 64px;
+
+  /* —— Motion —— */
+  --mt-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --mt-duration: 160ms;
+
+  /* Legacy aliases used by existing screens */
+  --mt-font-family: var(--font-body);
+  --mt-font-data: var(--font-body);
+  --mt-bg-app: var(--mt-canvas);
+  --mt-bg-sidebar: var(--mt-sidebar-bg);
+  --mt-bg-card: var(--mt-card);
+  --mt-bg-input: #faf9f6;
+  --mt-text-primary: var(--mt-ink);
+  --mt-text-secondary: var(--mt-ink-secondary);
+  --mt-text-muted: var(--mt-ink-muted);
+  --mt-text-link: var(--mt-primary);
+  --mt-border-default: var(--mt-card-border);
+  --mt-border-card: var(--mt-card-border);
+  --mt-accent-blue: var(--mt-primary);
+  --ink: var(--mt-ink);
+  --muted: var(--mt-ink-secondary);
+  --line: var(--mt-card-border);
+  --panel: var(--mt-card);
+  --accent-teal: var(--mt-primary);
+  --radius: var(--mt-radius-lg);
+}
+
+.mt-data-num {
+  font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--mt-weight-semibold);
+  letter-spacing: -0.02em;
+}
+
+.mt-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--mt-text-xs);
+  font-weight: var(--mt-weight-semibold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mt-ink-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mt-duration: 0ms;
+  }
+}

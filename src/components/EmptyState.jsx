@@ -1,13 +1,20 @@
 /**
- * Empty state placeholder for lists and panels.
- * @param {{ title: string, text?: string, icon?: React.ReactNode }} props
+ * Empty state for lists/tables.
+ * @param {{
+ *   title: string,
+ *   text?: string,
+ *   icon?: React.ReactNode,
+ *   action?: React.ReactNode,
+ *   className?: string,
+ * }} props
  */
-export default function EmptyState({ title, text, icon }) {
+export default function EmptyState({ title, text, icon, action, className = "" }) {
   return (
-    <div className="mt-empty-state">
-      {icon && <span className="mt-empty-state-icon">{icon}</span>}
+    <div className={`mt-empty-state ${className}`.trim()}>
+      {icon ? <span className="mt-empty-state-icon">{icon}</span> : null}
       <strong>{title}</strong>
-      {text && <p>{text}</p>}
+      {text ? <p>{text}</p> : null}
+      {action || null}
     </div>
   );
 }

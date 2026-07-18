@@ -1,17 +1,18 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
+import { motion } from "framer-motion";
 import {
   BarChart3,
-  BookOpen,
   Calculator,
   CalendarDays,
+  Camera,
   Check,
   ChevronRight,
+  ChevronLeft,
   ClipboardCheck,
   X,
   ClipboardList,
-  Flame,
   Gift,
   GraduationCap,
   Heart,
@@ -23,11 +24,11 @@ import {
   Menu,
   Pencil,
   Phone,
+  Upload,
   Volume2,
   VolumeX,
   PiggyBank,
   Play,
-  Plus,
   RotateCcw,
   Settings,
   ShieldAlert,
@@ -47,27 +48,34 @@ import RewardsPage from "./pages/RewardsPage";
 import AttendancePage from "./pages/Attendance";
 import CreateLessonsPage from "./pages/CreateLessonsPage";
 import LessonsLibraryPage from "./pages/LessonsLibraryPage";
-import FinancialZonePage from "./pages/FinancialZone";
 import CalendarPage from "./pages/Calendar";
-import DateCard from "./components/DateCard";
-import WelcomeBanner from "./components/WelcomeBanner";
 import Topbar from "./components/Topbar";
-import AttendanceStatCard from "./components/dashboard/AttendanceStatCard";
-import UpcomingEventsCard from "./components/dashboard/UpcomingEventsCard";
-import LessonActivitiesCard from "./components/dashboard/LessonActivitiesCard";
-import { useTheme } from "./hooks/useTheme";
+import EventsRail from "./components/EventsRail";
+import Select from "./components/ui/Select";
 import { useLocalStorage } from "./hooks/useLocalStorage";
-import { applyMockSeed, seedLocalStorageMockData, shouldSeedMockData } from "./data/seedMockData";
+import { purgeLegacyMockData } from "./utils/purgeMockData";
 import { formatPoints } from "./utils/points";
 import "../styles.css";
+import "./fonts.css";
+import "./design-tokens.css";
+import "./themes/dashboard-themes.css";
 import "./react.css";
 import "./responsive.css";
-import "./theme-v2.css";
 import "./theme-light.css";
-import "./dashboard.css";
+import "./dashboard-v2.css";
+import "./shell-v2.css";
+import "./students.css";
+import "./components/ui.css";
+import "./components/ui/shell-components.css";
+import DashboardPage from "./pages/DashboardPage";
+import PersonalizationSettings from "./components/admin/PersonalizationSettings";
+import StudentsDashboard from "./components/StudentsDashboard/StudentsDashboard";
+import PageChalkLoader from "./components/shared/PageChalkLoader";
+import AddStudentWizard from "./components/AddStudent/AddStudentWizard";
+import { ThemeProvider } from "./themes/ThemeContext";
 
 import { navSections, ICON_SIZE, ICON_STROKE } from "./config/navigation";
-import { IconMoon, IconSun } from "@tabler/icons-react";
+import { buttonTap, fadeUp } from "./lib/motion";
 
 const STORAGE_KEY = "moneytykes.teacher.dashboard.v3";
 const assetPath = path => `${import.meta.env.BASE_URL}${path}`;
@@ -112,7 +120,8 @@ const financialTips = [
 
 const emptySchoolForm = { name: "", contactPerson: "", email: "", phone: "", address: "", status: "active" };
 const emptyTeacherForm = { firstName: "", lastName: "", email: "", temporaryPassword: "", schoolId: "", role: "Teacher", status: "active" };
-const emptyStudentForm = { first: "", last: "", email: "", age: "", classLabel: "", schoolId: "", teacherId: "", guardian: "", phone: "", photo: "" };
+const emptyStudentForm = { first: "", last: "", email: "", age: "", dateOfBirth: "", classLabel: "", schoolId: "", teacherId: "", guardian: "", phone: "", photo: "" };
+const studentGradeOptions = ["Form 1", "Form 2", "Form 3", "Form 4", "Form 5", "Standard 1", "Standard 2", "Standard 3", "Standard 4", "Standard 5"];
 const studentAvatars = [
   "bullbasaur.png",
   "charmander.png",
@@ -127,7 +136,7 @@ const studentAvatars = [
 
 function createDatabase() {
   return {
-    teacher: { first: "Teacher", last: "Advisor", email: "teacher@moneytykes.local" },
+    teacher: { first: "Teacher", last: "Young", email: "teacher@moneytykes.local" },
     school: "MoneyTykes Classroom",
     className: "Financial Literacy Class",
     students: [],
@@ -151,30 +160,25 @@ function resolveDefaultSchoolFilter(db) {
 }
 
 function loadDatabase() {
-  const baseUrl = import.meta.env.BASE_URL;
+  purgeLegacyMockData();
   try {
-    let saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || createDatabase();
-    saved = normalizeDatabase(saved);
-    if (shouldSeedMockData(saved)) {
-      saved = applyMockSeed(saved, baseUrl);
-      seedLocalStorageMockData(saved);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-    }
-    return saved;
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || createDatabase();
+    return normalizeDatabase(saved);
   } catch {
-    const saved = applyMockSeed(createDatabase(), baseUrl);
-    seedLocalStorageMockData(saved);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-    return saved;
+    return createDatabase();
   }
 }
 
 function normalizeDatabase(saved) {
   const defaults = createDatabase();
+  const teacher = { ...defaults.teacher, ...(saved.teacher || {}) };
+  // Migrate the pre-existing placeholder surname so already-saved browsers
+  // pick up the current default teacher identity instead of the old one.
+  if (teacher.last === "Advisor") teacher.last = defaults.teacher.last;
   return {
     ...defaults,
     ...saved,
-    teacher: { ...defaults.teacher, ...(saved.teacher || {}) },
+    teacher,
     students: saved.students || [],
     schools: saved.schools || [],
     teachers: saved.teachers || [],
@@ -197,14 +201,29 @@ function App() {
   const [schoolFilter, setSchoolFilter] = useState(() => resolveDefaultSchoolFilter(loadDatabase()));
   const [range, setRange] = useState("month");
   const [toast, setToast] = useState("");
-  const [sidebarHidden, setSidebarHidden] = useState(false);
+  const [sidebarHidden, setSidebarHidden] = useState(() => {
+    try {
+      return localStorage.getItem("sidebarCollapsed") === "true";
+    } catch {
+      return false;
+    }
+  });
   const [studentFocus, setStudentFocus] = useState(null);
+  const [editingStudentId, setEditingStudentId] = useState(null);
   const [calendarFocusDate, setCalendarFocusDate] = useState(null);
   const [calendarEvents] = useLocalStorage("calendar_events", []);
-  const { theme, toggleTheme, isLight } = useTheme();
+  const [pageLoading, setPageLoading] = useState(false);
   const mainContentRef = useRef(null);
+  const pageLoadTimerRef = useRef(null);
 
   useEffect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(db)), [db]);
+  useEffect(() => {
+    try {
+      localStorage.setItem("sidebarCollapsed", String(sidebarHidden));
+    } catch {
+      // Persist is best-effort.
+    }
+  }, [sidebarHidden]);
   useEffect(() => {
     if (!toast) return undefined;
     const timer = setTimeout(() => setToast(""), 2200);
@@ -248,18 +267,50 @@ function App() {
   }
 
   function navigate(nextView, options = {}) {
-    setView(nextView);
-    if (options.focusDate) setCalendarFocusDate(options.focusDate);
-    setCurrentTip(current => randomFinancialTip(current));
-    closeSidebarMenu();
-    requestAnimationFrame(() => {
-      mainContentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  }
+    if (pageLoadTimerRef.current) {
+      window.clearTimeout(pageLoadTimerRef.current);
+      pageLoadTimerRef.current = null;
+    }
 
-  function logout() {
-    window.location.href = `${import.meta.env.BASE_URL}login`;
+    const applyView = () => {
+      setView(nextView);
+      if (options.focusDate) setCalendarFocusDate(options.focusDate);
+      if (nextView === "add-student") {
+        setEditingStudentId(options.editStudentId ?? null);
+      } else if (nextView !== "students") {
+        setEditingStudentId(null);
+      }
+      setCurrentTip(current => randomFinancialTip(current));
+      closeSidebarMenu();
+      requestAnimationFrame(() => {
+        mainContentRef.current?.scrollTo({ top: 0, behavior: "auto" });
+        window.scrollTo({ top: 0, behavior: "auto" });
+      });
+    };
+
+    // Most routes are local/sync — open immediately.
+    // Pass { wait: true } (or a Promise in options.wait) only when something actually needs to load.
+    if (!options.wait || nextView === view) {
+      setPageLoading(false);
+      applyView();
+      return;
+    }
+
+    setPageLoading(true);
+    const finish = () => {
+      applyView();
+      setPageLoading(false);
+      pageLoadTimerRef.current = null;
+    };
+
+    if (typeof options.wait?.then === "function") {
+      Promise.resolve(options.wait).finally(() => {
+        pageLoadTimerRef.current = window.setTimeout(finish, 180);
+      });
+      return;
+    }
+
+    pageLoadTimerRef.current = window.setTimeout(finish, 450);
   }
 
   const pageProps = {
@@ -276,6 +327,8 @@ function App() {
     currentTip,
     studentFocus,
     setStudentFocus,
+    editingStudentId,
+    setEditingStudentId,
     update,
     navigate,
     setToast,
@@ -285,7 +338,7 @@ function App() {
   if (isLoginRoute) return <LoginPage />;
 
   return (
-    <div className={`app-shell react-app ${isLight ? "theme-light" : "theme-v2"} ${sidebarHidden ? "sidebar-collapsed" : ""} ${view === "game" ? "game-active" : ""}`}>
+    <ThemeProvider className={`app-shell react-app theme-light ${sidebarHidden ? "sidebar-collapsed" : ""} ${view === "game" ? "game-active" : ""}`}>
       <Sidebar
         currentView={view}
         open={menuOpen}
@@ -293,36 +346,38 @@ function App() {
         collapsed={sidebarHidden}
         toggleCollapsed={() => setSidebarHidden(!sidebarHidden)}
         closeMenu={closeSidebarMenu}
-        isLight={isLight}
-        onToggleTheme={toggleTheme}
       />
       {menuOpen && <button className="sidebar-backdrop" type="button" aria-label="Close navigation menu" onClick={closeSidebarMenu} />}
-      <main className={`dashboard ${view === "game" ? "game-view" : ""}`} ref={mainContentRef}>
+      <main
+        className={`dashboard ${view === "game" ? "game-view" : ""} ${view === "dashboard" ? "dashboard-view teacher-dashboard-chalk-cursor" : ""} ${view === "students" ? "students-view" : ""} ${view === "attendance" ? "attendance-view" : ""} ${view === "add-student" ? "add-student-view" : ""} ${view === "lessons" ? "lessons-view" : ""} ${view === "create-lessons" ? "create-lessons-view" : ""}`}
+        ref={mainContentRef}
+        style={
+          view === "dashboard"
+            ? {
+                "--ruler-cursor": `url("${assetPath("cursors/ruler-cursor.svg")}") 4 28, auto`,
+                "--chalk-cursor": `url("${assetPath("cursors/chalk-cursor.svg")}") 4 28, crosshair`,
+                "--eraser-cursor": `url("${assetPath("cursors/eraser-cursor.svg")}") 16 16, cell`
+              }
+            : undefined
+        }
+      >
         <Topbar
           view={view}
           db={db}
-          search={search}
-          setSearch={setSearch}
           onOpenMenu={toggleSidebarMenu}
           menuOpen={menuOpen}
-          onLogout={logout}
-          setToast={setToast}
         />
 
-        {view === "dashboard" && (
-          <div className="mobile-school-context" aria-label="School context">
-            <p className="eyebrow">{db.school} · {db.className}</p>
-          </div>
-        )}
-
-          <div className="view active page-swap" key={view}>
-          {view === "admin" && <AdminDashboard db={db} update={update} />}
-          {view === "dashboard" && <Dashboard {...pageProps} />}
-          {view === "students" && <Students {...pageProps} />}
-          {view === "lessons" && <LessonsLibraryPage setToast={setToast} navigate={navigate} />}
-          {view === "create-lessons" && <CreateLessonsPage db={db} setToast={setToast} navigate={navigate} />}
-          {view === "attendance" && <AttendancePage db={db} setToast={setToast} />}
-          {view === "calendar" && (
+        <div className="view active page-swap">
+          <PageChalkLoader active={pageLoading} />
+          {!pageLoading && view === "admin" && <AdminDashboard db={db} update={update} />}
+          {!pageLoading && view === "dashboard" && <DashboardPage {...pageProps} />}
+          {!pageLoading && view === "students" && <Students {...pageProps} />}
+          {!pageLoading && view === "add-student" && <AddStudentPage {...pageProps} />}
+          {!pageLoading && view === "lessons" && <LessonsLibraryPage setToast={setToast} navigate={navigate} />}
+          {!pageLoading && view === "create-lessons" && <CreateLessonsPage db={db} setToast={setToast} navigate={navigate} />}
+          {!pageLoading && view === "attendance" && <AttendancePage db={db} setToast={setToast} navigate={navigate} />}
+          {!pageLoading && view === "calendar" && (
             <CalendarPage
               db={db}
               setToast={setToast}
@@ -330,14 +385,15 @@ function App() {
               onFocusHandled={() => setCalendarFocusDate(null)}
             />
           )}
-          {view === "rewards" && <RewardsPage db={db} setToast={setToast} update={update} />}
-          {view === "leaderboard" && <Leaderboard {...pageProps} />}
-          {view === "reports" && <Reports dashboard={dashboard} />}
-          {view === "financial-zone" && <FinancialZonePage setToast={setToast} />}
-          {view === "game" && <GameDashboard setToast={setToast} />}
-          {view === "settings" && <SettingsPage db={db} />}
+          {!pageLoading && view === "rewards" && <RewardsPage db={db} setToast={setToast} update={update} />}
+          {!pageLoading && view === "leaderboard" && <Leaderboard {...pageProps} />}
+          {!pageLoading && view === "game" && <GameDashboard setToast={setToast} />}
         </div>
       </main>
+
+      {view === "dashboard" && (
+        <EventsRail calendarEvents={calendarEvents} navigate={navigate} currentTip={currentTip} />
+      )}
 
       <MobileTabBar
         view={view}
@@ -346,73 +402,117 @@ function App() {
         onOpenMenu={toggleSidebarMenu}
       />
       <div className={`toast ${toast ? "show" : ""}`} role="status" aria-live="polite">{toast}</div>
-    </div>
+    </ThemeProvider>
   );
 }
 
-function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, closeMenu, isLight, onToggleTheme }) {
+function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, closeMenu }) {
+  const logoSrc = `${import.meta.env.BASE_URL}Logo.png`;
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+
+  function goToLogin() {
+    const base = import.meta.env.BASE_URL.endsWith("/")
+      ? import.meta.env.BASE_URL
+      : `${import.meta.env.BASE_URL}/`;
+    window.location.href = `${base}login`;
+  }
+
   return (
     <aside className={`sidebar ${open ? "open" : ""} ${collapsed ? "collapsed" : ""}`} aria-label="Primary navigation">
-      <div className="sidebar-top">
-        {!collapsed && (
-          <div className="brand">
-            <img className="brand-logo" src={assetPath("Logo.png")} alt="MoneyTykes" />
-          </div>
-        )}
-        <button className="sidebar-collapse-button" type="button" aria-label={open ? "Close menu" : collapsed ? "Show sidebar" : "Hide sidebar"} onClick={() => {
+      <button
+        className="sidebar-toggle"
+        type="button"
+        aria-label={open ? "Close menu" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        onClick={() => {
           if (open) closeMenu();
           else toggleCollapsed();
-        }}>
-          {open ? <X /> : collapsed ? <ChevronRight /> : <Menu />}
-        </button>
-      </div>
+        }}
+      >
+        {open ? (
+          <X size={14} strokeWidth={2.25} />
+        ) : (
+          <ChevronLeft
+            className={collapsed ? "is-flipped" : undefined}
+            size={14}
+            strokeWidth={2.25}
+          />
+        )}
+      </button>
+
       <div className="sidebar-scroll mt-sidebar-scroll">
         {navSections.map(section => (
           <nav className="nav-section" key={section.label} aria-label={section.label}>
-            {!collapsed && <p className="nav-section-label">{section.label}</p>}
+            <p className="nav-section-label">{section.label}</p>
             <div className="nav-list">
               {section.items.map(item => (
                 <NavButton
                   key={item.view}
                   item={item}
-                  active={currentView === item.view}
+                  active={
+                    currentView === item.view
+                    || (item.view === "students" && (currentView === "add-student" || currentView === "attendance"))
+                    || (item.view === "lessons" && currentView === "create-lessons")
+                  }
                   navigate={navigate}
                   showLabel={!collapsed}
+                  collapsed={collapsed}
                 />
               ))}
+              {section.label === "System" ? (
+                <button
+                  type="button"
+                  className="nav-item sidebar-logout"
+                  title="Log out"
+                  aria-label="Log out"
+                  onClick={() => setLogoutConfirmOpen(true)}
+                >
+                  <LogOut size={ICON_SIZE} strokeWidth={ICON_STROKE} aria-hidden="true" />
+                  {!collapsed ? <span className="label nav-item-label">Log out</span> : null}
+                </button>
+              ) : null}
             </div>
           </nav>
         ))}
-        {!collapsed && (
-          <>
-            <section className="challenge-card mt-sidebar-action-card">
-              <div className="challenge-badge mt-sidebar-action-icon" aria-hidden="true"><Trophy /></div>
-              <h2 className="mt-sidebar-action-title">Run a Challenge</h2>
-              <p className="mt-sidebar-action-text">Motivate students with fun class goals.</p>
-              <button className="secondary-action mt-sidebar-action-button" type="button" onClick={() => navigate("game")}>Start Challenge</button>
-            </section>
-            <button className="teacher-chip mt-sidebar-profile-card" type="button">
-              <span className="avatar initials mt-sidebar-profile-avatar">T</span>
-              <span className="mt-sidebar-profile-info">
-                <strong className="mt-sidebar-profile-name">Teacher</strong>
-                <span className="mt-sidebar-profile-role">Class owner</span>
-              </span>
-              <ChevronRight className="mt-sidebar-profile-arrow" />
-            </button>
-            <div className="sidebar-footer-tools">
-              <button
-                type="button"
-                className="sidebar-theme-toggle"
-                onClick={onToggleTheme}
-                aria-label={isLight ? "Switch to dark theme" : "Switch to light theme"}
-              >
-                {isLight ? <IconMoon size={18} stroke={ICON_STROKE} /> : <IconSun size={18} stroke={ICON_STROKE} />}
-                <span>{isLight ? "Dark mode" : "Light mode"}</span>
-              </button>
-            </div>
-          </>
-        )}
       </div>
+
+      <div className="sidebar-brand-footer" aria-hidden={collapsed}>
+        <img className="sidebar-brand-logo" src={logoSrc} alt="MoneyTykes" />
+      </div>
+
+      {logoutConfirmOpen
+        ? createPortal(
+            <div
+              className="modal-backdrop show logout-confirm-backdrop"
+              onClick={event => {
+                if (event.target === event.currentTarget) setLogoutConfirmOpen(false);
+              }}
+              role="presentation"
+            >
+              <div
+                className="modal-card logout-confirm-card"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="logout-confirm-title"
+              >
+                <div className="modal-icon logout-confirm-icon" aria-hidden="true">
+                  <LogOut size={22} strokeWidth={2.25} />
+                </div>
+                <h3 id="logout-confirm-title">Log out?</h3>
+                <p>You&apos;ll be returned to the login screen. You can sign back in anytime.</p>
+                <div className="modal-actions">
+                  <button type="button" className="btn" onClick={() => setLogoutConfirmOpen(false)}>
+                    Cancel
+                  </button>
+                  <button type="button" className="btn danger-btn" onClick={goToLogin}>
+                    <LogOut size={15} strokeWidth={2.25} />
+                    Log out
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
     </aside>
   );
 }
@@ -445,28 +545,33 @@ function MobileTabBar({ view, menuOpen, navigate, onOpenMenu }) {
   );
 }
 
-function NavButton({ item, active, navigate, compact = false, showLabel = true }) {
+function NavButton({ item, active, navigate, compact = false, showLabel = true, collapsed = false }) {
   const Icon = item.icon;
   const className = compact ? "mobile-tab" : "nav-item";
   const badgeText = item.badge?.text ?? (item.badge?.count != null ? String(item.badge.count) : null);
 
   return (
-    <button
+    <motion.button
       className={`${className} ${active ? "active" : ""}`}
       type="button"
       title={item.label}
+      aria-label={collapsed || compact ? item.label : undefined}
+      aria-current={active ? "page" : undefined}
       onClick={() => navigate(item.view)}
+      {...(compact ? {} : { ...buttonTap })}
     >
       {compact ? (
         <Icon />
       ) : (
-        <Icon size={ICON_SIZE} stroke={ICON_STROKE} />
+        <>
+          <Icon size={ICON_SIZE} stroke={ICON_STROKE} aria-hidden="true" />
+          {showLabel ? <span className="label nav-item-label">{item.label}</span> : null}
+          {showLabel && badgeText ? (
+            <span className={`nav-item-badge ${item.badge?.variant || "gray"}`}>{badgeText}</span>
+          ) : null}
+        </>
       )}
-      {showLabel && <span className="nav-item-label">{item.label}</span>}
-      {showLabel && badgeText && (
-        <span className={`nav-item-badge ${item.badge?.variant || "gray"}`}>{badgeText}</span>
-      )}
-    </button>
+    </motion.button>
   );
 }
 
@@ -652,7 +757,7 @@ function AdminDashboard({ db, update }) {
         <article className="mt-admin-card">
           <div className="mt-admin-card-header">
             <div><h2>Schools</h2><p>Add and manage participating schools.</p></div>
-            <button className="primary-action mt-admin-primary" type="button" onClick={() => openSchoolForm()}>Add School</button>
+            <button className="primary-action mt-admin-primary" type="button" onClick={() => openSchoolForm()}>Add school</button>
           </div>
           {schoolFormOpen && (
             <form className="mt-admin-form" onSubmit={saveSchool}>
@@ -668,9 +773,9 @@ function AdminDashboard({ db, update }) {
               <Field label="Address" value={schoolForm.address} onChange={address => setSchoolForm({ ...schoolForm, address })} required />
               <label className="field-label">Status<span className="input-without-icon"><select value={schoolForm.status} onChange={event => setSchoolForm({ ...schoolForm, status: event.target.value })} required><option value="active">Active</option><option value="inactive">Inactive</option></select></span></label>
               <div className="mt-admin-form-actions">
-                <button className="primary-action" type="submit">Save School</button>
+                <button className="primary-action" type="submit">Save school</button>
                 <button className="secondary-action" type="button" onClick={() => setSchoolFormOpen(false)}>Cancel</button>
-                {editingSchoolId && <button className="secondary-action mt-admin-danger" type="button" onClick={() => deleteSchool(editingSchoolId)}>Delete School</button>}
+                {editingSchoolId && <button className="secondary-action mt-admin-danger" type="button" onClick={() => deleteSchool(editingSchoolId)}>Delete school</button>}
               </div>
             </form>
           )}
@@ -680,7 +785,7 @@ function AdminDashboard({ db, update }) {
         <article className="mt-admin-card">
           <div className="mt-admin-card-header">
             <div><h2>Teachers</h2><p>Create teacher accounts and assign them to a school.</p></div>
-            <button className="primary-action mt-admin-primary" type="button" onClick={() => openTeacherForm()} disabled={!schools.length} title={!schools.length ? "Create a school before adding a teacher" : "Add Teacher"}>Add Teacher</button>
+            <button className="primary-action mt-admin-primary" type="button" onClick={() => openTeacherForm()} disabled={!schools.length} title={!schools.length ? "Create a school before adding a teacher" : "Add teacher"}>Add teacher</button>
           </div>
           {!schools.length && <p className="mt-admin-note">Create a school first so each teacher can be assigned during setup.</p>}
           {teacherError && !teacherFormOpen && <p className="mt-admin-error">{teacherError}</p>}
@@ -708,6 +813,8 @@ function AdminDashboard({ db, update }) {
           <AdminTeacherTable teachers={teachers} editTeacher={openTeacherForm} deleteTeacher={deleteTeacher} />
         </article>
       </section>
+
+      <PersonalizationSettings />
     </div>
   );
 }
@@ -750,217 +857,90 @@ function StatusBadge({ status }) {
   return <span className={`mt-status-badge mt-status-${status}`}>{status === "active" ? "Active" : "Inactive"}</span>;
 }
 
-function Dashboard(props) {
-  const { dashboard, db, search, setSearch, status, setStatus, schoolFilter, setSchoolFilter, currentTip, navigate, setStudentFocus, calendarEvents } = props;
-  return (
-    <div className="dashboard-main">
-      <section className="dashboard-hero-row">
-        <WelcomeBanner
-          teacherName={db.teacher.first}
-          className={db.className}
-          studentCount={dashboard.studentCount}
-          onViewAnalytics={() => navigate("reports")}
-          assetPath={assetPath}
-        />
-        <DateCard panel />
-      </section>
-
-      <section className="quick-actions section-panel">
-        <div className="section-heading"><h2>Quick Actions</h2></div>
-        <div className="quick-action-grid">
-          <ActionCard icon={Plus} title="Add Student" text="Grow your classroom roster." onClick={() => navigate("students")} />
-          <ActionCard icon={Trophy} title="Award Points" text="Recognize student achievements." onClick={() => navigate("rewards")} />
-          <ActionCard icon={BookOpen} title="Create Lesson" text="Build and publish lessons." onClick={() => navigate("create-lessons")} />
-          <ActionCard icon={Trophy} title="Launch Game" text="Open Money Moves Live." onClick={() => navigate("game")} />
-        </div>
-      </section>
-
-      <section className="dashboard-stats-row dashboard-stats-row-two" aria-label="Attendance and students">
-        <AttendanceStatCard
-          className={db.className}
-          studentCount={dashboard.studentCount}
-          onNavigate={() => navigate("attendance")}
-        />
-        <StudentOverview
-          db={db}
-          search={search}
-          setSearch={setSearch}
-          status={status}
-          setStatus={setStatus}
-          schoolFilter={schoolFilter}
-          setSchoolFilter={setSchoolFilter}
-          navigate={navigate}
-          setStudentFocus={setStudentFocus}
-        />
-      </section>
-
-      <section className="dashboard-split-row" aria-label="Events and lessons">
-        <UpcomingEventsCard
-          events={calendarEvents}
-          onNavigate={date => navigate("calendar", date ? { focusDate: date } : {})}
-        />
-        <LessonActivitiesCard onNavigate={() => navigate("lessons")} />
-      </section>
-
-      <section className="content-grid">
-        <RecentTasks tasks={db.tasks.slice(-4).reverse()} navigate={navigate} />
-        <Insights dashboard={dashboard} />
-      </section>
-
-      <MoneyTykesTipBanner tip={currentTip} />
-    </div>
-  );
-}
-
-function ActionCard({ icon: Icon, title, text, onClick }) {
-  return (
-    <button className="quick-action lift-card" type="button" onClick={onClick}>
-      <span><Icon /></span>
-      <strong>{title}</strong>
-      <small>{text}</small>
-    </button>
-  );
-}
-
-function StudentOverview({ db, search, setSearch, status, setStatus, schoolFilter, setSchoolFilter, navigate, setStudentFocus }) {
-  const students = filterStudents(db.students, search, status, schoolFilter).slice(0, 5);
-  function openStudent(student, mode) {
-    setStudentFocus({ id: student.id, mode });
-    navigate("students");
-  }
-  return (
-    <article className="section-panel student-overview">
-      <div className="section-heading"><h2>Student Overview</h2></div>
-      <StudentListFilters
-        schools={db.schools}
-        schoolFilter={schoolFilter}
-        setSchoolFilter={setSchoolFilter}
-        search={search}
-        setSearch={setSearch}
-        status={status}
-        setStatus={setStatus}
-      />
-      <StudentTable students={students} simple onView={student => openStudent(student, "view")} linkNamesOnly />
-    </article>
-  );
-}
-
-function TopEarners({ earners, range, setRange, navigate }) {
-  return (
-    <article className="section-panel">
-      <div className="section-heading inline-control">
-        <h2>Top Point Earners</h2>
-        <select value={range} onChange={event => setRange(event.target.value)}>
-          <option value="week">This Week</option>
-          <option value="month">This Month</option>
-          <option value="all">All Time</option>
-        </select>
-      </div>
-      <EarnersList earners={earners} />
-      <button className="wide-button" type="button" onClick={() => navigate("leaderboard")}>View Full Leaderboard</button>
-    </article>
-  );
-}
-
-function RecentTasks({ tasks, navigate }) {
-  return (
-    <article className="section-panel">
-      <div className="section-heading inline-control">
-        <h2>Recent Tasks</h2>
-        <button className="link-button" type="button" onClick={() => navigate("create-lessons")}>Create Lesson</button>
-      </div>
-      <div className="task-list">
-        {tasks.length ? tasks.map(task => <TaskRow key={task.id} task={task} />) : <EmptyState title="No tasks yet" text="Create a task to start tracking progress." />}
-      </div>
-    </article>
-  );
-}
-
-function Insights({ dashboard }) {
-  return (
-    <article className="section-panel">
-      <div className="section-heading"><h2>Class Insights</h2></div>
-      <div className="insight-grid">
-        <Insight title="Average Points" value={formatPoints(Math.round(dashboard.averageBalance))} />
-        <Insight title="Task Library" value={dashboard.taskCount} />
-        <Insight title="Top Category" value={dashboard.topCategory} />
-        <Insight title="Momentum" value={`${dashboard.completionRate}%`} />
-      </div>
-    </article>
-  );
-}
-
-function Students({ db, dashboard, update, studentFocus, setStudentFocus, search, setSearch, status, setStatus, schoolFilter, setSchoolFilter }) {
-  const [editingStudent, setEditingStudent] = useState(null);
+function Students({ db, update, studentFocus, setStudentFocus, navigate, setToast }) {
   const [viewingStudent, setViewingStudent] = useState(null);
-  const rosterStudents = filterStudents(dashboard.students, search, status, schoolFilter);
-
-  useEffect(() => {
-    if (!studentFocus) return;
-    const student = db.students.find(item => item.id === studentFocus.id);
-    if (!student) {
-      setStudentFocus(null);
-      return;
-    }
-    if (studentFocus.mode === "edit") {
-      setEditingStudent(student);
-      setViewingStudent(null);
-    } else {
-      setViewingStudent(student);
-      setEditingStudent(null);
-    }
-    setStudentFocus(null);
-  }, [db.students, setStudentFocus, studentFocus]);
-
-  function closeEdit() {
-    setEditingStudent(null);
-  }
 
   function deleteStudent(student) {
     if (!window.confirm(`Delete ${student.first} ${student.last}? This cannot be undone.`)) return;
-    update(db => {
-      db.students = db.students.filter(item => item.id !== student.id);
-      db.transactions = db.transactions.filter(item => item.studentId !== student.id);
+    update(dbState => {
+      dbState.students = dbState.students.filter(item => item.id !== student.id);
+      dbState.transactions = dbState.transactions.filter(item => item.studentId !== student.id);
     }, "Student deleted");
-    if (editingStudent?.id === student.id) setEditingStudent(null);
     if (viewingStudent?.id === student.id) setViewingStudent(null);
   }
 
+  function openEditStudent(student) {
+    setViewingStudent(null);
+    navigate("add-student", { editStudentId: student.id });
+  }
+
   return (
-    <div className="students-dashboard-screen">
-      <PageHeading eyebrow="Class Roster" title="Students Dashboard" hideOnMobile />
-      <div className="management-grid">
-        <StudentForm db={db} update={update} editingStudent={editingStudent} onCancelEdit={closeEdit} />
-        <PointsForm students={db.students} update={update} />
-      </div>
-      {viewingStudent && <StudentProfile student={viewingStudent} onClose={() => setViewingStudent(null)} onEdit={() => { setEditingStudent(viewingStudent); setViewingStudent(null); }} onDelete={deleteStudent} />}
-      <article className="section-panel full-width-panel students-roster-card">
-        <div className="section-heading students-card-heading">
-          <span className="card-heading-icon"><Users /></span>
-          <h2>Students</h2>
-        </div>
-        <StudentListFilters
-          schools={db.schools}
-          schoolFilter={schoolFilter}
-          setSchoolFilter={setSchoolFilter}
-          search={search}
-          setSearch={setSearch}
-          status={status}
-          setStatus={setStatus}
+    <>
+      {viewingStudent && (
+        <StudentProfile
+          student={viewingStudent}
+          onClose={() => setViewingStudent(null)}
+          onEdit={() => openEditStudent(viewingStudent)}
+          onDelete={deleteStudent}
         />
-        <StudentTable
-          students={rosterStudents}
-          simple
-          onView={setViewingStudent}
-        />
-      </article>
-    </div>
+      )}
+      <StudentsDashboard
+        db={db}
+        update={update}
+        navigate={navigate}
+        setToast={setToast}
+        studentFocus={studentFocus}
+        setStudentFocus={setStudentFocus}
+        onViewStudent={setViewingStudent}
+        onEditStudent={openEditStudent}
+        onDeleteStudent={deleteStudent}
+      />
+    </>
   );
 }
 
-function StudentForm({ db, update, editingStudent, onCancelEdit }) {
+function calculateAgeFromDob(dateOfBirth) {
+  if (!dateOfBirth) return "";
+  const birth = new Date(dateOfBirth);
+  if (Number.isNaN(birth.getTime())) return "";
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age -= 1;
+  return age >= 0 ? String(age) : "";
+}
+
+function AddStudentPage({ db, update, navigate, editingStudentId, setEditingStudentId }) {
+  const editingStudent = editingStudentId
+    ? db.students.find(student => student.id === editingStudentId)
+    : null;
+
+  function returnToStudents() {
+    setEditingStudentId(null);
+    navigate("students");
+  }
+
+  return (
+    <AddStudentWizard
+      db={db}
+      update={update}
+      navigate={navigate}
+      editingStudent={editingStudent}
+      onCancel={returnToStudents}
+      onSuccess={returnToStudents}
+    />
+  );
+}
+
+function StudentForm({ db, update, editingStudent, onCancelEdit, onSuccess, fullPage = false }) {
   const [form, setForm] = useState(emptyStudentForm);
+  const [photoDragActive, setPhotoDragActive] = useState(false);
+  const photoInputRef = useRef(null);
   const assignedTeachers = db.teachers.filter(teacher => teacher.schoolId === Number(form.schoolId));
+  const gradeOptions = useMemo(() => {
+    if (!form.classLabel || studentGradeOptions.includes(form.classLabel)) return studentGradeOptions;
+    return [form.classLabel, ...studentGradeOptions];
+  }, [form.classLabel]);
 
   useEffect(() => {
     if (!editingStudent) {
@@ -972,6 +952,7 @@ function StudentForm({ db, update, editingStudent, onCancelEdit }) {
       last: editingStudent.last || "",
       email: editingStudent.email || "",
       age: String(editingStudent.age || ""),
+      dateOfBirth: "",
       classLabel: editingStudent.classLabel || "",
       schoolId: editingStudent.schoolId ? String(editingStudent.schoolId) : "",
       teacherId: editingStudent.teacherId ? String(editingStudent.teacherId) : "",
@@ -986,14 +967,16 @@ function StudentForm({ db, update, editingStudent, onCancelEdit }) {
     const school = db.schools.find(item => item.id === Number(form.schoolId));
     const teacher = db.teachers.find(item => item.id === Number(form.teacherId));
     if (!school || !teacher) return;
+    const resolvedAge = form.dateOfBirth ? calculateAgeFromDob(form.dateOfBirth) : form.age;
     const studentPayload = {
       ...form,
-      age: Number(form.age),
+      age: Number(resolvedAge),
       schoolId: school.id,
       schoolName: school.name,
       teacherId: teacher.id,
       teacherName: `${teacher.firstName} ${teacher.lastName}`
     };
+    delete studentPayload.dateOfBirth;
     update(db => {
       if (editingStudent) {
         const student = db.students.find(item => item.id === editingStudent.id);
@@ -1004,15 +987,27 @@ function StudentForm({ db, update, editingStudent, onCancelEdit }) {
       db.students.push({ id: Date.now(), balance: 0, totalEarned: 0, streak: 0, status: "inactive", ...studentPayload });
     }, editingStudent ? "Student updated" : "Student added");
     setForm(emptyStudentForm);
-    if (editingStudent) onCancelEdit();
+    onSuccess?.();
+  }
+
+  function applyPhotoFile(file) {
+    if (!file || !file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => setForm(current => ({ ...current, photo: String(reader.result || "") }));
+    reader.readAsDataURL(file);
   }
 
   function updatePhoto(event) {
     const file = event.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setForm(current => ({ ...current, photo: String(reader.result || "") }));
-    reader.readAsDataURL(file);
+    if (file) applyPhotoFile(file);
+    event.target.value = "";
+  }
+
+  function handlePhotoDrop(event) {
+    event.preventDefault();
+    setPhotoDragActive(false);
+    const file = event.dataTransfer.files?.[0];
+    if (file) applyPhotoFile(file);
   }
 
   function chooseAvatar(fileName) {
@@ -1023,6 +1018,169 @@ function StudentForm({ db, update, editingStudent, onCancelEdit }) {
     setForm(current => ({ ...current, schoolId, teacherId: "" }));
   }
 
+  function updateDateOfBirth(dateOfBirth) {
+    setForm(current => ({
+      ...current,
+      dateOfBirth,
+      age: calculateAgeFromDob(dateOfBirth) || current.age
+    }));
+  }
+
+  const computedAge = form.dateOfBirth ? calculateAgeFromDob(form.dateOfBirth) : form.age;
+
+  if (fullPage) {
+    return (
+      <form className="add-student-form" onSubmit={submit}>
+        <div className="add-student-layout">
+          <aside className="add-student-photo-card">
+            <h3 className="add-student-card-title">Student Photo</h3>
+            <div className="add-student-photo-preview-wrap">
+              <span className="add-student-photo-preview">
+                {form.photo ? <img src={form.photo} alt="" /> : <User size={36} strokeWidth={1.5} />}
+              </span>
+              <button
+                type="button"
+                className="add-student-photo-camera"
+                onClick={() => photoInputRef.current?.click()}
+                aria-label="Change photo"
+              >
+                <Camera size={14} />
+              </button>
+            </div>
+
+            <label
+              className={`add-student-upload-zone ${photoDragActive ? "is-dragging" : ""}`}
+              onDragEnter={event => { event.preventDefault(); setPhotoDragActive(true); }}
+              onDragOver={event => event.preventDefault()}
+              onDragLeave={event => { event.preventDefault(); setPhotoDragActive(false); }}
+              onDrop={handlePhotoDrop}
+            >
+              <Upload size={22} />
+              <strong>Upload photo</strong>
+              <span>or drag and drop</span>
+              <small>PNG or JPG up to 5 MB</small>
+              <input ref={photoInputRef} type="file" accept="image/png,image/jpeg,image/jpg,image/webp" onChange={updatePhoto} hidden />
+            </label>
+
+            <div className="add-student-avatar-divider">
+              <span>or choose an avatar</span>
+            </div>
+
+            <div className="add-student-avatar-grid" aria-label="Choose a student avatar">
+              {studentAvatars.map(fileName => {
+                const src = assetPath(`avatars/${fileName}`);
+                return (
+                  <button
+                    className={`add-student-avatar-choice ${form.photo === src ? "selected" : ""}`}
+                    type="button"
+                    key={fileName}
+                    onClick={() => chooseAvatar(fileName)}
+                    aria-label={`Choose ${fileName.replace(".png", "")} avatar`}
+                  >
+                    <img src={src} alt="" />
+                  </button>
+                );
+              })}
+            </div>
+          </aside>
+
+          <div className="add-student-fields">
+            <section className="add-student-info-card">
+              <header className="add-student-info-card-header">
+                <span className="add-student-info-card-icon"><User size={18} /></span>
+                <h3>Student Information</h3>
+              </header>
+              <div className="add-student-field-grid add-student-field-grid-2">
+                <Field label="First Name" placeholder="Enter first name" icon={User} value={form.first} onChange={first => setForm({ ...form, first })} required />
+                <Field label="Last Name" placeholder="Enter last name" icon={User} value={form.last} onChange={last => setForm({ ...form, last })} required />
+                <Field label="Email Address" placeholder="Enter email address" icon={Mail} type="email" value={form.email} onChange={email => setForm({ ...form, email })} required className="add-student-field-span-2" />
+              </div>
+              <div className="add-student-field-grid add-student-field-grid-age">
+                <Field label="Date of Birth" placeholder="Select date" icon={CalendarDays} type="date" value={form.dateOfBirth} onChange={updateDateOfBirth} helpText="Age will be calculated automatically" />
+                <Field label="Age" placeholder="--" icon={Calculator} type="number" value={computedAge} onChange={age => setForm({ ...form, age })} readOnly={Boolean(form.dateOfBirth)} required={!form.dateOfBirth} />
+                <label className="field-label">
+                  Grade / Form
+                  <span className="input-with-icon">
+                    <GraduationCap />
+                    <Select
+                      aria-label="Grade / Form"
+                      value={form.classLabel}
+                      onChange={classLabel => setForm({ ...form, classLabel })}
+                      placeholder="Select grade"
+                      required
+                      options={gradeOptions.map(grade => ({ value: grade, label: grade }))}
+                    />
+                  </span>
+                </label>
+              </div>
+            </section>
+
+            <section className="add-student-info-card">
+              <header className="add-student-info-card-header">
+                <span className="add-student-info-card-icon"><School size={18} /></span>
+                <h3>School Information</h3>
+              </header>
+              <div className="add-student-field-grid add-student-field-grid-2">
+                <label className="field-label">
+                  School
+                  <span className="input-with-icon">
+                    <School />
+                    <Select
+                      aria-label="School"
+                      value={String(form.schoolId || "")}
+                      onChange={updateSchool}
+                      placeholder="Search and select school"
+                      required
+                      options={db.schools.map(school => ({ value: String(school.id), label: school.name }))}
+                    />
+                  </span>
+                </label>
+                <label className="field-label">
+                  Teacher
+                  <span className="input-with-icon">
+                    <Users />
+                    <Select
+                      aria-label="Teacher"
+                      value={String(form.teacherId || "")}
+                      onChange={teacherId => setForm({ ...form, teacherId })}
+                      placeholder="Search and select teacher"
+                      required
+                      disabled={!form.schoolId}
+                      options={assignedTeachers.map(teacher => ({
+                        value: String(teacher.id),
+                        label: `${teacher.firstName} ${teacher.lastName}`
+                      }))}
+                    />
+                  </span>
+                </label>
+              </div>
+              {(!db.schools.length || !db.teachers.length) && <p className="mt-student-form-note">Create a school and teacher in Admin before assigning students.</p>}
+            </section>
+
+            <section className="add-student-info-card">
+              <header className="add-student-info-card-header">
+                <span className="add-student-info-card-icon"><Users size={18} /></span>
+                <h3>Guardian Information</h3>
+              </header>
+              <div className="add-student-field-grid add-student-field-grid-2">
+                <Field label="Parent / Guardian Name" placeholder="Enter parent or guardian name" icon={User} value={form.guardian} onChange={guardian => setForm({ ...form, guardian })} />
+                <Field label="Phone Number" placeholder="Enter phone number" icon={Phone} type="tel" value={form.phone} onChange={phone => setForm({ ...form, phone })} helpText="Include country code (e.g. +501 600-0000)" />
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div className="add-student-form-footer">
+          <button className="secondary-action add-student-cancel-btn" type="button" onClick={onCancelEdit}>Cancel</button>
+          <button className="primary-action teal-action add-student-submit-btn" type="submit">
+            <UserPlus size={16} />
+            {editingStudent ? "Save Changes" : "Create Student"}
+          </button>
+        </div>
+      </form>
+    );
+  }
+
   return (
     <article className="section-panel students-form-card">
       <div className="section-heading students-card-heading">
@@ -1030,80 +1188,69 @@ function StudentForm({ db, update, editingStudent, onCancelEdit }) {
         <h2>{editingStudent ? "Update Student" : "Add Student"}</h2>
       </div>
       <form className="stacked-form" onSubmit={submit}>
-        <label className="field-label">
-          Student Photo
-          <span className="mt-student-photo-field">
-            <span className="mt-student-photo-preview">{form.photo ? <img src={form.photo} alt="" /> : initials(form)}</span>
-            <span className="mt-student-photo-controls">
-              <span className="mt-student-photo-help">Upload a photo or choose an avatar.</span>
-              <input type="file" accept="image/*" onChange={updatePhoto} />
+        <section className="add-student-section add-student-photo-section">
+          <h3 className="add-student-section-title">Photo</h3>
+          <div className="add-student-photo-row">
+            <span className="mt-student-photo-preview add-student-photo-preview">
+              {form.photo ? <img src={form.photo} alt="" /> : initials(form)}
             </span>
-          </span>
-        </label>
-        <div className="mt-student-avatar-grid" aria-label="Choose a student avatar">
-          {studentAvatars.map(fileName => {
-            const src = assetPath(`avatars/${fileName}`);
-            return (
-              <button className={`mt-student-avatar-choice ${form.photo === src ? "selected" : ""}`} type="button" key={fileName} onClick={() => chooseAvatar(fileName)} aria-label={`Choose ${fileName.replace(".png", "")} avatar`}>
-                <img src={src} alt="" />
-              </button>
-            );
-          })}
-        </div>
-        <div className="form-grid">
-          <Field label="First Name" placeholder="First name" icon={User} value={form.first} onChange={first => setForm({ ...form, first })} required />
-          <Field label="Last Name" placeholder="Last name" icon={User} value={form.last} onChange={last => setForm({ ...form, last })} required />
-        </div>
-        <Field label="Email" placeholder="Email address" icon={Mail} type="email" value={form.email} onChange={email => setForm({ ...form, email })} required />
-        <div className="form-grid">
-          <Field label="Age" placeholder="Age" icon={Users} type="number" value={form.age} onChange={age => setForm({ ...form, age })} required />
-          <Field label="Standard / Form" placeholder="Standard / Form" icon={School} value={form.classLabel} onChange={classLabel => setForm({ ...form, classLabel })} required />
-        </div>
-        <div className="form-grid">
-          <label className="field-label">School<span className="input-with-icon"><School /><select value={form.schoolId} onChange={event => updateSchool(event.target.value)} required><option value="">Select school</option>{db.schools.map(school => <option key={school.id} value={school.id}>{school.name}</option>)}</select></span></label>
-          <label className="field-label">Teacher<span className="input-with-icon"><Users /><select value={form.teacherId} onChange={event => setForm({ ...form, teacherId: event.target.value })} required disabled={!form.schoolId}><option value="">Select teacher</option>{assignedTeachers.map(teacher => <option key={teacher.id} value={teacher.id}>{teacher.firstName} {teacher.lastName}</option>)}</select></span></label>
-        </div>
-        {(!db.schools.length || !db.teachers.length) && <p className="mt-student-form-note">Create a school and teacher in Admin before assigning students.</p>}
-        <div className="form-grid">
-          <Field label="Parent / Guardian" placeholder="Parent / Guardian" icon={User} value={form.guardian} onChange={guardian => setForm({ ...form, guardian })} />
-          <Field label="Contact Number" placeholder="Contact number" icon={Phone} type="tel" value={form.phone} onChange={phone => setForm({ ...form, phone })} />
-        </div>
+            <div className="add-student-photo-side">
+              <p className="add-student-photo-help">Upload a photo or pick an avatar below.</p>
+              <label className="add-student-upload-btn">
+                <UserPlus size={14} />
+                Upload photo
+                <input type="file" accept="image/*" onChange={updatePhoto} hidden />
+              </label>
+            </div>
+          </div>
+          <div className="mt-student-avatar-grid" aria-label="Choose a student avatar">
+            {studentAvatars.map(fileName => {
+              const src = assetPath(`avatars/${fileName}`);
+              return (
+                <button className={`mt-student-avatar-choice ${form.photo === src ? "selected" : ""}`} type="button" key={fileName} onClick={() => chooseAvatar(fileName)} aria-label={`Choose ${fileName.replace(".png", "")} avatar`}>
+                  <img src={src} alt="" />
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="add-student-section">
+          <h3 className="add-student-section-title">Basic Information</h3>
+          <div className="form-grid">
+            <Field label="First Name" placeholder="First name" icon={User} value={form.first} onChange={first => setForm({ ...form, first })} required />
+            <Field label="Last Name" placeholder="Last name" icon={User} value={form.last} onChange={last => setForm({ ...form, last })} required />
+          </div>
+          <Field label="Email" placeholder="Email address" icon={Mail} type="email" value={form.email} onChange={email => setForm({ ...form, email })} required />
+          <div className="form-grid">
+            <Field label="Age" placeholder="Age" icon={Users} type="number" value={form.age} onChange={age => setForm({ ...form, age })} required />
+            <Field label="Standard / Form" placeholder="e.g. Form 3" icon={School} value={form.classLabel} onChange={classLabel => setForm({ ...form, classLabel })} required />
+          </div>
+        </section>
+
+        <section className="add-student-section">
+          <h3 className="add-student-section-title">School & Teacher</h3>
+          <div className="form-grid">
+            <label className="field-label">School<span className="input-with-icon"><School /><Select aria-label="School" value={String(form.schoolId || "")} onChange={updateSchool} placeholder="Select school" required options={db.schools.map(school => ({ value: String(school.id), label: school.name }))} /></span></label>
+            <label className="field-label">Teacher<span className="input-with-icon"><Users /><Select aria-label="Teacher" value={String(form.teacherId || "")} onChange={teacherId => setForm({ ...form, teacherId })} placeholder="Select teacher" required disabled={!form.schoolId} options={assignedTeachers.map(teacher => ({ value: String(teacher.id), label: `${teacher.firstName} ${teacher.lastName}` }))} /></span></label>
+          </div>
+          {(!db.schools.length || !db.teachers.length) && <p className="mt-student-form-note">Create a school and teacher in Admin before assigning students.</p>}
+        </section>
+
+        <section className="add-student-section">
+          <h3 className="add-student-section-title">Guardian Contact</h3>
+          <div className="form-grid">
+            <Field label="Parent / Guardian" placeholder="Parent / Guardian" icon={User} value={form.guardian} onChange={guardian => setForm({ ...form, guardian })} />
+            <Field label="Contact Number" placeholder="Contact number" icon={Phone} type="tel" value={form.phone} onChange={phone => setForm({ ...form, phone })} />
+          </div>
+        </section>
+
         <div className="mt-student-form-actions">
           <button className="primary-action teal-action" type="submit"><UserPlus /> {editingStudent ? "Update Student" : "Add Student"}</button>
-          {editingStudent && <button className="secondary-action" type="button" onClick={onCancelEdit}>Cancel Edit</button>}
+          <button className="secondary-action" type="button" onClick={onCancelEdit}>
+            {editingStudent ? "Cancel Edit" : "Cancel"}
+          </button>
         </div>
-      </form>
-    </article>
-  );
-}
-
-function PointsForm({ students, update }) {
-  const [studentId, setStudentId] = useState("");
-  const [amount, setAmount] = useState(10);
-  const [description, setDescription] = useState("Great class participation");
-  function submit(event) {
-    event.preventDefault();
-    update(db => {
-      const student = db.students.find(item => item.id === Number(studentId));
-      if (!student) return;
-      student.balance += Number(amount);
-      student.totalEarned += Number(amount);
-      student.streak += 1;
-      student.status = "on_track";
-      db.transactions.push({ id: Date.now(), studentId: student.id, amount: Number(amount), description, date: today() });
-    }, "Points awarded");
-  }
-  return (
-    <article className="section-panel students-form-card earnings-form-card">
-      <div className="section-heading students-card-heading">
-        <span className="card-heading-icon"><Trophy /></span>
-        <h2>Award Points</h2>
-      </div>
-      <form className="stacked-form" onSubmit={submit}>
-        <label className="field-label">Student<span className="input-with-icon"><Users /><select value={studentId} onChange={event => setStudentId(event.target.value)} required><option value="">Select student</option>{students.map(student => <option key={student.id} value={student.id}>{student.first} {student.last}</option>)}</select></span></label>
-        <Field label="Points" icon={Trophy} type="number" value={amount} onChange={setAmount} required />
-        <Field label="Description" icon={ClipboardList} value={description} onChange={setDescription} required />
-        <button className="primary-action teal-action" type="submit"><Trophy /> Award Points</button>
       </form>
     </article>
   );
@@ -1111,32 +1258,25 @@ function PointsForm({ students, update }) {
 
 function Leaderboard({ dashboard, range, setRange }) {
   return (
-    <>
+    <div className="mt-page-content leaderboard-page">
       <PageHeading eyebrow="Competition" title="Leaderboard" />
-      <article className="section-panel full-width-panel">
-        <div className="section-heading inline-control"><h2>Top Point Earners</h2><select value={range} onChange={event => setRange(event.target.value)}><option value="week">This Week</option><option value="month">This Month</option><option value="all">All Time</option></select></div>
+      <article className="section-panel mt-card">
+        <div className="section-heading inline-control">
+          <h2>Top point earners</h2>
+          <select
+            className="mt-input"
+            value={range}
+            onChange={event => setRange(event.target.value)}
+            aria-label="Leaderboard range"
+          >
+            <option value="week">This week</option>
+            <option value="month">This month</option>
+            <option value="all">All time</option>
+          </select>
+        </div>
         <EarnersList earners={dashboard.leaderboard} />
       </article>
-    </>
-  );
-}
-
-function Reports({ dashboard }) {
-  return <><PageHeading eyebrow="Class Analytics" title="Reports" /><article className="section-panel full-width-panel"><div className="insight-grid"><Insight title="Total Points" value={formatPoints(dashboard.totalEarned)} /><Insight title="Average Points" value={formatPoints(Math.round(dashboard.averageBalance))} /><Insight title="Completion" value={`${dashboard.completionRate}%`} /><Insight title="Top Category" value={dashboard.topCategory} /></div></article></>;
-}
-
-function MoneyTykesTipBanner({ tip, inline = false }) {
-  return (
-    <section className={`tip-bar tip-banner mt-tip-banner ${inline ? "inline-tip" : ""}`} aria-label="Financial literacy tip">
-      <div className="mt-tip-banner-logo-wrap">
-        <img className="mt-tip-banner-logo" src={assetPath("assets/boss-tyker.png")} alt="MoneyTykes Boss and Tyker" />
-      </div>
-      <span className="tip-icon mt-tip-banner-icon"><Lightbulb /></span>
-      <div className="mt-tip-banner-content">
-        <strong className="mt-tip-banner-label">MoneyTykes Tip</strong>
-        <p className="mt-tip-banner-text">{tip}</p>
-      </div>
-    </section>
+    </div>
   );
 }
 
@@ -1273,15 +1413,12 @@ function GameDashboard({ setToast }) {
     return (
       <section className="game-select-screen page-swap">
         <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
-        <div className="game-hero compact">
-          <img src={assetPath("gamefrontend.jpeg")} alt="Money Moves Live dashboard concept" />
-          <div>
-            <p className="eyebrow">Select Game</p>
-            <h2>Game</h2>
-            <p>Choose a classroom game to start.</p>
-          </div>
+        <div className="game-select-intro">
+          <p className="mt-eyebrow">Classroom games</p>
+          <h2>Choose a game to start</h2>
+          <p>Pick a classroom game, then set up teams and open the board.</p>
         </div>
-        <button className="game-choice-card" type="button" onClick={openLoading}>
+        <button className="game-choice-card mt-card" type="button" onClick={openLoading}>
           <span><Calculator /></span>
           <strong>Money Moves</strong>
           <small>Fast questions, timed answers, and team point scoring.</small>
@@ -1376,9 +1513,9 @@ function GameDashboard({ setToast }) {
                     const id = tileId(category.title, value);
                     const used = usedTiles.includes(id);
                     return (
-                      <button type="button" key={value} className={`money-tile ${used ? "used" : ""}`} disabled={used} onClick={() => chooseTile(category, value)}>
+                      <button type="button" key={value} className={`money-tile ${used ? "used" : ""} ${value >= 400 ? "is-high-value" : ""}`} disabled={used} onClick={() => chooseTile(category, value)}>
                         <img className="money-tile-coin" src={assetPath("mtcoinpng.png")} alt="" aria-hidden="true" />
-                        <strong className="money-value">{formatPoints(value)}</strong>
+                        <strong className="money-value mt-data-num">{formatPoints(value)}</strong>
                       </button>
                     );
                   })}
@@ -1554,18 +1691,15 @@ function QuestionModal({ question, timeLeft, timerRunning, startTimer, showAnswe
   );
 }
 
-function SettingsPage({ db }) {
-  return <><PageHeading eyebrow="Configuration" title="Class Settings" /><article className="section-panel full-width-panel"><div className="settings-list"><p><strong>School</strong><span>{db.school}</span></p><p><strong>Class</strong><span>{db.className}</span></p><p><strong>Storage</strong><span>Browser localStorage</span></p></div></article></>;
-}
-
-function Field({ label, value, onChange, type = "text", required = false, placeholder = "", icon: Icon }) {
+function Field({ label, value, onChange, type = "text", required = false, placeholder = "", icon: Icon, className = "", helpText = "", readOnly = false }) {
   return (
-    <label className="field-label">
+    <label className={`field-label ${className}`.trim()}>
       {label}
       <span className={Icon ? "input-with-icon" : "input-without-icon"}>
         {Icon && <Icon />}
-        <input type={type} value={value} placeholder={placeholder} onChange={event => onChange(event.target.value)} required={required} />
+        <input type={type} value={value} placeholder={placeholder} onChange={event => onChange(event.target.value)} required={required} readOnly={readOnly} />
       </span>
+      {helpText ? <span className="field-help">{helpText}</span> : null}
     </label>
   );
 }
@@ -1578,10 +1712,11 @@ function PageHeading({ eyebrow, title, hideOnMobile = false }) {
   );
 }
 
-function StudentListFilters({ schools, schoolFilter, setSchoolFilter, search, setSearch, status, setStatus, showStatus = true }) {
+function StudentListFilters({ schools, schoolFilter, setSchoolFilter, search, setSearch, status, setStatus, showStatus = true, className = "" }) {
   return (
-    <div className="student-tools">
+    <div className={`student-tools ${className}`.trim()}>
       <label className="search-box">
+        <Search size={16} strokeWidth={2} aria-hidden="true" />
         <input
           type="search"
           placeholder="Search students..."
@@ -1590,14 +1725,14 @@ function StudentListFilters({ schools, schoolFilter, setSchoolFilter, search, se
           aria-label="Search students"
         />
       </label>
-      <select value={schoolFilter} onChange={event => setSchoolFilter(event.target.value)} aria-label="Filter by school">
+      <select className="students-filter-select" value={schoolFilter} onChange={event => setSchoolFilter(event.target.value)} aria-label="Filter by school" title={(schools || []).find(s => String(s.id) === schoolFilter)?.name || "All schools"}>
         <option value="all">All schools</option>
         {(schools || []).map(school => (
           <option key={school.id} value={String(school.id)}>{school.name}</option>
         ))}
       </select>
       {showStatus && (
-        <select value={status} onChange={event => setStatus(event.target.value)} aria-label="Filter by status">
+        <select className="students-filter-select" value={status} onChange={event => setStatus(event.target.value)} aria-label="Filter by status">
           <option value="all">All statuses</option>
           <option value="on_track">On Track</option>
           <option value="at_risk">At Risk</option>
@@ -1608,12 +1743,32 @@ function StudentListFilters({ schools, schoolFilter, setSchoolFilter, search, se
   );
 }
 
-function StudentTable({ students, detailed = false, onView, onEdit, onDelete, linkNamesOnly = false, simple = false }) {
+function StudentTable({ students, detailed = false, onView, onEdit, onDelete, linkNamesOnly = false, simple = false, animated = false, variant = "default" }) {
   if (!students.length) return <EmptyState title="No students yet" text="Add students to begin tracking progress." />;
+  const Row = animated ? motion.div : "div";
+  const isRoster = variant === "roster";
   return (
-    <div className={`student-table ${linkNamesOnly ? "name-links" : ""} ${simple ? "student-table-simple" : ""}`}>
-      {students.map(student => (
-        <div className={`student-row ${simple ? "student-row-simple" : ""}`} key={student.id}>
+    <div className={`student-table ${linkNamesOnly ? "name-links" : ""} ${simple ? "student-table-simple" : ""} ${isRoster ? "student-table-roster" : ""}`}>
+      {isRoster && (
+        <div className="student-table-header" role="row">
+          <span>Student</span>
+          <span>Class / Form</span>
+          <span>Points</span>
+          <span>Status</span>
+          <span>Actions</span>
+        </div>
+      )}
+      {students.map((student, index) => (
+        <Row
+          className={`student-row ${simple ? "student-row-simple" : ""}`}
+          key={student.id}
+          {...(animated ? {
+            variants: fadeUp,
+            initial: "initial",
+            animate: "animate",
+            transition: { ...fadeUp.animate.transition, delay: index * 0.05 }
+          } : {})}
+        >
           <div className="student-person">
             <span className="avatar initials">{student.photo ? <img src={student.photo} alt="" /> : initials(student)}</span>
             <div>
@@ -1624,25 +1779,28 @@ function StudentTable({ students, detailed = false, onView, onEdit, onDelete, li
               ) : (
                 <strong>{student.first} {student.last}</strong>
               )}
-              {!simple && (
-                <span>{student.schoolName || student.teacherName || student.classLabel || "Student profile"}</span>
+              {!simple && !isRoster && (
+                <span>{student.teacherName || student.classLabel || "Student profile"}</span>
               )}
             </div>
           </div>
           {simple ? (
             <span className="student-age">{student.age ? `${student.age} yrs` : "—"}</span>
           ) : (
-            <span className="student-class">{student.classLabel || "Standard / Form"}</span>
+            <span className="student-class">{student.classLabel || "—"}</span>
           )}
           <strong className="points-value student-balance">{formatPoints(student.balance || 0)}</strong>
-          {!simple && !linkNamesOnly && (
+          {isRoster && (
+            <span className={`student-status-badge ${student.status || "inactive"}`}>{labelStatus(student.status)}</span>
+          )}
+          {(isRoster || (!simple && !linkNamesOnly)) && (
             <div className="student-actions">
-              <button className="student-action-button profile" type="button" onClick={() => onView?.(student)}>View Profile</button>
+              <button className="student-action-button profile" type="button" onClick={() => onView?.(student)}>View</button>
               <button className="student-action-button edit" type="button" onClick={() => onEdit?.(student)}><Pencil /> Edit</button>
               {detailed && <button className="student-action-button delete" type="button" onClick={() => onDelete?.(student)}>Delete</button>}
             </div>
           )}
-        </div>
+        </Row>
       ))}
     </div>
   );
@@ -1650,11 +1808,16 @@ function StudentTable({ students, detailed = false, onView, onEdit, onDelete, li
 
 function StudentProfile({ student, onClose, onEdit, onDelete }) {
   return (
-    <article className="section-panel mt-student-profile-card">
+    <article className="section-panel mt-student-profile-card students-profile-panel">
+      <div className="mt-student-profile-header">
+        <p className="eyebrow">Student Profile</p>
+        <button type="button" className="mt-student-profile-close" onClick={onClose} aria-label="Close profile">
+          <X size={16} />
+        </button>
+      </div>
       <div className="mt-student-profile-main">
         <span className="mt-student-profile-photo">{student.photo ? <img src={student.photo} alt="" /> : initials(student)}</span>
         <div>
-          <p className="eyebrow">Student Profile</p>
           <h2>{student.first} {student.last}</h2>
           <div className="mt-student-profile-grid">
             <p><strong>Standard / Form</strong><span>{student.classLabel || "Not set"}</span></p>
@@ -1679,29 +1842,29 @@ function StudentProfile({ student, onClose, onEdit, onDelete }) {
 }
 
 function EarnersList({ earners }) {
-  if (!earners.length) return <EmptyState title="No points yet" text="Award points to build the leaderboard." />;
-  return <ol className="earners-list">{earners.map((student, index) => <li key={student.id}><span>{index + 1}</span><strong>{student.first} {student.last}</strong><em>{formatPoints(student.totalEarned || 0)}</em></li>)}</ol>;
-}
-
-function TaskRow({ task }) {
+  if (!earners.length) {
+    return <EmptyState title="No points awarded yet" text="Award points from Rewards to build the class leaderboard." />;
+  }
   return (
-    <div className="task-row">
-      <span className="task-dot" />
-      <div className="task-row-body">
-        <strong className="task-title">{task.title}</strong>
-        <span className="task-meta">{task.category} · Due {formatDate(task.due)}</span>
-      </div>
-      <em className="task-reward">{formatPoints(task.reward)}</em>
-    </div>
+    <ol className="earners-list">
+      {earners.map((student, index) => (
+        <li key={student.id}>
+          <span className={`rank ${index === 0 ? "top" : index === 1 ? "second" : index === 2 ? "third" : ""}`}>{index + 1}</span>
+          <strong>{student.first} {student.last}</strong>
+          <em className="mt-data-num">{formatPoints(student.totalEarned || 0)}</em>
+        </li>
+      ))}
+    </ol>
   );
 }
 
-function Insight({ title, value }) {
-  return <div className="insight-card"><span>{title}</span><strong>{value}</strong></div>;
-}
-
 function EmptyState({ title, text }) {
-  return <div className="empty-state"><strong>{title}</strong><span>{text}</span></div>;
+  return (
+    <div className="mt-empty-state">
+      <strong>{title}</strong>
+      {text ? <p>{text}</p> : null}
+    </div>
+  );
 }
 
 function buildDashboard(db) {
@@ -1755,16 +1918,6 @@ function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function addDays(dateString, days) {
-  const date = new Date(`${dateString}T00:00:00`);
-  date.setDate(date.getDate() + days);
-  return date.toISOString().slice(0, 10);
-}
-
-function formatDate(value) {
-  return value ? new Date(`${value}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "TBD";
-}
-
 function secondsForValue(value) {
   if (value >= 400) return 15;
   return 10;
@@ -1783,4 +1936,7 @@ function shuffleQuestions(questions) {
   return shuffled;
 }
 
-createRoot(document.getElementById("root")).render(<App />);
+const rootEl = document.getElementById("root");
+const appRoot = rootEl._mtReactRoot ?? createRoot(rootEl);
+rootEl._mtReactRoot = appRoot;
+appRoot.render(<App />);

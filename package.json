@@ -12,6 +12,7 @@
   "dependencies": {
     "@tabler/icons-react": "^3.44.0",
     "@vitejs/plugin-react": "latest",
+    "framer-motion": "^12.42.0",
     "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",

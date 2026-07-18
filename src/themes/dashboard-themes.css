@@ -1,0 +1,74 @@
+/**
+ * Teacher dashboard themes — pixel-sampled from the approved mockup.
+ * Scoped via [data-theme] on the dashboard root wrapper (not html/body).
+ */
+
+/* —— Shared defaults (Teal + Gold) —— */
+.dashboard-theme-root,
+[data-theme="teal-gold"] {
+  --sidebar-bg: #0b4b4e;
+  --sidebar-active-bg: #1d8180;
+  --sidebar-active-text: #ffffff;
+  --header-bg: #123e35;
+  --header-text: #e8f4f3;
+  --right-panel-bg: #d8eae4;
+  --icon-accent: #359392;
+  --gold-accent: #f6cc69;
+  --sidebar-text: #e8f4f3;
+  --wood-accent: #8a5a35;
+  --header-bg-2: color-mix(in srgb, var(--header-bg) 82%, #000);
+
+  /* Bridge to existing shell / component tokens */
+  --mt-sidebar-bg: var(--sidebar-bg);
+  --mt-sidebar-bg-top: var(--sidebar-bg);
+  --mt-sidebar-bg-bottom: var(--sidebar-bg);
+  --mt-sidebar-edge: var(--sidebar-bg);
+  --mt-sidebar-text: var(--sidebar-text);
+  --mt-sidebar-muted: color-mix(in srgb, var(--sidebar-text) 82%, transparent);
+  --mt-sidebar-hover: rgba(255, 255, 255, 0.1);
+  --mt-sidebar-active-bg: var(--sidebar-active-bg);
+  --mt-sidebar-active-text: var(--sidebar-active-text);
+  --mt-sidebar-chalk: var(--sidebar-text);
+  --mt-sidebar-toggle-ink: var(--sidebar-bg);
+  --mt-rail-bg: var(--right-panel-bg);
+  --mt-primary: var(--icon-accent);
+  --mt-primary-strong: var(--icon-accent);
+  --mt-primary-soft: color-mix(in srgb, var(--icon-accent) 14%, transparent);
+  --mt-primary-border: color-mix(in srgb, var(--icon-accent) 28%, transparent);
+}
+
+[data-theme="chalkboard-green"] {
+  --sidebar-bg: #193220;
+  --sidebar-active-bg: #2c5a38;
+  --sidebar-active-text: #ffffff;
+  --header-bg: #29422f;
+  --header-text: #e9f1e9;
+  --right-panel-bg: #cadbcb;
+  --icon-accent: #4d724f;
+  --gold-accent: #f6cc69;
+  --sidebar-text: #e9f1e9;
+}
+
+[data-theme="navy-gold"] {
+  --sidebar-bg: #0c2d4f;
+  --sidebar-active-bg: #f6cc69;
+  --sidebar-active-text: #0c2d4f;
+  --header-bg: #0a2443;
+  --header-text: #dce6f5;
+  --right-panel-bg: #dce3f5;
+  --icon-accent: #f6cc69;
+  --gold-accent: #f6cc69;
+  --sidebar-text: #dce6f5;
+}
+
+[data-theme="soft-teal-mint"] {
+  --sidebar-bg: #389191;
+  --sidebar-active-bg: #4fa9a8;
+  --sidebar-active-text: #ffffff;
+  --header-bg: #b8dedc;
+  --header-text: #1a4a49;
+  --right-panel-bg: #e9f6f7;
+  --icon-accent: #73b1ac;
+  --gold-accent: #f6cc69;
+  --sidebar-text: #f0fafa;
+}

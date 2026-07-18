@@ -1,0 +1,494 @@
+/**
+ * Attendance — theme tokens only (plus semantic present/late/absent accents).
+ */
+
+.attendance-dash {
+  --teal: var(--icon-accent);
+  --teal-dark: color-mix(in srgb, var(--icon-accent) 62%, #000);
+  --gold: var(--gold-accent);
+  --orange: #ff6b1a;
+
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.react-app .dashboard.attendance-view {
+  padding-top: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: 28px !important;
+}
+
+.react-app .attendance-view .topbar {
+  display: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+}
+
+.react-app .attendance-view .page-swap {
+  padding: 0 0 28px !important;
+  max-width: none !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.attendance-dash-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 28px;
+  box-sizing: border-box;
+}
+
+.attendance-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 16px;
+}
+
+/* Segmented tabs */
+.attendance-dash .tab-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--right-panel-bg) 70%, #fff);
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 14%, transparent);
+}
+
+.attendance-dash .tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mt-ink-secondary, #5a6b68);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.attendance-dash .tab.active {
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text, #fff);
+}
+
+/* Filters */
+.attendance-dash .filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.attendance-dash .field {
+  display: grid;
+  gap: 5px;
+  min-width: 140px;
+}
+
+.attendance-dash .field.grow {
+  flex: 1 1 180px;
+}
+
+.attendance-dash .field label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.attendance-dash .select-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 16%, transparent);
+  box-shadow: 0 1px 0 rgba(28, 43, 42, 0.03);
+  overflow: hidden;
+}
+
+.attendance-dash .select-wrap select,
+.attendance-dash .select-wrap input,
+.attendance-dash .select-wrap input[type="date"],
+.attendance-dash .select-wrap input[type="search"] {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: 38px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  background-color: transparent !important;
+  outline: none;
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  line-height: 38px;
+  color: var(--mt-ink, #1c2b2a) !important;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  color-scheme: light;
+}
+
+.attendance-dash .select-wrap select::-ms-expand {
+  display: none;
+}
+
+.attendance-dash .select-wrap input[type="date"]::-webkit-datetime-edit,
+.attendance-dash .select-wrap input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+.attendance-dash .select-wrap input[type="date"]::-webkit-datetime-edit-text,
+.attendance-dash .select-wrap input[type="date"]::-webkit-datetime-edit-month-field,
+.attendance-dash .select-wrap input[type="date"]::-webkit-datetime-edit-day-field,
+.attendance-dash .select-wrap input[type="date"]::-webkit-datetime-edit-year-field {
+  background: transparent;
+  color: var(--mt-ink, #1c2b2a);
+  padding: 0;
+}
+
+.attendance-dash .select-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.85;
+  margin: 0;
+  padding: 0;
+  filter: invert(42%) sepia(18%) saturate(900%) hue-rotate(130deg) brightness(90%);
+}
+
+.attendance-dash .select-wrap svg {
+  flex-shrink: 0;
+  margin-left: 6px;
+  color: var(--icon-accent);
+  pointer-events: none;
+}
+
+.attendance-dash .filter-edit,
+.attendance-dash .filter-export {
+  min-height: 40px;
+  background: #fff;
+  color: var(--mt-ink, #1c2b2a);
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 16%, transparent);
+}
+
+.attendance-dash .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.attendance-dash .btn.primary {
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text, #fff);
+}
+
+.attendance-dash .btn.ghost {
+  background: color-mix(in srgb, var(--right-panel-bg) 55%, #fff);
+  color: var(--mt-ink, #1c2b2a);
+  border-color: color-mix(in srgb, var(--icon-accent) 16%, transparent);
+}
+
+.attendance-dash .btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.attendance-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--gold-accent) 22%, #fff);
+  border: 1px solid color-mix(in srgb, var(--gold-accent) 45%, transparent);
+  color: color-mix(in srgb, var(--gold-accent) 35%, #5a3718);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Roll call card */
+.roll-call-card,
+.report-card {
+  background: var(--mt-card, #fff);
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 12%, transparent);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(28, 43, 42, 0.04);
+}
+
+.roll-call-head,
+.report-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px 18px;
+  border-bottom: 1px solid color-mix(in srgb, var(--icon-accent) 10%, transparent);
+}
+
+.roll-call-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.roll-call-title h2,
+.report-card-head h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--mt-ink, #1c2b2a);
+}
+
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--icon-accent) 14%, transparent);
+  color: var(--icon-accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.roll-call-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.attendance-dash .row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 18px;
+  border-top: 1px solid color-mix(in srgb, var(--icon-accent) 8%, transparent);
+}
+
+.attendance-dash .row:first-child {
+  border-top: 0;
+}
+
+.attendance-dash .avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.attendance-dash .avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.attendance-dash .name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mt-ink, #1c2b2a);
+}
+
+.status-pills {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.status-pill {
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 16%, transparent);
+  background: #fff;
+  color: var(--mt-ink-secondary, #5a6b68);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.status-pill:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.status-pill.present.active {
+  background: #e2f6f2;
+  border-color: var(--teal);
+  color: var(--teal-dark);
+}
+
+.status-pill.late.active {
+  background: #fdf5df;
+  border-color: var(--gold);
+  color: #a17d1a;
+}
+
+.status-pill.absent.active {
+  background: #fdeee0;
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.roll-call-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 14px 18px 16px;
+  border-top: 1px solid color-mix(in srgb, var(--icon-accent) 10%, transparent);
+}
+
+.report-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.report-table-head,
+.report-table-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) 110px 100px minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 18px;
+  align-items: center;
+}
+
+.report-table-head {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mt-ink-muted, #8a9693);
+  background: color-mix(in srgb, var(--right-panel-bg) 45%, #fff);
+}
+
+.report-table-row {
+  border-top: 1px solid color-mix(in srgb, var(--icon-accent) 8%, transparent);
+  font-size: 13px;
+  color: var(--mt-ink, #1c2b2a);
+}
+
+.report-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  padding: 14px 18px 18px;
+}
+
+.report-summary-card {
+  padding: 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--right-panel-bg) 50%, #fff);
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 12%, transparent);
+}
+
+.report-summary-card strong {
+  display: block;
+  font-size: 13px;
+  color: var(--mt-ink, #1c2b2a);
+}
+
+.report-summary-card p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+@media (max-width: 900px) {
+  .attendance-dash-body {
+    padding: 0 16px;
+  }
+
+  .react-app .attendance-view .topbar {
+    display: block;
+    padding: 12px 16px 0;
+    background: transparent !important;
+    border: 0 !important;
+  }
+
+  .attendance-dash .row {
+    grid-template-columns: 36px minmax(0, 1fr);
+    grid-template-areas:
+      "avatar name"
+      "pills pills";
+  }
+
+  .attendance-dash .avatar {
+    grid-area: avatar;
+  }
+
+  .attendance-dash .name {
+    grid-area: name;
+  }
+
+  .status-pills {
+    grid-area: pills;
+    justify-content: flex-start;
+  }
+
+  .report-table-head,
+  .report-table-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Clear the fixed mobile tab bar */
+  .react-app .dashboard.attendance-view {
+    padding-bottom: var(--mobile-tabbar-offset, 88px) !important;
+  }
+
+  /* Report rows become stacked cards; header hidden */
+  .report-table-head {
+    display: none;
+  }
+
+  .report-table-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding: 12px 16px;
+  }
+
+  .status-pill {
+    min-height: 38px;
+  }
+
+  .attendance-dash .tab {
+    min-height: 40px;
+  }
+
+  .attendance-dash .btn {
+    min-height: 44px;
+  }
+}

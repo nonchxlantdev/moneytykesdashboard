@@ -1,0 +1,381 @@
+/**
+ * Students Dashboard — colors come from [data-theme] tokens only.
+ */
+
+.students-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: none;
+  width: 100%;
+}
+
+/* Flush mini chalk to the top edge of the main canvas */
+.react-app .dashboard.students-view {
+  padding-top: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: 28px !important;
+}
+
+.react-app .students-view .topbar {
+  display: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+}
+
+.react-app .students-view .page-swap {
+  padding: 0 0 28px !important;
+  max-width: none !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.students-dash .students-dash-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 28px;
+  box-sizing: border-box;
+}
+
+/* Chalk banner + empty box styles live in shared/page-shell.css */
+
+/* Stat cards: shared/stat-card.css */
+
+.students-dash .stats-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* —— Roster card —— */
+.students-dash .roster-card {
+  background: var(--mt-card, #fff);
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 12%, transparent);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(28, 43, 42, 0.04);
+}
+
+.students-dash .roster-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 8px;
+}
+
+.students-dash .roster-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.students-dash .roster-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text, #fff);
+}
+
+.students-dash .roster-title h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--mt-ink, #1c2b2a);
+}
+
+.students-dash .toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 8px 18px 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--icon-accent) 10%, transparent);
+}
+
+.students-dash .search-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 200px;
+  min-width: 180px;
+  max-width: 320px;
+  padding: 0 12px;
+  min-height: 38px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 18%, transparent);
+  background: color-mix(in srgb, var(--right-panel-bg) 55%, #fff);
+  color: var(--icon-accent);
+}
+
+.students-dash .search-box input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  color: var(--mt-ink, #1c2b2a);
+}
+
+.students-dash .filter-pills {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.students-dash .sort-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.students-dash .pill {
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 18%, transparent);
+  background: #fff;
+  color: var(--mt-ink-secondary, #5a6b68);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.students-dash .pill.active {
+  background: var(--sidebar-active-bg);
+  border-color: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text, #fff);
+}
+
+.students-dash .showing {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.students-dash .showing strong {
+  color: var(--icon-accent);
+}
+
+/* —— Roster table —— */
+.students-dash .roster-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.students-dash .roster-table-head {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) minmax(120px, 0.9fr) 88px;
+  gap: 12px;
+  padding: 10px 18px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mt-ink-muted, #8a9693);
+  background: color-mix(in srgb, var(--right-panel-bg) 45%, #fff);
+}
+
+.students-dash .roster-table-head span:first-child {
+  grid-column: 1 / 3;
+}
+
+.students-dash .roster-table-head span:last-child {
+  text-align: right;
+}
+
+.students-dash .row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) minmax(120px, 0.9fr) 88px;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 12px 18px;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--icon-accent) 8%, transparent);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.students-dash .row:hover {
+  background: color-mix(in srgb, var(--right-panel-bg) 55%, #fff);
+}
+
+.students-dash .avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.students-dash .avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.students-dash .name {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mt-ink, #1c2b2a);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.students-dash .completion-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.students-dash .mini-bar {
+  flex: 1;
+  height: 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--icon-accent) 14%, transparent);
+  overflow: hidden;
+}
+
+.students-dash .mini-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--sidebar-active-bg);
+}
+
+.students-dash .pct {
+  flex-shrink: 0;
+  width: 34px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mt-ink-secondary, #5a6b68);
+  text-align: right;
+}
+
+.students-dash .pts {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--icon-accent);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* —— Empty state —— */
+.students-dash .empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 36px 20px;
+  text-align: center;
+}
+
+.students-dash .empty-box .t {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--mt-ink, #1c2b2a);
+}
+
+.students-dash .empty-box .d {
+  font-size: 13px;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.students-dash .empty-box .actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+@media (max-width: 900px) {
+  .students-dash .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .students-dash .showing {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .students-dash .students-dash-body {
+    padding: 0 16px;
+  }
+
+  .react-app .students-view .topbar {
+    display: block;
+    padding: 12px 16px 0;
+    background: transparent !important;
+    border: 0 !important;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Clear the fixed mobile tab bar */
+  .react-app .dashboard.students-view {
+    padding-bottom: var(--mobile-tabbar-offset, 88px) !important;
+  }
+
+  .students-dash .search-box {
+    max-width: none;
+    min-height: 44px;
+  }
+
+  .students-dash .search-box input {
+    font-size: 16px;
+  }
+
+  .students-dash .pill {
+    min-height: 36px;
+  }
+}
+
+@media (max-width: 640px) {
+  .students-dash .roster-table-head {
+    display: none;
+  }
+
+  .students-dash .row {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "avatar name pts"
+      "avatar completion completion";
+    row-gap: 8px;
+  }
+
+  .students-dash .avatar {
+    grid-area: avatar;
+  }
+
+  .students-dash .name {
+    grid-area: name;
+  }
+
+  .students-dash .completion-cell {
+    grid-area: completion;
+  }
+
+  .students-dash .pts {
+    grid-area: pts;
+  }
+}

@@ -38,6 +38,29 @@ export function youtubeEmbedUrl(url) {
 }
 
 /**
+ * Fetch public oEmbed metadata (title + thumbnail). Duration requires Data API / key.
+ * Uses noembed as a CORS-friendly proxy for browser calls.
+ * @param {string} url
+ * @returns {Promise<{ title?: string, thumbnailUrl?: string } | null>}
+ */
+export async function fetchYoutubeOEmbed(url) {
+  if (!isValidYoutubeUrl(url)) return null;
+  try {
+    const endpoint = `https://noembed.com/embed?url=${encodeURIComponent(url.trim())}`;
+    const response = await fetch(endpoint);
+    if (!response.ok) return null;
+    const data = await response.json();
+    if (data?.error) return null;
+    return {
+      title: data.title || undefined,
+      thumbnailUrl: data.thumbnail_url || youtubeThumbnail(url) || undefined
+    };
+  } catch {
+    return { thumbnailUrl: youtubeThumbnail(url) || undefined };
+  }
+}
+
+/**
  * Basic markdown-like formatting for lesson descriptions.
  * @param {string} text
  */

@@ -1,0 +1,529 @@
+/**
+ * Add Student wizard — theme tokens only.
+ */
+
+.add-student-wizard {
+  --teal: var(--icon-accent);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.react-app .dashboard.add-student-view {
+  padding-top: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: 28px !important;
+}
+
+.react-app .add-student-view .topbar {
+  display: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+}
+
+.react-app .add-student-view .page-swap {
+  padding: 0 0 28px !important;
+  max-width: none !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.add-student-wizard-body {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 28px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Progress */
+.wizard-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+  padding: 4px 0 2px;
+}
+
+.w-step {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 64px;
+  color: var(--mt-ink-muted, #8a9693);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.w-dot {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--icon-accent) 28%, transparent);
+  background: #fff;
+  color: var(--mt-ink-secondary, #5a6b68);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.w-step.active {
+  color: var(--icon-accent);
+}
+
+.w-step.active .w-dot {
+  border-color: var(--sidebar-active-bg);
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text, #fff);
+}
+
+.w-step.done .w-dot {
+  border-color: var(--icon-accent);
+  background: color-mix(in srgb, var(--icon-accent) 14%, #fff);
+  color: var(--icon-accent);
+}
+
+.w-line {
+  width: 42px;
+  height: 2px;
+  margin: 0 4px 18px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--icon-accent) 0 6px,
+    transparent 6px 11px
+  );
+  opacity: 0.55;
+}
+
+/* Layout */
+.wizard-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.wizard-main {
+  min-width: 0;
+  background: var(--mt-card, #fff);
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 12%, transparent);
+  border-radius: 16px;
+  padding: 20px 20px 16px;
+  box-shadow: 0 10px 24px rgba(28, 43, 42, 0.04);
+}
+
+.wizard-step-panel h2 {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+  color: var(--mt-ink, #1c2b2a);
+}
+
+.wizard-step-lead {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.wizard-grid {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.wizard-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.wizard-grid.student-meta {
+  grid-template-columns: minmax(0, 1.4fr) minmax(88px, 0.55fr);
+  align-items: end;
+  gap: 12px;
+}
+
+/* Avatar grid — small uploaded icon circles */
+.avatar-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.avatar-option {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--icon-accent) 18%, transparent);
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--right-panel-bg) 55%, #fff);
+  cursor: pointer;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.avatar-option img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar-option.selected {
+  border-color: var(--sidebar-active-bg);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--sidebar-active-bg) 30%, transparent);
+}
+
+.id-avatar {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 22px;
+  overflow: hidden;
+  box-shadow: 0 8px 16px rgba(28, 43, 42, 0.16);
+}
+
+.id-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.wizard-field {
+  display: grid;
+  gap: 6px;
+}
+
+.wizard-field > span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.wizard-field input,
+.wizard-field select {
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 16%, transparent);
+  background: #fff;
+  color: var(--mt-ink, #1c2b2a);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.wizard-hint {
+  font-size: 12px;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.wizard-error {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #c2410c;
+}
+
+.wizard-inline-note {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--mt-ink-secondary, #5a6b68);
+}
+
+.wizard-link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--icon-accent);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ID card */
+.id-card-wrap {
+  position: sticky;
+  top: 16px;
+}
+
+.id-card {
+  position: relative;
+  padding: 22px 18px 16px;
+  border-radius: 18px;
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--right-panel-bg) 70%, #fff), #fff 55%);
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 16%, transparent);
+  box-shadow:
+    0 18px 36px rgba(28, 43, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transform: rotate(-1.5deg);
+  text-align: center;
+}
+
+.id-punch {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--mt-canvas, #f5f4ef) 80%, #fff);
+  box-shadow: inset 0 1px 2px rgba(28, 43, 42, 0.2);
+}
+
+.id-thumbtack {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  width: 18px;
+  height: 22px;
+  transform: translate(-50%, -55%) rotate(-12deg);
+  pointer-events: none;
+  filter: drop-shadow(0 2px 2px rgba(28, 43, 42, 0.28));
+}
+
+.id-thumbtack-head {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 14px;
+  height: 14px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, #ff7a7a 0%, #e11d2e 55%, #b91c1c 100%);
+  box-shadow:
+    inset 0 -2px 3px rgba(0, 0, 0, 0.22),
+    inset 0 2px 2px rgba(255, 255, 255, 0.35);
+}
+
+.id-thumbtack-pin {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  width: 3px;
+  height: 10px;
+  transform: translateX(-50%);
+  border-radius: 1px 1px 2px 2px;
+  background: linear-gradient(180deg, #c0c0c0 0%, #8a8a8a 55%, #6b6b6b 100%);
+}
+
+.id-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--mt-ink, #1c2b2a);
+}
+
+.id-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--icon-accent);
+}
+
+.id-divider {
+  height: 1px;
+  margin: 14px 0 12px;
+  background: color-mix(in srgb, var(--icon-accent) 16%, transparent);
+}
+
+.id-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  text-align: left;
+}
+
+.id-row span {
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.id-row strong {
+  color: var(--mt-ink, #1c2b2a);
+  font-weight: 700;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.id-stamp {
+  margin-top: 14px;
+  font-family: var(--font-hand, Caveat, cursive);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gold-accent);
+  opacity: 0.9;
+}
+
+.id-caption {
+  margin: 14px 0 0;
+  font-size: 12px;
+  color: var(--mt-ink-muted, #8a9693);
+  text-align: center;
+}
+
+/* Review */
+.review-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.review-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--right-panel-bg) 45%, #fff);
+  font-size: 13px;
+}
+
+.review-row span {
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.review-row strong {
+  color: var(--mt-ink, #1c2b2a);
+  text-align: right;
+}
+
+/* Step nav */
+.step-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid color-mix(in srgb, var(--icon-accent) 10%, transparent);
+}
+
+.step-nav-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.step-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.add-student-wizard .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 16%, transparent);
+  background: #fff;
+  color: var(--mt-ink, #1c2b2a);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.add-student-wizard .btn.primary {
+  background: var(--sidebar-active-bg);
+  border-color: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text, #fff);
+}
+
+.add-student-wizard .btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .add-student-wizard-body {
+    padding: 0 16px;
+  }
+
+  .wizard-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .id-card-wrap {
+    position: static;
+    order: -1;
+  }
+
+  .id-card {
+    transform: rotate(-0.8deg);
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .wizard-grid.two,
+  .wizard-grid.student-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .react-app .add-student-view .topbar {
+    display: block;
+    padding: 12px 16px 0;
+    background: transparent !important;
+    border: 0 !important;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Clear the fixed mobile tab bar */
+  .react-app .dashboard.add-student-view {
+    padding-bottom: var(--mobile-tabbar-offset, 88px) !important;
+  }
+
+  /* Prevent iOS zoom-on-focus */
+  .wizard-field input,
+  .wizard-field select {
+    font-size: 16px;
+    min-height: 44px;
+  }
+
+  .avatar-option {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Stack the step nav so buttons are full-width and easy to tap */
+  .step-nav {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .step-nav-right {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .step-count {
+    text-align: center;
+  }
+
+  .add-student-wizard .btn {
+    width: 100%;
+    min-height: 46px;
+  }
+}

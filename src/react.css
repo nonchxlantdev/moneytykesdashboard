@@ -25,7 +25,7 @@
     align-self: stretch;
     height: 100dvh;
     max-height: 100dvh;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .react-app .sidebar-scroll,
@@ -165,8 +165,8 @@
   align-items: center;
   gap: 0;
   width: 72px;
-  padding: 18px 16px;
-  border-right: 1px solid rgba(15, 118, 110, 0.16);
+  padding: 0;
+  border-right: 0;
   overflow: visible;
 }
 
@@ -190,11 +190,13 @@
 }
 
 .page-swap {
-  animation: pageIn 360ms ease both;
+  animation: none;
+  position: relative;
+  min-height: 40vh;
 }
 
 .app-entrance {
-  animation: slideDown 420ms ease both;
+  animation: none;
 }
 
 .stagger-in {
@@ -503,27 +505,31 @@
 
 .game-column.blue header,
 .game-column.blue .money-tile {
-  background: linear-gradient(135deg, #0e61aa, #083268);
+  background: linear-gradient(160deg, #0aabb5, #067a82);
 }
 
 .game-column.green header,
 .game-column.green .money-tile {
-  background: linear-gradient(135deg, #1d9a45, #0c5e24);
+  background: linear-gradient(160deg, #0ecad4, #0aabb5);
 }
 
 .game-column.purple header,
 .game-column.purple .money-tile {
-  background: linear-gradient(135deg, #7c35c9, #3e136f);
+  background: linear-gradient(160deg, #08939b, #056b73);
 }
 
 .game-column.orange header,
 .game-column.orange .money-tile {
-  background: linear-gradient(135deg, #f06d16, #8e2e06);
+  background: linear-gradient(160deg, #e8a317, #c8870a);
 }
 
 .game-column.teal header,
 .game-column.teal .money-tile {
-  background: linear-gradient(135deg, #0b9c91, #074d58);
+  background: linear-gradient(160deg, #ff6b1a, #c84f0f);
+}
+
+.money-tile.is-high-value:not(.used) {
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
 
 .game-select-screen {
@@ -533,8 +539,29 @@
   gap: 18px;
 }
 
+.game-select-intro {
+  display: grid;
+  gap: 8px;
+  padding: 8px 4px 4px;
+}
+
+.game-select-intro h2 {
+  margin: 0;
+  font-size: var(--mt-text-xl, 1.5rem);
+  font-weight: var(--mt-weight-medium, 600);
+  color: var(--ink, #1c2b2a);
+  text-transform: none;
+  letter-spacing: -0.02em;
+}
+
+.game-select-intro p {
+  margin: 0;
+  color: var(--muted, #3d524f);
+  font-size: var(--mt-text-base, 0.9375rem);
+}
+
 .game-hero.compact {
-  min-height: 300px;
+  display: none;
 }
 
 .game-choice-card {
@@ -2524,8 +2551,8 @@
 
   .react-app .sidebar {
     width: 260px;
-    padding: 18px 14px;
-    transition: width 180ms ease, padding 180ms ease;
+    padding: 0;
+    transition: width 180ms ease;
   }
 
   .app-shell.react-app.sidebar-collapsed {
@@ -2535,7 +2562,8 @@
   .react-app .sidebar.collapsed {
     width: 76px;
     max-width: 76px;
-    padding: 18px 10px;
+    padding: 0;
+    border-right: 0;
   }
 
   .react-app .dashboard {
@@ -2567,8 +2595,8 @@
 
   .react-app .sidebar {
     width: 248px;
-    padding: 16px 12px;
-    transition: width 180ms ease, padding 180ms ease;
+    padding: 0;
+    transition: width 180ms ease;
   }
 
   .app-shell.react-app.sidebar-collapsed {
@@ -2578,7 +2606,8 @@
   .react-app .sidebar.collapsed {
     width: 72px;
     max-width: 72px;
-    padding: 16px 8px;
+    padding: 0;
+    border-right: 0;
   }
 
   .react-app .dashboard {
@@ -4314,16 +4343,16 @@
   gap: 14px;
   margin-bottom: 16px;
   color: #92400e;
-  background: #fffbeb;
-  border: 1px solid #fde68a;
+  background: var(--mt-status-pending-soft, #fffbeb);
+  border: 1px solid rgba(217, 119, 6, 0.25);
 }
 
 .attendance-warning.compact {
   gap: 8px;
   margin-bottom: 10px;
   padding: 8px 12px;
-  border-radius: 10px;
-  font-size: 0.86rem;
+  border-radius: var(--mt-radius-md, 10px);
+  font-size: var(--mt-text-sm, 0.86rem);
 }
 
 .attendance-list-card.compact,
@@ -4650,6 +4679,21 @@
   font-size: 0.95rem;
 }
 
+.lesson-app-plan-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lesson-app-plan-section h4 {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0f766e;
+}
+
 .lesson-app-content p,
 .lesson-app-content ul {
   margin: 0 0 10px;
@@ -4667,6 +4711,30 @@
   padding: 12px 16px 16px;
   border-top: 1px solid #e1e6f0;
   background: #fff;
+}
+
+.lesson-app-footer-split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.lesson-app-footer-split .lesson-app-present-btn {
+  flex: 1 1 auto;
+}
+
+.lesson-app-footer-split .lesson-app-complete-btn,
+.lesson-app-footer-split .lesson-app-completed {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.lesson-app-present-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .lesson-app-complete-btn {
@@ -4751,12 +4819,22 @@
 .lesson-editor-toolbar button {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fff;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--mt-border-default, var(--line));
+  border-radius: var(--mt-radius-sm, 8px);
+  background: var(--mt-bg-card, #fff);
+  color: var(--mt-text-primary, inherit);
   cursor: pointer;
+}
+
+.lesson-editor-toolbar button:hover,
+.lesson-editor-toolbar button:focus-visible {
+  border-color: var(--mt-primary, #0aabb5);
+  color: var(--mt-primary-strong, #08939b);
+  background: var(--mt-primary-soft, rgba(10, 171, 181, 0.12));
+  outline: none;
+  box-shadow: 0 0 0 3px var(--mt-primary-focus, rgba(10, 171, 181, 0.22));
 }
 
 .lesson-youtube-preview {

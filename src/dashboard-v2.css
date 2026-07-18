@@ -1,0 +1,580 @@
+/**
+ * Dashboard home — dark sidebar / light canvas, compact, reference-inspired layout.
+ * Main column + sticky upcoming-events rail.
+ */
+
+/* NOTE: the fixed rail's width is already reserved by `.react-app
+   .dashboard-view { padding-right: 240px }` in shell-v2.css — applied
+   directly to the <main> element. Don't reserve it again here, or the
+   space doubles up and content ends up stranded on the left. */
+.dash-home {
+  width: 100%;
+}
+
+/* Dashboard home: flush chalkboard band from sidebar → events rail */
+.react-app .dashboard.dashboard-view {
+  padding-top: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 240px !important;
+  padding-bottom: 28px !important;
+}
+
+.react-app .dashboard-view .page-swap {
+  padding: 0 0 28px !important;
+  max-width: none !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.react-app .dashboard-view .page-swap .dash-home > .chalkboard-header {
+  width: 100%;
+  max-width: none;
+  margin: 0 0 18px;
+  border-radius: 0;
+  border: 0;
+}
+
+.react-app .dashboard-view .page-swap .dash-home-main {
+  padding-left: 28px;
+  padding-right: 28px;
+}
+
+@media (max-width: 1100px) {
+  .react-app .dashboard.dashboard-view {
+    padding-right: 0 !important;
+  }
+
+  .react-app .dashboard-view .page-swap .dash-home-main {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .react-app .dashboard.dashboard-view {
+    padding-bottom: var(--mobile-tabbar-offset, 88px) !important;
+  }
+
+  .react-app .dashboard-view .page-swap .dash-home-main {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+.teacher-dashboard-chalk-cursor,
+.teacher-dashboard-chalk-cursor * {
+  cursor: var(--ruler-cursor, auto) !important;
+}
+
+/* Chalkboard keeps chalk / eraser — everything else on the dashboard uses the ruler */
+.teacher-dashboard-chalk-cursor .chalkboard-header,
+.teacher-dashboard-chalk-cursor .chalkboard-header * {
+  cursor: var(--chalk-cursor, crosshair) !important;
+}
+
+.teacher-dashboard-chalk-cursor .chalkboard-ink.is-erasing {
+  cursor: var(--eraser-cursor, cell) !important;
+}
+
+.teacher-dashboard-chalk-cursor .chalkboard-ink.is-chalk {
+  cursor: var(--chalk-cursor, crosshair) !important;
+}
+
+.teacher-dashboard-chalk-cursor .chalkboard-eraser,
+.teacher-dashboard-chalk-cursor .chalkboard-eraser * {
+  cursor: pointer !important;
+}
+
+.dash-home-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.dash-home-welcome h1 {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: clamp(1.45rem, 2.2vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--mt-ink);
+}
+
+.dash-home-welcome-lead {
+  display: inline;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  letter-spacing: inherit;
+  line-height: inherit;
+  color: var(--mt-ink);
+}
+
+.dash-home-welcome-name {
+  font-family: inherit;
+  font-size: 1.22em;
+  font-weight: 700;
+  letter-spacing: inherit;
+  line-height: inherit;
+  color: #ff6b1a;
+  -webkit-text-stroke: 0;
+  paint-order: normal;
+  filter: none;
+}
+
+.dash-home-tagline {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--mt-ink);
+}
+
+.dash-home-tagline-gradient {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.dash-home-context {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--mt-ink-secondary);
+}
+
+.dash-home-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 0;
+  background: var(--mt-gradient-promo);
+  box-shadow: 0 12px 28px rgba(124, 58, 237, 0.25);
+}
+
+.dash-home-tip-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.dash-home-tip-label {
+  margin: 0 0 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dash-home-tip-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #fff;
+}
+
+.dash-home-mid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.dash-home-card {
+  border-radius: 20px;
+  box-shadow: 0 10px 28px rgba(28, 43, 42, 0.05);
+}
+
+.dash-home-chart {
+  width: 100%;
+  min-height: 220px;
+}
+
+.dash-home-rail {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 240px;
+  height: 100vh;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Compound selector (.dash-home-rail-inner.mt-card-panel) so this reliably
+   beats the plain .mt-card-panel rule regardless of CSS import order. */
+.dash-home-rail-inner.mt-card-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: 100%;
+  border-radius: 0;
+  border: 0;
+  border-left: 1px solid var(--mt-card-border);
+  background: var(--right-panel-bg, var(--mt-rail-bg));
+  padding: 16px 14px;
+  box-shadow: none;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.dash-home-rail-inner .mt-card-panel-header h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-home-rail-link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mt-primary-strong);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dash-home-rail-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dash-home-rail-events {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dash-home-rail-events .mt-card-panel-header {
+  flex-shrink: 0;
+}
+
+.dash-home-events-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-gutter: stable;
+}
+
+.dash-home-events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.dash-home-event {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 8px;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--mt-card-border);
+  border-radius: 12px;
+  background: var(--mt-card);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--mt-duration) var(--mt-ease),
+    background var(--mt-duration) var(--mt-ease),
+    transform var(--mt-duration) var(--mt-ease);
+}
+
+.dash-home-event:hover {
+  border-color: rgba(10, 171, 181, 0.28);
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.dash-home-event-date {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+  min-height: 44px;
+  border-radius: 10px;
+  border: 1px solid rgba(10, 171, 181, 0.18);
+  background: #fff;
+  color: var(--mt-ink);
+  text-align: center;
+}
+
+.dash-home-event-date em {
+  display: block;
+  padding: 4px 3px 3px;
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mt-primary-strong);
+  background: var(--mt-cat-teal-soft);
+}
+
+.dash-home-event-date strong {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--mt-ink);
+}
+
+.dash-home-event-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  align-content: center;
+}
+
+.dash-home-event-body > strong {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mt-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-home-event-when {
+  font-size: 11px;
+  color: var(--mt-ink-muted);
+}
+
+.dash-home-event-place {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--mt-ink-secondary);
+}
+
+.dash-home-event-place i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mt-primary);
+  flex-shrink: 0;
+}
+
+.dash-home-event-place.tone-teal i { background: var(--mt-primary); }
+.dash-home-event-place.tone-violet i { background: var(--mt-cat-violet); }
+.dash-home-event-place.tone-green i { background: var(--mt-cat-green); }
+.dash-home-event-place.tone-amber i { background: var(--mt-achieve-strong); }
+.dash-home-event-place.tone-rose i { background: var(--mt-cat-rose); }
+
+.dash-home-events-empty {
+  padding: 10px 6px;
+  gap: 4px;
+}
+
+.dash-home-events-empty strong {
+  font-size: 12px;
+}
+
+.dash-home-events-empty p {
+  font-size: 11px;
+  max-width: 22ch;
+  line-height: 1.35;
+}
+
+.dash-home-rail-section:not(.dash-home-rail-events) {
+  display: grid;
+  gap: 10px;
+}
+
+.dash-home-rail-quick,
+.dash-home-rail-tip {
+  flex-shrink: 0;
+}
+
+.dash-home-rail-events + .dash-home-rail-quick {
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.dash-home-rail-section + .dash-home-rail-section,
+.dash-home-rail-section + .dash-home-rail-tip {
+  margin-top: 12px;
+}
+
+.dash-home-rail-section-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mt-ink);
+}
+
+.dash-home-rail-quick-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.dash-home-rail-quick-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 4px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--mt-ink);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--mt-duration) var(--mt-ease),
+    color var(--mt-duration) var(--mt-ease);
+}
+
+.dash-home-rail-quick-item:hover {
+  background: color-mix(in srgb, var(--icon-accent, #359392) 10%, transparent);
+  color: var(--icon-accent, var(--mt-primary-strong));
+}
+
+.dash-home-rail-quick-item:hover .dash-home-rail-quick-dot {
+  transform: scale(1.08);
+}
+
+.dash-home-rail-quick-dot {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--icon-accent, #359392);
+  transition: transform 0.15s ease;
+}
+
+.dash-home-rail-tip {
+  position: relative;
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--icon-accent, #359392) 18%, transparent);
+  background: color-mix(in srgb, var(--right-panel-bg, #d8eae4) 55%, #fff);
+  overflow: hidden;
+}
+
+.dash-home-rail-tip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--icon-accent, var(--mt-primary-strong));
+}
+
+.dash-home-rail-tip-label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--icon-accent, var(--mt-primary-strong));
+}
+
+.dash-home-rail-tip-text {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--mt-ink);
+}
+
+.dash-home-rail-tip-art {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.dash-v2-subtle {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--mt-ink-muted);
+}
+
+.dash-v2-progress-cell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 100px;
+}
+
+.dash-v2-progress-cell .mt-data-num {
+  font-size: 12px;
+  color: var(--mt-ink-secondary);
+}
+
+/* White page canvas with off-white cards + teal hover highlight (dashboard only) */
+.react-app .dashboard.dashboard-view {
+  background: #fff;
+  padding-top: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 240px !important;
+  padding-bottom: 28px !important;
+}
+
+.dash-home .mt-segmented-card,
+.dash-home .dash-home-card {
+  background: var(--mt-card-offwhite);
+  border-radius: 20px;
+  border-color: rgba(10, 171, 181, 0.1);
+  box-shadow: 0 10px 28px rgba(28, 43, 42, 0.04);
+  transition:
+    border-color var(--mt-duration) var(--mt-ease),
+    box-shadow var(--mt-duration) var(--mt-ease),
+    transform var(--mt-duration) var(--mt-ease);
+}
+
+.dash-home .mt-segmented-card:hover,
+.dash-home .dash-home-card:hover {
+  border-color: var(--mt-primary-border);
+  box-shadow: 0 14px 32px rgba(10, 171, 181, 0.16);
+  transform: translateY(-2px);
+}
+
+.dash-home .mt-segment:hover .mt-segment-label {
+  color: var(--mt-primary-strong);
+}
+
+@media (max-width: 1100px) {
+  .dash-home-rail {
+    position: static;
+    width: auto;
+    height: auto;
+  }
+
+  .dash-home-rail-inner.mt-card-panel {
+    border-radius: 20px;
+    border: 1px solid var(--mt-card-border);
+  }
+
+  .dash-home-mid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .dash-home {
+    gap: 14px;
+  }
+}

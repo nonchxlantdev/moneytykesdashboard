@@ -1024,10 +1024,6 @@ a,
   text-underline-offset: 2px;
 }
 
-.react-app.theme-v2 .student-name-link:hover {
-  color: var(--accent-teal, #0ea5e9);
-}
-
 /* Recent tasks — spacing between title and category */
 .task-row-body {
   display: flex;

@@ -1,43 +1,83 @@
 /**
- * Light theme — high-contrast readable text on soft surfaces.
- * Pair with class `theme-light` on `.react-app` (replaces `theme-v2`).
+ * Light theme — warm off-white canvas, teal primary, achievement gold.
+ * Pair with class `theme-light` on `.react-app`.
  */
 
 .react-app.theme-light {
-  --mt-bg-app: #f5f7fb;
-  --mt-bg-sidebar: #ffffff;
-  --mt-bg-card: #ffffff;
-  --mt-bg-card-hover: #f8fafc;
-  --mt-bg-input: #ffffff;
-  --mt-bg-right-panel: #f8fafc;
-  --mt-accent-blue: #0284c7;
-  --mt-accent-purple: #7c3aed;
-  --mt-accent-green: #059669;
-  --mt-accent-amber: #d97706;
-  --mt-accent-red: #dc2626;
-  --mt-text-primary: #0f172a;
-  --mt-text-secondary: #334155;
-  --mt-text-muted: #64748b;
-  --mt-text-link: #0284c7;
-  --mt-border-default: #e2e8f0;
-  --mt-border-hover: #cbd5e1;
-  --mt-border-accent: rgba(2, 132, 199, 0.35);
-  --mt-nav-active-bg: rgba(14, 165, 233, 0.1);
-  --mt-nav-active-border: #0284c7;
-  --mt-nav-active-text: #0369a1;
-  --mt-section-label: #64748b;
-  --mt-shadow-card: 0 8px 24px rgba(15, 23, 42, 0.06);
-  --ink: var(--mt-text-primary);
-  --muted: var(--mt-text-secondary);
-  --line: var(--mt-border-default);
-  --panel: var(--mt-bg-card);
-  --soft: #f1f5f9;
-  color: var(--mt-text-primary);
+  --bg: #f5f4ef;
+  --bg-surface: #faf9f6;
+  --bg-sidebar: #faf9f6;
+  --bg-card: #ffffff;
+  --bg-elevated: #f0efe9;
+  --bg-hover: #ebe9e1;
+  --bg-input: #faf9f6;
+  --accent: var(--mt-primary, #0aabb5);
+  --accent-soft: var(--mt-primary-soft);
+  --accent-border: var(--mt-primary-border);
+  --accent-glow: #0ecad4;
+  --pop: var(--mt-achieve, #e8a317);
+  --pop-soft: var(--mt-achieve-soft);
+  --text-primary: #1c2b2a;
+  --text-secondary: #3d524f;
+  --text-muted: #6b7c79;
+  --border-subtle: rgba(28, 43, 42, 0.06);
+  --border-default: rgba(28, 43, 42, 0.12);
+  --border-strong: rgba(10, 171, 181, 0.4);
+  --success: var(--mt-status-success, #059669);
+  --warning: var(--mt-status-pending, #d97706);
+  --error: var(--mt-status-danger, #dc2626);
+  --shadow-card: 0 1px 3px rgba(28, 43, 42, 0.05), 0 0 0 1px rgba(28, 43, 42, 0.04);
+  --shadow-hover: 0 8px 24px rgba(28, 43, 42, 0.08), 0 0 0 1px rgba(10, 171, 181, 0.12);
+  --shadow-glow: 0 0 20px rgba(10, 171, 181, 0.12);
+
+  --mt-bg-card: var(--bg-card);
+  --mt-bg-input: var(--bg-input);
+  --mt-text-primary: var(--text-primary);
+  --mt-text-secondary: var(--text-secondary);
+  --mt-text-muted: var(--text-muted);
+  --mt-border-default: var(--border-default);
+  --mt-border-card: var(--border-subtle);
+  --mt-shadow-card: var(--shadow-card);
+
+  --mt-bg-app: var(--bg);
+  --mt-bg-sidebar: var(--bg-sidebar);
+  --mt-bg-card: var(--bg-card);
+  --mt-bg-card-hover: var(--bg-hover);
+  --mt-bg-input: var(--bg-input);
+  --mt-bg-right-panel: var(--bg-elevated);
+  --mt-bg-elevated: var(--bg-elevated);
+  --mt-accent-blue: var(--accent);
+  --mt-accent-purple: #2dd4bf;
+  --mt-accent-green: var(--success);
+  --mt-accent-amber: var(--warning);
+  --mt-accent-red: var(--error);
+  --mt-accent-pop: var(--pop);
+  --mt-text-primary: var(--text-primary);
+  --mt-text-secondary: var(--text-secondary);
+  --mt-text-muted: var(--text-muted);
+  --mt-text-link: var(--accent);
+  --mt-border-default: var(--border-default);
+  --mt-border-hover: var(--border-strong);
+  --mt-border-accent: var(--accent-border);
+  --mt-border-card: var(--border-subtle);
+  --mt-nav-active-bg: var(--accent-soft);
+  --mt-nav-active-border: var(--accent);
+  --mt-nav-active-text: var(--accent);
+  --mt-section-label: var(--text-muted);
+  --mt-shadow-card: var(--shadow-card);
+  --mt-shadow-card-hover: var(--shadow-hover);
+  --mt-shadow-glow: var(--shadow-glow);
+  --ink: var(--text-primary);
+  --muted: var(--text-secondary);
+  --line: var(--border-default);
+  --panel: var(--bg-card);
+  --soft: var(--bg-elevated);
+  color: var(--text-primary);
 }
 
 .react-app.theme-light,
 body:has(.react-app.theme-light) {
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #f5f4ef;
 }
 
 .app-shell.react-app.theme-light {
@@ -45,44 +85,82 @@ body:has(.react-app.theme-light) {
 }
 
 .react-app.theme-light .sidebar {
-  background: #ffffff;
-  border-right: 1px solid var(--mt-border-default);
-  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.04);
+  /* Navy panel comes from shell-v2; keep tokens in sync only. */
+  color: var(--mt-sidebar-text);
+  border-right: 0;
+}
+
+.react-app.theme-light .brand {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 8px;
+  padding-bottom: 8px;
 }
 
 .react-app.theme-light .nav-item {
-  color: var(--mt-text-secondary);
+  color: var(--sidebar-text, #d7e0f5);
 }
 
 .react-app.theme-light .nav-item:hover {
-  color: var(--mt-text-primary);
-  background: #f1f5f9;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .react-app.theme-light .nav-item.active {
-  color: var(--mt-nav-active-text);
-  background: var(--mt-nav-active-bg);
-  border-left-color: var(--mt-nav-active-border);
+  color: #fff;
+  background: transparent;
+  border: 0;
+  border-left: 0;
 }
 
 .react-app.theme-light .topbar {
-  background: rgba(255, 255, 255, 0.95);
-  border-bottom: 1px solid var(--mt-border-default);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.react-app.theme-light .dashboard-view .topbar {
+  background: transparent;
+  border-bottom: 0;
 }
 
 .react-app.theme-light .topbar-search input {
-  background: #fff;
-  border-color: var(--mt-border-default);
-  color: var(--mt-text-primary);
+  background: var(--bg-input);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.react-app.theme-light .topbar-search input::placeholder {
+  color: var(--text-muted);
+}
+
+.react-app.theme-light .topbar-search input:focus {
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .react-app.theme-light .topbar-icon-button {
-  color: var(--mt-text-muted);
+  color: var(--text-secondary);
 }
 
 .react-app.theme-light .topbar-icon-button:hover {
-  background: #f1f5f9;
-  color: var(--mt-text-secondary);
+  background: var(--bg-elevated);
+  color: var(--accent);
+}
+
+.react-app.theme-light .topbar-icon-button.has-badge .topbar-icon-badge {
+  background: var(--accent);
+  border-color: var(--bg-surface);
+}
+
+.react-app.theme-light .topbar-logout-button {
+  color: var(--text-secondary);
+  border-color: var(--border-default);
+  background: transparent;
+}
+
+.react-app.theme-light .topbar-logout-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .react-app.theme-light .section-panel,
@@ -92,17 +170,22 @@ body:has(.react-app.theme-light) {
 .react-app.theme-light .insight-card,
 .react-app.theme-light .quick-actions,
 .react-app.theme-light .student-overview {
-  background: #ffffff;
-  border: 1px solid var(--mt-border-default);
-  color: var(--mt-text-primary);
-  box-shadow: var(--mt-shadow-card);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-card);
 }
 
 .react-app.theme-light .section-heading h2,
 .react-app.theme-light .dash-card-title,
 .react-app.theme-light .topbar-meta h1,
 .react-app.theme-light .page-heading h2 {
-  color: var(--mt-text-primary);
+  color: var(--text-primary);
+}
+
+.react-app.theme-light .section-heading h2::before {
+  background: var(--accent);
+  box-shadow: none;
 }
 
 .react-app.theme-light .dash-card-subtitle,
@@ -112,7 +195,7 @@ body:has(.react-app.theme-light) {
 .react-app.theme-light .field-label,
 .react-app.theme-light .topbar-subtitle,
 .react-app.theme-light .dash-card-footnote {
-  color: var(--mt-text-secondary);
+  color: var(--text-secondary);
 }
 
 .react-app.theme-light .dash-list-item strong,
@@ -120,123 +203,212 @@ body:has(.react-app.theme-light) {
 .react-app.theme-light .dash-stat-value,
 .react-app.theme-light .dash-list-name,
 .react-app.theme-light .dash-list-points {
-  color: var(--mt-text-primary);
+  color: var(--text-primary);
 }
 
 .react-app.theme-light input,
 .react-app.theme-light select,
-.react-app.theme-light textarea {
-  color: var(--mt-text-primary);
-  background: #fff;
-  border-color: var(--mt-border-default);
+.react-app.theme-light textarea,
+.react-app.theme-light .student-tools input,
+.react-app.theme-light .student-tools select,
+.react-app.theme-light .search-box {
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border-color: var(--border-subtle);
+}
+
+.react-app.theme-light input:focus,
+.react-app.theme-light select:focus,
+.react-app.theme-light textarea:focus {
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .react-app.theme-light .date-card.panel {
-  background: #fff;
-  border: 1px solid var(--mt-border-default);
-  border-left: 4px solid var(--mt-accent-blue);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--accent);
+  box-shadow: var(--shadow-card);
 }
 
 .react-app.theme-light .date-card-day {
-  color: var(--mt-accent-blue);
+  color: var(--accent);
 }
 
 .react-app.theme-light .date-card-date {
-  color: var(--mt-text-primary);
+  color: var(--text-primary);
 }
 
 .react-app.theme-light .date-card-time,
 .react-app.theme-light .date-card-today-label {
-  color: var(--mt-text-muted);
+  color: var(--text-muted);
+}
+
+.react-app.theme-light .welcome-banner {
+  background: var(--accent);
+  box-shadow: var(--shadow-card);
+  color: #ffffff;
+}
+
+.react-app.theme-light .welcome-banner h2,
+.react-app.theme-light .welcome-banner-subtitle {
+  color: #ffffff;
+}
+
+.react-app.theme-light .welcome-highlight {
+  color: #ffffff;
+  text-decoration-color: rgba(255, 255, 255, 0.55);
+}
+
+.react-app.theme-light .welcome-banner-cta {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+}
+
+.react-app.theme-light .welcome-banner-cta:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.react-app.theme-light .quick-action {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  color: var(--text-primary);
+}
+
+.react-app.theme-light .quick-action:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-hover);
+}
+
+.react-app.theme-light .quick-action span {
+  background: var(--accent-soft);
+  border: 1.5px solid var(--accent-border);
+  color: var(--accent);
+  box-shadow: none;
+}
+
+.react-app.theme-light .quick-action:hover span {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.react-app.theme-light .quick-action-pop span {
+  background: var(--pop-soft);
+  border-color: rgba(92, 158, 0, 0.2);
+  color: var(--pop);
+}
+
+.react-app.theme-light .quick-action-pop:hover span {
+  background: var(--pop);
+  color: #fff;
+}
+
+.react-app.theme-light .quick-action small {
+  color: var(--text-muted);
+}
+
+.react-app.theme-light .dash-card-chip {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+}
+
+.react-app.theme-light .dash-stat-value.present {
+  color: var(--success);
+}
+
+.react-app.theme-light .dash-stat-value.absent {
+  color: var(--text-primary);
+}
+
+.react-app.theme-light .dash-stat-value.absent.has-absent {
+  color: var(--error);
+}
+
+.react-app.theme-light .student-table-simple .student-row {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.react-app.theme-light .student-table-simple .student-row:hover {
+  background: var(--bg-hover);
+}
+
+.react-app.theme-light .student-age {
+  color: var(--text-muted);
+}
+
+.react-app.theme-light .points-value.student-balance {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
 }
 
 .react-app.theme-light .mobile-tabbar {
-  background: #ffffff;
-  border: 1px solid var(--mt-border-default);
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 12px 32px rgba(10, 171, 181, 0.12);
 }
 
 .react-app.theme-light .mobile-tab {
-  color: var(--mt-text-muted);
+  color: var(--text-muted);
 }
 
 .react-app.theme-light .mobile-tab.active {
-  background: var(--mt-nav-active-bg);
-  color: var(--mt-nav-active-text);
-}
-
-@media (max-width: 767px) {
-  .react-app.theme-light .mobile-tabbar {
-    background: #ffffff;
-    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
-  }
-
-  .react-app.theme-light .mobile-tab {
-    color: #64748b;
-  }
-
-  .react-app.theme-light .mobile-tab.active {
-    color: #0369a1;
-    background: rgba(14, 165, 233, 0.12);
-  }
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .react-app.theme-light .mt-sidebar-action-card,
 .react-app.theme-light .mt-sidebar-profile-card {
-  background: #f8fafc;
-  border-color: var(--mt-border-default);
-  color: var(--mt-text-primary);
-}
-
-.react-app.theme-light .sidebar-theme-toggle {
-  color: var(--mt-text-secondary);
-  background: #f8fafc;
-  border-color: var(--mt-border-default);
-}
-
-.react-app.theme-light .performance-chart-tabs button.active {
-  background: #fff;
-  color: var(--mt-text-primary);
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
-}
-
-.react-app.theme-light .performance-chart-tabs {
-  background: #e2e8f0;
+  background: var(--bg-elevated);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
 }
 
 .react-app.theme-light .student-row,
 .react-app.theme-light .task-row,
 .react-app.theme-light .dash-list-item,
 .react-app.theme-light .dash-event-item {
-  background: #f8fafc;
-  border-color: var(--mt-border-default);
+  background: var(--bg-elevated);
+  border-color: var(--border-subtle);
 }
 
 .react-app.theme-light .toast {
-  background: #fff;
-  border-color: var(--mt-border-default);
-  color: var(--mt-text-primary);
-}
-
-.react-app.theme-light .welcome-banner {
-  box-shadow: 0 12px 32px rgba(79, 70, 229, 0.2);
-}
-
-.react-app.theme-light .welcome-banner h2,
-.react-app.theme-light .welcome-banner-subtitle,
-.react-app.theme-light .welcome-highlight {
-  color: #fff;
+  background: var(--bg-card);
+  border-color: var(--border-default);
+  color: var(--text-primary);
 }
 
 .react-app.theme-light .dash-card-link {
-  color: #0284c7;
+  color: var(--accent);
 }
 
-.react-app.theme-light .performance-chart-tabs button {
-  color: var(--mt-text-secondary);
+.react-app.theme-light .performance-chart-tabs {
+  background: var(--bg-elevated);
+}
+
+.react-app.theme-light .performance-chart-tabs button.active {
+  background: var(--bg-card);
+  color: var(--text-primary);
 }
 
 .react-app.theme-light .dash-card-select {
-  background: #fff;
-  color: var(--mt-text-primary);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+}
+
+.react-app.theme-light .students-stat-card,
+.react-app.theme-light .students-roster-card,
+.react-app.theme-light .students-form-card,
+.react-app.theme-light .students-profile-panel {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
+}
+
+.react-app.theme-light .mobile-tabbar {
+  background: var(--bg-surface);
+  box-shadow: 0 12px 32px rgba(28, 43, 42, 0.08);
 }

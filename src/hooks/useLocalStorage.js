@@ -19,9 +19,23 @@ export function useLocalStorage(key, defaultValue) {
     nextValue => {
       setValue(current => {
         const resolved = typeof nextValue === "function" ? nextValue(current) : nextValue;
-        localStorage.setItem(key, JSON.stringify(resolved));
+        try {
+          localStorage.setItem(key, JSON.stringify(resolved));
+        } catch {
+          /* quota / private mode — still update in-memory state */
+        }
         return resolved;
       });
+
+      // Also write immediately for non-function values so unmount/navigation
+      // can't drop the persistence before React flushes the updater.
+      if (typeof nextValue !== "function") {
+        try {
+          localStorage.setItem(key, JSON.stringify(nextValue));
+        } catch {
+          /* ignore */
+        }
+      }
     },
     [key]
   );
