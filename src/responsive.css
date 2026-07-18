@@ -928,8 +928,9 @@ a,
 
 /* Undo legacy styles.css icon-only sidebar rules for the React app */
 @media (min-width: 768px) and (max-width: 1180px) {
+  /* Keep grid column synced to the sidebar token — a wider track left a canvas gap */
   .app-shell.react-app:not(.sidebar-collapsed) {
-    grid-template-columns: 260px minmax(0, 1fr);
+    grid-template-columns: var(--mt-sidebar-width, 210px) minmax(0, 1fr);
   }
 
   .react-app .nav-item span,
@@ -966,7 +967,7 @@ a,
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .app-shell.react-app:not(.sidebar-collapsed) {
-    grid-template-columns: 248px minmax(0, 1fr);
+    grid-template-columns: var(--mt-sidebar-width, 210px) minmax(0, 1fr);
   }
 }
 
@@ -1134,8 +1135,12 @@ a,
 
 /* Tablet portrait (768px – 1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .react-app .dashboard {
+  .react-app .dashboard:not(.dashboard-view) {
     padding: 18px 20px;
+  }
+
+  .react-app .dashboard.dashboard-view {
+    padding: 0 !important;
   }
 
   .dashboard-hero-row {

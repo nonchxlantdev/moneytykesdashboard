@@ -43,7 +43,7 @@
   --mt-wood-shadow: #5a3718;
 
   /* Handwritten accents (sidebar section labels + chalkboard feel) */
-  --font-hand: "Caveat", "Segoe Print", "Comic Sans MS", cursive;
+  --font-hand: "Caveat", cursive;
 
   /* —— Canvas —— */
   --mt-canvas: #f5f4ef;

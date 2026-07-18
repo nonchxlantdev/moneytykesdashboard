@@ -48,12 +48,12 @@ import RewardsPage from "./pages/RewardsPage";
 import AttendancePage from "./pages/Attendance";
 import CreateLessonsPage from "./pages/CreateLessonsPage";
 import LessonsLibraryPage from "./pages/LessonsLibraryPage";
-import CalendarPage from "./pages/Calendar";
 import Topbar from "./components/Topbar";
 import EventsRail from "./components/EventsRail";
 import Select from "./components/ui/Select";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { purgeLegacyMockData } from "./utils/purgeMockData";
+import { seedMockData } from "./data/seedMockData";
 import { formatPoints } from "./utils/points";
 import "../styles.css";
 import "./fonts.css";
@@ -77,6 +77,7 @@ import { ThemeProvider } from "./themes/ThemeContext";
 import { navSections, ICON_SIZE, ICON_STROKE } from "./config/navigation";
 import { buttonTap, fadeUp } from "./lib/motion";
 
+const CalendarPage = React.lazy(() => import("./pages/Calendar"));
 const STORAGE_KEY = "moneytykes.teacher.dashboard.v3";
 const assetPath = path => `${import.meta.env.BASE_URL}${path}`;
 
@@ -238,6 +239,31 @@ function App() {
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, [menuOpen]);
 
+  // Ruler cursor app-wide (incl. portals); chalkboard keeps red chalk / eraser
+  useEffect(() => {
+    if (isLoginRoute) return undefined;
+    const root = document.documentElement;
+    root.classList.add("mt-app-ruler-cursor");
+    root.style.setProperty(
+      "--ruler-cursor",
+      `url("${assetPath("cursors/ruler-cursor.svg")}") 4 28, auto`
+    );
+    root.style.setProperty(
+      "--chalk-cursor",
+      `url("${assetPath("cursors/chalk-cursor.svg")}") 4 28, crosshair`
+    );
+    root.style.setProperty(
+      "--eraser-cursor",
+      `url("${assetPath("cursors/eraser-cursor.svg")}") 16 16, cell`
+    );
+    return () => {
+      root.classList.remove("mt-app-ruler-cursor");
+      root.style.removeProperty("--ruler-cursor");
+      root.style.removeProperty("--chalk-cursor");
+      root.style.removeProperty("--eraser-cursor");
+    };
+  }, [isLoginRoute]);
+
   const dashboard = useMemo(() => buildDashboard(db, range), [db, range]);
 
   function update(mutator, message) {
@@ -338,7 +364,14 @@ function App() {
   if (isLoginRoute) return <LoginPage />;
 
   return (
-    <ThemeProvider className={`app-shell react-app theme-light ${sidebarHidden ? "sidebar-collapsed" : ""} ${view === "game" ? "game-active" : ""}`}>
+    <ThemeProvider
+      className={`app-shell react-app theme-light mt-app-ruler-cursor ${sidebarHidden ? "sidebar-collapsed" : ""} ${view === "game" ? "game-active" : ""}`}
+      style={{
+        "--ruler-cursor": `url("${assetPath("cursors/ruler-cursor.svg")}") 4 28, auto`,
+        "--chalk-cursor": `url("${assetPath("cursors/chalk-cursor.svg")}") 4 28, crosshair`,
+        "--eraser-cursor": `url("${assetPath("cursors/eraser-cursor.svg")}") 16 16, cell`
+      }}
+    >
       <Sidebar
         currentView={view}
         open={menuOpen}
@@ -349,17 +382,8 @@ function App() {
       />
       {menuOpen && <button className="sidebar-backdrop" type="button" aria-label="Close navigation menu" onClick={closeSidebarMenu} />}
       <main
-        className={`dashboard ${view === "game" ? "game-view" : ""} ${view === "dashboard" ? "dashboard-view teacher-dashboard-chalk-cursor" : ""} ${view === "students" ? "students-view" : ""} ${view === "attendance" ? "attendance-view" : ""} ${view === "add-student" ? "add-student-view" : ""} ${view === "lessons" ? "lessons-view" : ""} ${view === "create-lessons" ? "create-lessons-view" : ""}`}
+        className={`dashboard ${view === "game" ? "game-view" : ""} ${view === "dashboard" ? "dashboard-view" : ""} ${view === "students" ? "students-view" : ""} ${view === "attendance" ? "attendance-view" : ""} ${view === "add-student" ? "add-student-view" : ""} ${view === "lessons" ? "lessons-view" : ""} ${view === "create-lessons" ? "create-lessons-view" : ""} ${view === "calendar" ? "calendar-view" : ""}`}
         ref={mainContentRef}
-        style={
-          view === "dashboard"
-            ? {
-                "--ruler-cursor": `url("${assetPath("cursors/ruler-cursor.svg")}") 4 28, auto`,
-                "--chalk-cursor": `url("${assetPath("cursors/chalk-cursor.svg")}") 4 28, crosshair`,
-                "--eraser-cursor": `url("${assetPath("cursors/eraser-cursor.svg")}") 16 16, cell`
-              }
-            : undefined
-        }
       >
         <Topbar
           view={view}
@@ -378,12 +402,14 @@ function App() {
           {!pageLoading && view === "create-lessons" && <CreateLessonsPage db={db} setToast={setToast} navigate={navigate} />}
           {!pageLoading && view === "attendance" && <AttendancePage db={db} setToast={setToast} navigate={navigate} />}
           {!pageLoading && view === "calendar" && (
-            <CalendarPage
-              db={db}
-              setToast={setToast}
-              focusDate={calendarFocusDate}
-              onFocusHandled={() => setCalendarFocusDate(null)}
-            />
+            <React.Suspense fallback={<PageChalkLoader active />}>
+              <CalendarPage
+                db={db}
+                setToast={setToast}
+                focusDate={calendarFocusDate}
+                onFocusHandled={() => setCalendarFocusDate(null)}
+              />
+            </React.Suspense>
           )}
           {!pageLoading && view === "rewards" && <RewardsPage db={db} setToast={setToast} update={update} />}
           {!pageLoading && view === "leaderboard" && <Leaderboard {...pageProps} />}
@@ -1935,6 +1961,11 @@ function shuffleQuestions(questions) {
   }
   return shuffled;
 }
+
+// Clear any legacy demo data first, then seed a fresh demo dataset (once) so
+// every feature has data to explore. Both are guarded no-ops on return visits.
+purgeLegacyMockData();
+seedMockData();
 
 const rootEl = document.getElementById("root");
 const appRoot = rootEl._mtReactRoot ?? createRoot(rootEl);

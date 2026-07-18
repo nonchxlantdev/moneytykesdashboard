@@ -47,7 +47,10 @@
   top: 0;
   align-self: start;
   height: 100vh;
-  width: var(--mt-sidebar-width);
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -426,10 +429,11 @@
   color: var(--sidebar-active-text, #fff);
 }
 
-/* Collapsed icon rail */
+/* Collapsed icon rail — fill the grid track (column already uses --mt-sidebar-collapsed) */
 .react-app .sidebar.collapsed,
 .react-app.sidebar-collapsed .sidebar {
-  width: var(--mt-sidebar-collapsed, 72px);
+  width: 100%;
+  max-width: none;
   padding: 12px 10px !important;
 }
 
@@ -745,21 +749,24 @@ body:has(.react-app.theme-light) {
   padding-right: 240px;
 }
 
-@media (max-width: 1100px) {
+/* Keep chalkboard flush on tablet — don't restore the empty topbar strip */
+@media (max-width: 1180px) {
+  .react-app .dashboard-view .topbar {
+    display: none;
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 1023px) {
   .react-app .dashboard-view {
     padding-right: 0;
   }
+}
 
-  .react-app .dashboard-view .topbar {
-    display: block;
-    padding: 12px 16px 0;
-    background: transparent !important;
-    border: 0 !important;
-  }
-
-  .react-app .dashboard-view .topbar-main {
-    min-height: auto;
-    border-bottom: 0 !important;
-    background: transparent !important;
+@media (min-width: 1024px) and (max-width: 1180px) {
+  .react-app .dashboard-view {
+    padding-right: 200px;
   }
 }

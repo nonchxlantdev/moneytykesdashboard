@@ -39,14 +39,47 @@
   padding-right: 28px;
 }
 
-@media (max-width: 1100px) {
+/* iPad landscape: narrower content padding; rail width handled later */
+@media (min-width: 1024px) and (max-width: 1180px) {
   .react-app .dashboard.dashboard-view {
-    padding-right: 0 !important;
+    padding-right: 200px !important;
+    padding-left: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .react-app .dashboard-view {
+    padding-right: 200px;
   }
 
   .react-app .dashboard-view .page-swap .dash-home-main {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .dash-home-mid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* iPad portrait / phone: full-bleed chalk; rail goes below (see .dash-home-rail rules later) */
+@media (max-width: 1023px) {
+  .react-app .dashboard.dashboard-view {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .react-app .dashboard-view {
+    padding-right: 0;
+  }
+
+  .react-app .dashboard-view .page-swap .dash-home-main {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .dash-home-mid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -61,27 +94,27 @@
   }
 }
 
-.teacher-dashboard-chalk-cursor,
-.teacher-dashboard-chalk-cursor * {
+.mt-app-ruler-cursor,
+.mt-app-ruler-cursor * {
   cursor: var(--ruler-cursor, auto) !important;
 }
 
-/* Chalkboard keeps chalk / eraser — everything else on the dashboard uses the ruler */
-.teacher-dashboard-chalk-cursor .chalkboard-header,
-.teacher-dashboard-chalk-cursor .chalkboard-header * {
+/* Dashboard chalkboard only — red chalk / eraser */
+.mt-app-ruler-cursor .chalkboard-header,
+.mt-app-ruler-cursor .chalkboard-header * {
   cursor: var(--chalk-cursor, crosshair) !important;
 }
 
-.teacher-dashboard-chalk-cursor .chalkboard-ink.is-erasing {
+.mt-app-ruler-cursor .chalkboard-ink.is-erasing {
   cursor: var(--eraser-cursor, cell) !important;
 }
 
-.teacher-dashboard-chalk-cursor .chalkboard-ink.is-chalk {
+.mt-app-ruler-cursor .chalkboard-ink.is-chalk {
   cursor: var(--chalk-cursor, crosshair) !important;
 }
 
-.teacher-dashboard-chalk-cursor .chalkboard-eraser,
-.teacher-dashboard-chalk-cursor .chalkboard-eraser * {
+.mt-app-ruler-cursor .chalkboard-eraser,
+.mt-app-ruler-cursor .chalkboard-eraser * {
   cursor: pointer !important;
 }
 
@@ -200,12 +233,14 @@
   min-height: 220px;
 }
 
+/* Desktop: fixed right rail (reserved via dashboard padding-right) */
 .dash-home-rail {
   position: fixed;
   top: 0;
   right: 0;
   width: 240px;
   height: 100vh;
+  height: 100dvh;
   z-index: 5;
   pointer-events: none;
 }
@@ -225,6 +260,89 @@
   box-shadow: none;
   overflow: hidden;
   pointer-events: auto;
+}
+
+/* Must come AFTER the base fixed rail — otherwise Events overlays the chalkboard on tablet */
+@media (min-width: 1024px) and (max-width: 1180px) {
+  .dash-home-rail {
+    width: 200px;
+    height: 100dvh;
+  }
+}
+
+@media (max-width: 1023px) {
+  .react-app.app-shell:has(.dashboard-view) {
+    grid-template-columns: var(--mt-sidebar-width, 210px) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .react-app.app-shell.sidebar-collapsed:has(.dashboard-view) {
+    grid-template-columns: var(--mt-sidebar-collapsed, 72px) minmax(0, 1fr);
+  }
+
+  .react-app.app-shell:has(.dashboard-view) > .sidebar {
+    grid-column: 1;
+    grid-row: 1 / -1;
+  }
+
+  .react-app.app-shell:has(.dashboard-view) > .dashboard {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .react-app.app-shell:has(.dashboard-view) > .dash-home-rail {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .react-app.app-shell:has(.dashboard-view) > .mobile-tabbar,
+  .react-app.app-shell:has(.dashboard-view) > .toast,
+  .react-app.app-shell:has(.dashboard-view) > .sidebar-backdrop {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+  }
+
+  .dash-home-rail {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    z-index: auto;
+    pointer-events: auto;
+  }
+
+  .dash-home-rail-inner.mt-card-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(180px, 0.7fr) minmax(180px, 0.7fr);
+    gap: 14px 16px;
+    height: auto;
+    border-radius: 0;
+    border: 0;
+    border-left: 0;
+    border-top: 1px solid var(--mt-card-border);
+    padding: 16px;
+  }
+
+  .dash-home-rail-events {
+    min-height: 180px;
+    max-height: 280px;
+  }
+
+  .dash-home-events-scroll {
+    max-height: 220px;
+  }
+}
+
+@media (max-width: 767px) {
+  .dash-home-rail-inner.mt-card-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-home-rail-events {
+    max-height: none;
+  }
 }
 
 .dash-home-rail-inner .mt-card-panel-header h3 {
@@ -524,13 +642,45 @@
   color: var(--mt-ink-secondary);
 }
 
-/* White page canvas with off-white cards + teal hover highlight (dashboard only) */
-.react-app .dashboard.dashboard-view {
-  background: #fff;
+/* Kill leftover canvas padding from styles.css so chalkboard is flush to the sidebar */
+.react-app .dashboard.dashboard-view,
+.react-app.theme-light .dashboard.dashboard-view {
   padding-top: 0 !important;
   padding-left: 0 !important;
   padding-right: 240px !important;
   padding-bottom: 28px !important;
+}
+
+.react-app .dashboard.dashboard-view .page-swap,
+.react-app.theme-light .dashboard.dashboard-view .page-swap {
+  padding: 0 0 28px !important;
+  margin: 0 !important;
+}
+
+.react-app .dashboard.dashboard-view .dash-home > .chalkboard-header {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border-radius: 0 !important;
+}
+
+@media (min-width: 1024px) and (max-width: 1180px) {
+  .react-app .dashboard.dashboard-view,
+  .react-app.theme-light .dashboard.dashboard-view {
+    padding-right: 200px !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .react-app .dashboard.dashboard-view,
+  .react-app.theme-light .dashboard.dashboard-view {
+    padding-right: 0 !important;
+  }
+}
+
+/* Collapse control sits on top of the chalkboard edge — no reserved gap */
+.react-app.app-shell:has(.dashboard-view) .sidebar-toggle {
+  right: -14px;
+  z-index: 60;
 }
 
 .dash-home .mt-segmented-card,
@@ -554,23 +704,6 @@
 
 .dash-home .mt-segment:hover .mt-segment-label {
   color: var(--mt-primary-strong);
-}
-
-@media (max-width: 1100px) {
-  .dash-home-rail {
-    position: static;
-    width: auto;
-    height: auto;
-  }
-
-  .dash-home-rail-inner.mt-card-panel {
-    border-radius: 20px;
-    border: 1px solid var(--mt-card-border);
-  }
-
-  .dash-home-mid {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 720px) {

@@ -1,17 +1,84 @@
-export const EVENT_TYPES = [
-  { value: "test", label: "Test", color: "#ef4444" },
-  { value: "quiz", label: "Quiz", color: "#f59e0b" },
-  { value: "assignment", label: "Assignment", color: "#3b82f6" },
-  { value: "reminder", label: "Reminder", color: "#94a3b8" }
+/** @typedef {'lesson' | 'quiz' | 'test' | 'assignment' | 'reminder' | 'event'} EventType */
+/** @typedef {'school' | 'class' | 'personal'} EventScope */
+
+/**
+ * Event type config — emoji bubble + soft chip colors for the school planner.
+ * Keys are the source of truth; `eventTypeMeta` keeps older `value/label/color` callers working.
+ * @type {Record<EventType, { label: string, emoji: string, color: string, bg: string }>}
+ */
+export const EVENT_TYPES = {
+  lesson: {
+    label: "Lesson",
+    emoji: "📘",
+    color: "#0f766e",
+    bg: "rgba(15, 118, 110, 0.14)"
+  },
+  quiz: {
+    label: "Quiz",
+    emoji: "✏️",
+    color: "#b45309",
+    bg: "rgba(245, 158, 11, 0.18)"
+  },
+  test: {
+    label: "Test",
+    emoji: "📝",
+    color: "#be123c",
+    bg: "rgba(225, 29, 72, 0.14)"
+  },
+  assignment: {
+    label: "Assignment",
+    emoji: "📎",
+    color: "#1d4ed8",
+    bg: "rgba(37, 99, 235, 0.14)"
+  },
+  reminder: {
+    label: "Reminder",
+    emoji: "🔔",
+    color: "#475569",
+    bg: "rgba(100, 116, 139, 0.16)"
+  },
+  event: {
+    label: "Event",
+    emoji: "⭐",
+    color: "#7c3aed",
+    bg: "rgba(139, 92, 246, 0.16)"
+  }
+};
+
+export const EVENT_TYPE_OPTIONS = Object.entries(EVENT_TYPES).map(([value, meta]) => ({
+  value,
+  ...meta
+}));
+
+export const EVENT_SCOPES = [
+  { value: "school", label: "Whole school" },
+  { value: "class", label: "This class" },
+  { value: "personal", label: "Personal" }
 ];
 
+const LEGACY_TYPE_MAP = {
+  test: "test",
+  quiz: "quiz",
+  assignment: "assignment",
+  reminder: "reminder",
+  lesson: "lesson",
+  event: "event"
+};
+
+/**
+ * @param {string} type
+ * @returns {{ value: string, label: string, emoji: string, color: string, bg: string }}
+ */
 export function eventTypeMeta(type) {
-  return EVENT_TYPES.find(item => item.value === type) || EVENT_TYPES[3];
+  const key = LEGACY_TYPE_MAP[type] || "reminder";
+  const meta = EVENT_TYPES[key] || EVENT_TYPES.reminder;
+  return { value: key, ...meta };
 }
 
 export function formatTime12(time24) {
   if (!time24) return "";
-  const [hours, minutes] = time24.split(":").map(Number);
+  const [hours, minutes] = String(time24).split(":").map(Number);
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return "";
   const period = hours >= 12 ? "PM" : "AM";
   const hour12 = hours % 12 || 12;
   return `${hour12}:${String(minutes).padStart(2, "0")} ${period}`;
@@ -25,10 +92,14 @@ export function relativeEventTime(date, time) {
   const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
   const timeLabel = formatTime12(time);
 
-  if (diffDays === 0) return `Today at ${timeLabel}`;
-  if (diffDays === 1) return `Tomorrow at ${timeLabel}`;
-  if (diffDays > 1 && diffDays <= 7) return `In ${diffDays} days at ${timeLabel}`;
-  return `${eventDate.toLocaleDateString(undefined, { month: "short", day: "numeric" })} at ${timeLabel}`;
+  if (diffDays === 0) return timeLabel ? `Today at ${timeLabel}` : "Today";
+  if (diffDays === 1) return timeLabel ? `Tomorrow at ${timeLabel}` : "Tomorrow";
+  if (diffDays > 1 && diffDays <= 7) {
+    return timeLabel ? `In ${diffDays} days at ${timeLabel}` : `In ${diffDays} days`;
+  }
+  return `${eventDate.toLocaleDateString(undefined, { month: "short", day: "numeric" })}${
+    timeLabel ? ` at ${timeLabel}` : ""
+  }`;
 }
 
 export function isEventToday(date) {
@@ -41,15 +112,17 @@ export function isEventToday(date) {
   );
 }
 
-export function getUpcomingEvents(events, limit = 5, withinDays = 7) {
+export function getUpcomingEvents(events, limit = 5, withinDays = 14) {
   const now = new Date();
-  const end = new Date(now);
-  end.setDate(now.getDate() + withinDays);
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const end = new Date(startOfToday);
+  end.setDate(startOfToday.getDate() + withinDays);
 
-  return [...events]
+  return [...(events || [])]
     .filter(event => {
+      if (!event?.date) return false;
       const eventDate = new Date(`${event.date}T${event.time || "00:00"}:00`);
-      return eventDate >= now && eventDate <= end;
+      return eventDate >= startOfToday && eventDate <= end;
     })
     .sort((a, b) => {
       const aDate = new Date(`${a.date}T${a.time || "00:00"}:00`);
@@ -59,6 +132,7 @@ export function getUpcomingEvents(events, limit = 5, withinDays = 7) {
     .slice(0, limit);
 }
 
+/** @deprecated Prefer FullCalendar month math; kept for any legacy callers. */
 export function getMonthMatrix(year, month) {
   const firstDay = new Date(year, month, 1);
   const startOffset = firstDay.getDay();
@@ -72,4 +146,25 @@ export function getMonthMatrix(year, month) {
   }
   while (cells.length % 7 !== 0) cells.push(null);
   return cells;
+}
+
+/**
+ * Normalize a stored calendar event (adds defaults for newer fields).
+ * @param {object} event
+ */
+export function normalizeCalendarEvent(event) {
+  if (!event || typeof event !== "object") return null;
+  const meta = eventTypeMeta(event.type);
+  return {
+    id: String(event.id ?? Date.now()),
+    title: String(event.title || "").trim() || "Untitled",
+    type: meta.value,
+    scope: event.scope || (event.classId ? "class" : "school"),
+    classId: event.classId || "",
+    date: event.date || "",
+    time: event.time || "",
+    location: event.location || "",
+    notes: event.notes || "",
+    createdAt: event.createdAt || new Date().toISOString()
+  };
 }

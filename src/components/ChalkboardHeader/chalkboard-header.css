@@ -70,7 +70,7 @@
 
 .chalkboard-copy h1 {
   margin: 0;
-  font-family: "Segoe Print", "Comic Sans MS", cursive;
+  font-family: var(--font-hand, "Caveat", "Segoe Print", cursive);
   font-size: clamp(1.5rem, 2.8vw, 2.35rem);
   font-weight: 700;
   line-height: 1.2;
@@ -99,7 +99,7 @@
 
 .chalkboard-kicker,
 .chalkboard-meta {
-  font-family: "Segoe Print", "Comic Sans MS", cursive;
+  font-family: var(--font-hand, "Caveat", "Segoe Print", cursive);
   color: color-mix(in srgb, var(--header-text, #e8f4f3) 82%, transparent);
 }
 
@@ -174,7 +174,7 @@
   z-index: 6;
   display: grid;
   justify-items: end;
-  font-family: "Segoe Print", "Comic Sans MS", cursive;
+  font-family: var(--font-hand, "Caveat", "Segoe Print", cursive);
   color: color-mix(in srgb, var(--header-text, #e8f4f3) 90%, transparent);
   pointer-events: none;
 }
@@ -348,6 +348,17 @@
   to {
     opacity: 0;
     transform: translate(var(--dust-x), var(--dust-y)) scale(1.8);
+  }
+}
+
+@media (max-width: 1023px) {
+  .chalkboard-copy h1 {
+    white-space: normal;
+    font-size: clamp(1.35rem, 4.2vw, 1.9rem);
+  }
+
+  .chalkboard-copy {
+    inset: 0 72px 0 18px;
   }
 }
 

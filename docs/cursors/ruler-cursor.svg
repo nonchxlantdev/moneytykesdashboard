@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Wooden classroom ruler, tip at bottom-left for hotspot -->
+  <g transform="rotate(-35 16 16)">
+    <rect x="2" y="12" width="28" height="8" rx="1.5" fill="#d4a574"/>
+    <rect x="2.5" y="12.5" width="27" height="7" rx="1.2" fill="#e8c49a"/>
+    <rect x="2.5" y="12.5" width="27" height="2.2" rx="0.6" fill="#c48a4e" opacity=".55"/>
+    <!-- inch marks -->
+    <path d="M5 12.5v3.2M8 12.5v2M11 12.5v3.2M14 12.5v2M17 12.5v3.2M20 12.5v2M23 12.5v3.2M26 12.5v2M29 12.5v3.2"
+          stroke="#5a3718" stroke-width="1" stroke-linecap="round" opacity=".85"/>
+    <path d="M2.8 19.2h26.4" stroke="#8a5a35" stroke-width=".7" opacity=".45"/>
+  </g>
+</svg>
