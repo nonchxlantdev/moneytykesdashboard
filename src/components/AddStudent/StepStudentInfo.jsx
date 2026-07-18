@@ -14,7 +14,7 @@ function avatarSrc(fileName) {
   return `${import.meta.env.BASE_URL}avatars/${fileName}`;
 }
 
-export default function StepStudentInfo({ data, update, error }) {
+export default function StepStudentInfo({ data, update, error, isEditing = false }) {
   return (
     <div className="wizard-step-panel">
       <h2>Student Information</h2>
@@ -43,13 +43,25 @@ export default function StepStudentInfo({ data, update, error }) {
 
       <div className="wizard-grid student-meta">
         <label className="wizard-field">
-          <span>Date of Birth</span>
+          <span>Date of Birth{isEditing && !data.dob ? " (optional)" : ""}</span>
           <input
             type="date"
             value={data.dob}
             onChange={event => update({ dob: event.target.value })}
-            required
+            required={!isEditing}
           />
+        </label>
+        <label className="wizard-field">
+          <span>Gender</span>
+          <select
+            value={data.gender}
+            onChange={event => update({ gender: event.target.value })}
+            required
+          >
+            <option value="" disabled>Select gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
         </label>
         <label className="wizard-field">
           <span>Age</span>

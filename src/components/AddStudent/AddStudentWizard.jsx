@@ -48,7 +48,10 @@ export default function AddStudentWizard({
       if (!data.firstName.trim() || !data.lastName.trim()) {
         return "First and last name are required.";
       }
-      if (!data.dob) return "Date of birth is required.";
+      if (data.gender !== "male" && data.gender !== "female") {
+        return "Select Male or Female.";
+      }
+      if (!isEditing && !data.dob) return "Date of birth is required.";
       if (data.age == null) return "Select an age on the wheel.";
       return "";
     }
@@ -87,6 +90,8 @@ export default function AddStudentWizard({
     const studentPayload = {
       first: data.firstName.trim(),
       last: data.lastName.trim(),
+      gender: data.gender,
+      dob: data.dob || editingStudent?.dob || "",
       age: Number(data.age),
       classLabel,
       schoolId: school.id,
@@ -152,6 +157,7 @@ export default function AddStudentWizard({
                 data={data}
                 update={patch}
                 error={error}
+                isEditing={isEditing}
               />
             )}
             {step === 2 && (

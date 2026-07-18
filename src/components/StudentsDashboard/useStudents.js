@@ -24,17 +24,6 @@ function attendancePctForStudent(studentId, rows) {
   return Math.round((presentish / mine.length) * 100);
 }
 
-function completionPctForStudent(student) {
-  if (typeof student.completionPct === "number") {
-    return Math.max(0, Math.min(100, Math.round(student.completionPct)));
-  }
-  if (student.streak > 0) return Math.min(100, Math.round(student.streak * 12));
-  if (student.totalEarned > 0) return Math.min(100, Math.round(Number(student.totalEarned) / 10));
-  if (student.status === "on_track") return 78;
-  if (student.status === "at_risk") return 42;
-  return 12;
-}
-
 const AVATAR_PALETTE = [
   "var(--icon-accent)",
   "color-mix(in srgb, var(--icon-accent) 70%, var(--gold-accent))",
@@ -69,7 +58,6 @@ export default function useStudents(dbStudents = [], classFilter = "all") {
         name,
         points: Number(student.balance || student.totalEarned || 0),
         attendancePct: attendancePctForStudent(student.id, attendanceRows),
-        completionPct: completionPctForStudent(student),
         avatarColor: student.avatarColor || AVATAR_PALETTE[index % AVATAR_PALETTE.length],
         classSlug: slugClass(student.classLabel || "class")
       };

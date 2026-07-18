@@ -1,6 +1,7 @@
 export default function StepReview({ data, schoolName, teacherName }) {
   const rows = [
     { label: "Name", value: `${data.firstName} ${data.lastName}`.trim() || "—" },
+    { label: "Gender", value: data.gender === "male" ? "Male" : data.gender === "female" ? "Female" : "—" },
     { label: "Date of Birth", value: data.dob || "—" },
     { label: "Age", value: data.age != null ? String(data.age) : "—" },
     { label: "Standard", value: data.standard || "—" },

@@ -44,6 +44,14 @@ export default function useAttendance(db) {
 
   const selectedClass = classes.find(item => item.id === classId) || null;
 
+  // Default to the teacher's class (or first available) so roll call isn't empty
+  // when the dashboard already shows students.
+  useEffect(() => {
+    if (classId || !classes.length) return;
+    const preferred = classes.find(item => item.label === db.className || item.name === db.className);
+    setClassId(preferred?.id || classes[0].id);
+  }, [classId, classes, db.className]);
+
   const students = useMemo(() => {
     if (!selectedClass) return [];
     return (db.students || [])

@@ -1,3 +1,5 @@
+import { Pencil } from "lucide-react";
+
 function initials(name) {
   const parts = String(name || "")
     .trim()
@@ -8,38 +10,53 @@ function initials(name) {
   return `${parts[0][0] || ""}${parts[1][0] || ""}`.toUpperCase();
 }
 
-function RosterRow({ student, onView }) {
+function RosterRow({ student, onView, onEdit }) {
   return (
-    <button type="button" className="row" onClick={() => onView?.(student)}>
-      <div
-        className="avatar"
-        style={{ background: student.avatarColor || "var(--icon-accent)" }}
-        aria-hidden="true"
-      >
-        {student.photo ? <img src={student.photo} alt="" /> : initials(student.name)}
-      </div>
-      <div className="name">{student.name}</div>
-      <div className="completion-cell">
-        <div className="mini-bar" aria-hidden="true">
-          <span style={{ width: `${student.completionPct}%` }} />
+    <div className="row" role="listitem">
+      <div className="student-cell">
+        <div
+          className="avatar"
+          style={{ background: student.avatarColor || "var(--icon-accent)" }}
+          aria-hidden="true"
+        >
+          {student.photo ? <img src={student.photo} alt="" /> : initials(student.name)}
         </div>
-        <span className="pct">{student.completionPct}%</span>
+        <button type="button" className="student-name-button name" onClick={() => onView?.(student)}>
+          {student.name}
+        </button>
       </div>
+      <div className="gender">{student.gender === "female" ? "Female" : student.gender === "male" ? "Male" : "—"}</div>
+      <div className="age">{student.age ? `${student.age}` : "—"}</div>
+      <div className="class-label">{student.classLabel || "—"}</div>
       <div className="pts">{student.points} pts</div>
-    </button>
+      <div className="roster-actions">
+        <button
+          type="button"
+          className="roster-edit-button"
+          onClick={() => onEdit?.(student)}
+          aria-label={`Edit ${student.name}`}
+        >
+          <Pencil size={14} />
+          <span>Edit</span>
+        </button>
+      </div>
+    </div>
   );
 }
 
-export default function RosterTable({ students = [], onView }) {
+export default function RosterTable({ students = [], onView, onEdit }) {
   return (
     <div className="roster-table" role="list">
       <div className="roster-table-head" aria-hidden="true">
         <span>Student</span>
-        <span>Completion</span>
+        <span>Gender</span>
+        <span>Age</span>
+        <span>Class</span>
         <span>Points</span>
+        <span>Actions</span>
       </div>
       {students.map(student => (
-        <RosterRow key={student.id} student={student} onView={onView} />
+        <RosterRow key={student.id} student={student} onView={onView} onEdit={onEdit} />
       ))}
     </div>
   );

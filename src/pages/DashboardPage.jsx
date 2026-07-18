@@ -1,13 +1,4 @@
 import { useMemo } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis
-} from "recharts";
 import Badge from "../components/Badge";
 import DataTable from "../components/ui/DataTable";
 import ProgressBar from "../components/ui/ProgressBar";
@@ -60,20 +51,22 @@ function taskStatus(task) {
 }
 
 /**
- * Dashboard home — welcome, status, tasks, top students chart.
+ * Dashboard home — welcome, status, tasks, top students list.
  * Events, quick actions, and daily tip live in EventsRail.
  */
 export default function DashboardPage({ dashboard, db, navigate }) {
-  const teacherLast = db.teacher?.last || "Young";
+  const teacherLast = String(db.teacher?.last || "Young").trim() || "Young";
   const teacherName = `Ms. ${teacherLast}`;
   const className = db.className || "Class";
   const classId = slugClass(className) || "class";
   const teacherId = db.teacher?.id || db.teacher?.email || teacherLast;
 
   const attendance = useMemo(() => {
-    const classId = slugClass(className);
-    const records = loadAttendanceRecord(classId, todayIso()) || [];
-    const studentCount = dashboard.studentCount || db.students.length || 0;
+    const classStudents = (db.students || []).filter(
+      student => (student.classLabel || className) === className
+    );
+    const studentCount = classStudents.length || dashboard.studentCount || 0;
+    const records = loadAttendanceRecord(slugClass(className), todayIso()) || [];
     if (!records.length) {
       return { present: studentCount, rate: studentCount ? 100 : 0 };
     }
@@ -82,7 +75,7 @@ export default function DashboardPage({ dashboard, db, navigate }) {
       present,
       rate: studentCount ? Math.round((present / studentCount) * 100) : 0
     };
-  }, [className, dashboard.studentCount, db.students.length]);
+  }, [className, dashboard.studentCount, db.students]);
 
   const lessonStats = useMemo(() => {
     const lessons = loadCreatedLessons();
@@ -108,17 +101,7 @@ export default function DashboardPage({ dashboard, db, navigate }) {
       .slice(0, 5);
   }, [db.tasks]);
 
-  const leaderboard = (dashboard.leaderboard || []).slice(0, 6);
-
-  const chartData = useMemo(
-    () =>
-      leaderboard.map(student => ({
-        name: student.first || "Student",
-        points: Number(student.totalEarned || 0),
-        fullName: `${student.first || ""} ${student.last || ""}`.trim()
-      })),
-    [leaderboard]
-  );
+  const topStudents = (dashboard.leaderboard || []).slice(0, 5);
 
   const segments = [
     {
@@ -219,37 +202,22 @@ export default function DashboardPage({ dashboard, db, navigate }) {
                 View all
               </button>
             </div>
-            {chartData.length ? (
-              <div className="dash-home-chart" aria-label="Top students by reward points">
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={chartData} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(10, 171, 181, 0.12)" />
-                    <XAxis
-                      dataKey="name"
-                      tick={{ fill: "#5a6b68", fontSize: 12 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      tick={{ fill: "#8a9693", fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
-                      width={36}
-                    />
-                    <Tooltip
-                      cursor={{ fill: "rgba(10, 171, 181, 0.06)" }}
-                      contentStyle={{
-                        borderRadius: 12,
-                        border: "1px solid rgba(28, 43, 42, 0.08)",
-                        fontSize: 13
-                      }}
-                      formatter={(value) => [formatPoints(value), "Points"]}
-                      labelFormatter={(_, payload) => payload?.[0]?.payload?.fullName || ""}
-                    />
-                    <Bar dataKey="points" fill="#0aabb5" radius={[10, 10, 4, 4]} maxBarSize={36} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+            {topStudents.length ? (
+              <ol className="dash-home-top-list" aria-label="Top students by reward points">
+                {topStudents.map((student, index) => {
+                  const name = `${student.first || ""} ${student.last || ""}`.trim() || "Student";
+                  return (
+                    <li className="dash-home-top-item" key={student.id}>
+                      <span className={`dash-home-top-rank is-${index + 1}`}>{index + 1}</span>
+                      <div className="dash-home-top-copy">
+                        <strong>{name}</strong>
+                        <span>{student.classLabel || "Class"}</span>
+                      </div>
+                      <em className="dash-home-top-points">{formatPoints(student.totalEarned || 0)}</em>
+                    </li>
+                  );
+                })}
+              </ol>
             ) : (
               <div className="mt-empty-state">
                 <strong>No points awarded yet</strong>

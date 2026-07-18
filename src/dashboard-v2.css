@@ -13,10 +13,12 @@
 
 /* Dashboard home: flush chalkboard band from sidebar → events rail */
 .react-app .dashboard.dashboard-view {
+  --mt-events-rail-width: 240px;
   padding-top: 0 !important;
   padding-left: 0 !important;
-  padding-right: 240px !important;
+  padding-right: var(--mt-events-rail-width) !important;
   padding-bottom: 28px !important;
+  overflow-x: visible;
 }
 
 .react-app .dashboard-view .page-swap {
@@ -26,12 +28,23 @@
   width: 100% !important;
 }
 
+/* Extend chalk flush under the Events column so the wood ledge meets the rail */
 .react-app .dashboard-view .page-swap .dash-home > .chalkboard-header {
-  width: 100%;
+  width: calc(100% + var(--mt-events-rail-width));
   max-width: none;
   margin: 0 0 18px;
   border-radius: 0;
   border: 0;
+  box-sizing: border-box;
+}
+
+/* Keep clock + eraser in the visible chalk zone (not under Events) */
+.react-app .dashboard-view .chalkboard-clock {
+  right: calc(var(--mt-events-rail-width) + 22px);
+}
+
+.react-app .dashboard-view .chalkboard-eraser {
+  right: calc(var(--mt-events-rail-width) + 28px);
 }
 
 .react-app .dashboard-view .page-swap .dash-home-main {
@@ -42,7 +55,8 @@
 /* iPad landscape: narrower content padding; rail width handled later */
 @media (min-width: 1024px) and (max-width: 1180px) {
   .react-app .dashboard.dashboard-view {
-    padding-right: 200px !important;
+    --mt-events-rail-width: 200px;
+    padding-right: var(--mt-events-rail-width) !important;
     padding-left: 0 !important;
     padding-top: 0 !important;
   }
@@ -64,6 +78,7 @@
 /* iPad portrait / phone: full-bleed chalk; rail goes below (see .dash-home-rail rules later) */
 @media (max-width: 1023px) {
   .react-app .dashboard.dashboard-view {
+    --mt-events-rail-width: 0px;
     padding-right: 0 !important;
     padding-left: 0 !important;
     padding-top: 0 !important;
@@ -71,6 +86,18 @@
 
   .react-app .dashboard-view {
     padding-right: 0;
+  }
+
+  .react-app .dashboard-view .page-swap .dash-home > .chalkboard-header {
+    width: 100%;
+  }
+
+  .react-app .dashboard-view .chalkboard-clock {
+    right: 22px;
+  }
+
+  .react-app .dashboard-view .chalkboard-eraser {
+    right: 28px;
   }
 
   .react-app .dashboard-view .page-swap .dash-home-main {
@@ -233,16 +260,93 @@
   min-height: 220px;
 }
 
+.dash-home-top-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+
+.dash-home-top-item {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--mt-card-border, rgba(28, 43, 42, 0.08));
+}
+
+.dash-home-top-item:last-child {
+  border-bottom: 0;
+}
+
+.dash-home-top-rank {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--icon-accent) 12%, #fff);
+  color: var(--icon-accent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.dash-home-top-rank.is-1 {
+  background: color-mix(in srgb, var(--gold-accent) 55%, #fff);
+  color: #7a5a10;
+}
+
+.dash-home-top-rank.is-2 {
+  background: color-mix(in srgb, #94a3b8 28%, #fff);
+  color: #475569;
+}
+
+.dash-home-top-rank.is-3 {
+  background: color-mix(in srgb, #d97706 22%, #fff);
+  color: #9a3412;
+}
+
+.dash-home-top-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dash-home-top-copy strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mt-ink, #1c2b2a);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-home-top-copy span {
+  font-size: 12px;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.dash-home-top-points {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--icon-accent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 /* Desktop: fixed right rail (reserved via dashboard padding-right) */
 .dash-home-rail {
   position: fixed;
   top: 0;
   right: 0;
-  width: 240px;
+  width: var(--mt-events-rail-width, 240px);
   height: 100vh;
   height: 100dvh;
   z-index: 5;
   pointer-events: none;
+  background: var(--right-panel-bg, var(--mt-rail-bg));
 }
 
 /* Compound selector (.dash-home-rail-inner.mt-card-panel) so this reliably

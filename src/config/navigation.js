@@ -2,9 +2,11 @@ import {
   IconBook,
   IconCalculator,
   IconCalendar,
+  IconClipboardList,
   IconLayoutDashboard,
   IconMedal,
   IconShield,
+  IconSun,
   IconTrophy,
   IconUsers
 } from "@tabler/icons-react";
@@ -22,9 +24,11 @@ export const navSections = [
     label: "Main",
     items: [
       { id: "dashboard", label: "Dashboard", view: "dashboard", icon: IconLayoutDashboard },
+      { id: "my-day", label: "My Day", view: "my-day", icon: IconSun },
+      { id: "calendar", label: "Calendar", view: "calendar", icon: IconCalendar },
       { id: "students", label: "Students", view: "students", icon: IconUsers },
       { id: "lessons", label: "Lessons", view: "lessons", icon: IconBook },
-      { id: "calendar", label: "Calendar", view: "calendar", icon: IconCalendar },
+      { id: "quiz-test", label: "Quiz/Test", view: "quiz-test", icon: IconClipboardList },
       { id: "rewards", label: "Rewards", view: "rewards", icon: IconTrophy }
     ]
   },

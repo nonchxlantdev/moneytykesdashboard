@@ -73,11 +73,21 @@ export default function StudentsDashboard({
       if (prefill) {
         setClassFilter(prefill);
         sessionStorage.removeItem(STUDENTS_CLASS_PREFILL_KEY);
+        return;
       }
     } catch {
       /* ignore */
     }
-  }, []);
+
+    // Default to the teacher's class (or first roster class) so the page
+    // isn't empty when the dashboard already shows students.
+    if (classFilter) return;
+    if (db.className && classOptions.includes(db.className)) {
+      setClassFilter(db.className);
+      return;
+    }
+    if (classOptions[0]) setClassFilter(classOptions[0]);
+  }, [classFilter, classOptions, db.className]);
 
   useEffect(() => {
     if (!studentFocus) return;
@@ -216,7 +226,11 @@ export default function StudentsDashboard({
               <div className="d">Choose a class above to view the student roster.</div>
             </div>
           ) : filtered.length ? (
-            <RosterTable students={filtered} onView={onViewStudent} />
+            <RosterTable
+              students={filtered}
+              onView={onViewStudent}
+              onEdit={onEditStudent}
+            />
           ) : students.length ? (
             <div className="empty-box">
               <div className="t">No matching students</div>

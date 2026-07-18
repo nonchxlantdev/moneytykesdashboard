@@ -7,7 +7,7 @@
  */
 
 const STORAGE_KEY = "moneytykes.teacher.dashboard.v3";
-const SEED_MARKER = "moneytykes.seed.demo.v1";
+const SEED_MARKER = "moneytykes.seed.demo.v5";
 const CALENDAR_KEY = "calendar_events";
 const REWARDS_BANK_KEY = "rewards_bank";
 const CREATED_LESSONS_KEY = "created_lessons";
@@ -53,21 +53,17 @@ const TEACHER = {
 };
 
 const CLASS_A = "Standard 4A";
-const CLASS_B = "Standard 5B";
 
+/** Keep mock roster at 8 so dashboard / students counts match. */
 const STUDENT_SEEDS = [
-  { first: "Liam", last: "Banda", classLabel: CLASS_A, age: 10, avatar: "pikachu.png", balance: 320, totalEarned: 540, status: "on_track" },
-  { first: "Nia", last: "Phiri", classLabel: CLASS_A, age: 10, avatar: "eevee.png", balance: 275, totalEarned: 460, status: "on_track" },
-  { first: "Kofi", last: "Mensah", classLabel: CLASS_A, age: 9, avatar: "charmander.png", balance: 180, totalEarned: 300, status: "on_track" },
-  { first: "Zara", last: "Tembo", classLabel: CLASS_A, age: 10, avatar: "jigglypuff.png", balance: 95, totalEarned: 210, status: "at_risk" },
-  { first: "Malik", last: "Osei", classLabel: CLASS_A, age: 9, avatar: "snorlax.png", balance: 60, totalEarned: 120, status: "at_risk" },
-  { first: "Ava", last: "Sakala", classLabel: CLASS_A, age: 10, avatar: "ditto.png", balance: 40, totalEarned: 80, status: "inactive" },
-  { first: "Sami", last: "Zulu", classLabel: CLASS_A, age: 9, avatar: "voltorb.png", balance: 210, totalEarned: 350, status: "on_track" },
-  { first: " Imani ".trim(), last: "Chanda", classLabel: CLASS_B, age: 11, avatar: "bullbasaur.png", balance: 300, totalEarned: 500, status: "on_track" },
-  { first: "Deka", last: "Njoroge", classLabel: CLASS_B, age: 11, avatar: "gastly.png", balance: 155, totalEarned: 260, status: "on_track" },
-  { first: "Tariq", last: "Bello", classLabel: CLASS_B, age: 12, avatar: "pikachu.png", balance: 110, totalEarned: 190, status: "at_risk" },
-  { first: "Lulu", last: "Moyo", classLabel: CLASS_B, age: 11, avatar: "eevee.png", balance: 85, totalEarned: 140, status: "at_risk" },
-  { first: "Femi", last: "Okafor", classLabel: CLASS_B, age: 12, avatar: "charmander.png", balance: 45, totalEarned: 70, status: "inactive" }
+  { first: "Aysia", last: "Spain", gender: "female", classLabel: CLASS_A, age: 10, avatar: "pikachu.png", balance: 410, totalEarned: 620, status: "on_track" },
+  { first: "Michael", last: "Young", gender: "male", classLabel: CLASS_A, age: 10, avatar: "eevee.png", balance: 385, totalEarned: 580, status: "on_track" },
+  { first: "Moses", last: "Guild", gender: "male", classLabel: CLASS_A, age: 9, avatar: "charmander.png", balance: 360, totalEarned: 540, status: "on_track" },
+  { first: "Norman", last: "Logan", gender: "male", classLabel: CLASS_A, age: 10, avatar: "snorlax.png", balance: 335, totalEarned: 510, status: "on_track" },
+  { first: "Serena", last: "Jackson", gender: "female", classLabel: CLASS_A, age: 10, avatar: "jigglypuff.png", balance: 310, totalEarned: 490, status: "on_track" },
+  { first: "Nia", last: "Phiri", gender: "female", classLabel: CLASS_A, age: 10, avatar: "ditto.png", balance: 275, totalEarned: 460, status: "on_track" },
+  { first: "Kofi", last: "Mensah", gender: "male", classLabel: CLASS_A, age: 9, avatar: "voltorb.png", balance: 180, totalEarned: 300, status: "on_track" },
+  { first: "Zara", last: "Tembo", gender: "female", classLabel: CLASS_A, age: 10, avatar: "gastly.png", balance: 95, totalEarned: 210, status: "at_risk" }
 ];
 
 const REWARD_BANK = [
@@ -84,6 +80,7 @@ function buildStudents() {
     id: 1001 + index,
     first: seed.first,
     last: seed.last,
+    gender: seed.gender,
     age: seed.age,
     classLabel: seed.classLabel,
     schoolId: SCHOOL.id,
@@ -170,12 +167,12 @@ function buildCalendarEvents(todayDate) {
     mk(1, "Morning savings lesson", "lesson", "class", 0, "09:00", { classId: CLASS_A, location: "Room 4", notes: "Intro to saving goals." }),
     mk(2, "Times-tables quiz", "quiz", "class", 0, "11:30", { classId: CLASS_A, location: "Room 4" }),
     mk(3, "Staff briefing", "reminder", "personal", 0, "15:30", { location: "Staff room" }),
-    mk(4, "Budgeting assignment due", "assignment", "class", 2, "", { classId: CLASS_B, notes: "Collect worksheets." }),
+    mk(4, "Budgeting assignment due", "assignment", "class", 2, "", { classId: CLASS_A, notes: "Collect worksheets." }),
     mk(5, "Unit test: money basics", "test", "class", 4, "10:00", { classId: CLASS_A, location: "Hall" }),
     mk(6, "School assembly", "event", "school", 1, "08:00", { location: "Main hall" }),
     mk(7, "Parent-teacher evening", "event", "school", 6, "17:00", { location: "Main hall", notes: "Bring progress reports." }),
     mk(8, "Reading week starts", "reminder", "school", 8, ""),
-    mk(9, "Field trip: local bank", "event", "class", 9, "09:30", { classId: CLASS_B, location: "First National Bank" }),
+    mk(9, "Field trip: local bank", "event", "class", 9, "09:30", { classId: CLASS_A, location: "First National Bank" }),
     mk(10, "Pop quiz: coins & notes", "quiz", "class", -3, "13:00", { classId: CLASS_A }),
     mk(11, "Report cards due", "assignment", "personal", -1, "", { notes: "Finalize term grades." }),
     mk(12, "Savings challenge kickoff", "event", "school", 3, "12:00", { location: "Playground" }),
@@ -213,7 +210,7 @@ function buildCreatedLessons(todayDate) {
       wrapUp: "Students name three uses of money.",
       tags: "money, beginner",
       isFavorite: true,
-      assignedCount: 24,
+      assignedCount: 8,
       createdAt: iso(addDays(todayDate, -12))
     },
     {
@@ -294,33 +291,93 @@ function buildCreatedLessons(todayDate) {
 }
 
 function seedAttendance(students, todayDate) {
-  const classes = [CLASS_A, CLASS_B];
+  const classId = slugClass(CLASS_A);
   const statuses = ["present", "present", "present", "late", "present", "absent", "present", "sick"];
 
-  classes.forEach(classLabel => {
-    const classId = slugClass(classLabel);
-    const roster = students.filter(s => s.classLabel === classLabel);
+  for (let dayOffset = 0; dayOffset < 6; dayOffset += 1) {
+    const day = addDays(todayDate, -dayOffset);
+    const weekday = day.getDay();
+    if (weekday === 0 || weekday === 6) continue; // skip weekends
 
-    for (let dayOffset = 0; dayOffset < 6; dayOffset += 1) {
-      const day = addDays(todayDate, -dayOffset);
-      const weekday = day.getDay();
-      if (weekday === 0 || weekday === 6) continue; // skip weekends
+    const records = students.map((student, index) => ({
+      studentId: student.id,
+      studentName: `${student.first} ${student.last}`.trim(),
+      status: statuses[(index + dayOffset) % statuses.length],
+      note: "",
+      timestamp: new Date(`${iso(day)}T08:15:00`).toISOString()
+    }));
 
-      const records = roster.map((student, index) => ({
-        studentId: student.id,
-        studentName: `${student.first} ${student.last}`.trim(),
-        status: statuses[(index + dayOffset) % statuses.length],
-        note: "",
-        timestamp: new Date(`${iso(day)}T08:15:00`).toISOString()
-      }));
+    localStorage.setItem(`attendance_${classId}_${iso(day)}`, JSON.stringify(records));
+  }
+}
 
-      localStorage.setItem(`attendance_${classId}_${iso(day)}`, JSON.stringify(records));
+function looksLikeDemoRoster(existing) {
+  return (
+    localStorage.getItem("moneytykes.seed.demo.v1")
+    || localStorage.getItem("moneytykes.seed.demo.v2")
+    || localStorage.getItem("moneytykes.seed.demo.v3")
+    || existing?.school === SCHOOL.name
+    || (existing?.students || []).some(
+      student =>
+        (student.first === "Nia" && student.last === "Phiri")
+        || (student.first === "Aysia" && student.last === "Spain")
+        || (student.first === "Liam" && student.last === "Banda")
+        || (student.first === "Imani" && student.last === "Chanda")
+    )
+  );
+}
+
+function syncDemoRoster(existing) {
+  const todayDate = new Date();
+  const students = buildStudents();
+
+  // Drop stale demo point keys before writing the 8-student roster.
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith("student_points_") || key.startsWith("points_log_") || key.startsWith("attendance_")) {
+      localStorage.removeItem(key);
     }
   });
+
+  const next = {
+    ...existing,
+    teacher: { id: TEACHER.id, first: TEACHER.firstName, last: TEACHER.lastName, email: TEACHER.email },
+    school: SCHOOL.name,
+    className: CLASS_A,
+    students,
+    schools: existing.schools?.length ? existing.schools : [SCHOOL],
+    teachers: [TEACHER],
+    tasks: existing.tasks?.length ? existing.tasks : buildTasks(todayDate),
+    rewards: existing.rewards?.length ? existing.rewards : REWARD_BANK,
+    redemptions: existing.redemptions || [],
+    transactions: buildTransactions(students, todayDate),
+    tips: existing.tips?.length
+      ? existing.tips
+      : [
+          "Encourage students to set savings goals. Small steps today build financial confidence.",
+          "Ask students to separate needs from wants before spending reward points.",
+          "A clear point goal gives every reward a purpose before it gets spent."
+        ]
+  };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  localStorage.setItem(REWARDS_BANK_KEY, JSON.stringify(REWARD_BANK));
+  if (!localStorage.getItem(CREATED_LESSONS_KEY)) {
+    localStorage.setItem(CREATED_LESSONS_KEY, JSON.stringify(buildCreatedLessons(todayDate)));
+  }
+  if (!localStorage.getItem(CALENDAR_KEY)) {
+    localStorage.setItem(CALENDAR_KEY, JSON.stringify(buildCalendarEvents(todayDate)));
+  }
+
+  students.forEach(student => {
+    localStorage.setItem(`student_points_${student.id}`, JSON.stringify(student.totalEarned));
+    localStorage.setItem(`points_log_${student.id}`, JSON.stringify(buildPointsLog(student, todayDate)));
+  });
+  seedAttendance(students, todayDate);
 }
 
 /**
- * Seed demo data once. Safe no-op if a teacher already has students.
+ * Seed demo data once. Safe no-op for real teacher data.
+ * v4 resets the demo roster to exactly 8 students so counts match.
  */
 export function seedMockData() {
   try {
@@ -333,8 +390,13 @@ export function seedMockData() {
       existing = null;
     }
 
-    const hasRealStudents = existing && Array.isArray(existing.students) && existing.students.length > 0;
-    if (hasRealStudents) {
+    const hasStudents = existing && Array.isArray(existing.students) && existing.students.length > 0;
+
+    if (hasStudents) {
+      if (looksLikeDemoRoster(existing)) {
+        syncDemoRoster(existing);
+      }
+      ["v1", "v2", "v3", "v4"].forEach(v => localStorage.removeItem(`moneytykes.seed.demo.${v}`));
       localStorage.setItem(SEED_MARKER, "1");
       return;
     }
@@ -372,6 +434,7 @@ export function seedMockData() {
 
     seedAttendance(students, todayDate);
 
+    ["v1", "v2", "v3", "v4"].forEach(v => localStorage.removeItem(`moneytykes.seed.demo.${v}`));
     localStorage.setItem(SEED_MARKER, "1");
   } catch {
     /* best-effort: never block app startup on seeding */

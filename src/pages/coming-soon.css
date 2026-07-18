@@ -1,0 +1,42 @@
+.coming-soon-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.react-app .dashboard.coming-soon-view {
+  padding-top: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: 28px !important;
+}
+
+.react-app .coming-soon-view .topbar {
+  display: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+}
+
+.react-app .coming-soon-view .page-swap {
+  padding: 0 0 28px !important;
+  max-width: none !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.coming-soon-body {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 28px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+  .coming-soon-body {
+    padding: 0 12px;
+    padding-bottom: var(--mobile-tabbar-offset, 88px);
+  }
+}

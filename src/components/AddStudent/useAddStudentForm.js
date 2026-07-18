@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 const EMPTY = {
   firstName: "",
   lastName: "",
+  gender: "",
   dob: "",
   age: null,
   avatar: null,
@@ -42,7 +43,8 @@ export default function useAddStudentForm(editingStudent = null) {
     setData({
       firstName: editingStudent.first || "",
       lastName: editingStudent.last || "",
-      dob: "",
+      gender: editingStudent.gender === "female" ? "female" : editingStudent.gender === "male" ? "male" : "",
+      dob: editingStudent.dob || "",
       age: editingStudent.age ? Number(editingStudent.age) : null,
       avatar: photo ? { src: photo, fileName: fileName || photo.split("/").pop() } : null,
       standard,

@@ -68,6 +68,7 @@ import "./students.css";
 import "./components/ui.css";
 import "./components/ui/shell-components.css";
 import DashboardPage from "./pages/DashboardPage";
+import ComingSoonPage from "./pages/ComingSoonPage";
 import PersonalizationSettings from "./components/admin/PersonalizationSettings";
 import StudentsDashboard from "./components/StudentsDashboard/StudentsDashboard";
 import PageChalkLoader from "./components/shared/PageChalkLoader";
@@ -137,7 +138,7 @@ const studentAvatars = [
 
 function createDatabase() {
   return {
-    teacher: { first: "Teacher", last: "Young", email: "teacher@moneytykes.local" },
+    teacher: { id: 1, first: "Amara", last: "Young", email: "amara.young@moneytykes.school" },
     school: "MoneyTykes Classroom",
     className: "Financial Literacy Class",
     students: [],
@@ -382,7 +383,7 @@ function App() {
       />
       {menuOpen && <button className="sidebar-backdrop" type="button" aria-label="Close navigation menu" onClick={closeSidebarMenu} />}
       <main
-        className={`dashboard ${view === "game" ? "game-view" : ""} ${view === "dashboard" ? "dashboard-view" : ""} ${view === "students" ? "students-view" : ""} ${view === "attendance" ? "attendance-view" : ""} ${view === "add-student" ? "add-student-view" : ""} ${view === "lessons" ? "lessons-view" : ""} ${view === "create-lessons" ? "create-lessons-view" : ""} ${view === "calendar" ? "calendar-view" : ""}`}
+        className={`dashboard ${view === "game" ? "game-view" : ""} ${view === "dashboard" ? "dashboard-view" : ""} ${view === "students" ? "students-view" : ""} ${view === "attendance" ? "attendance-view" : ""} ${view === "add-student" ? "add-student-view" : ""} ${view === "lessons" ? "lessons-view" : ""} ${view === "create-lessons" ? "create-lessons-view" : ""} ${view === "calendar" ? "calendar-view" : ""} ${view === "my-day" || view === "quiz-test" ? "coming-soon-view" : ""}`}
         ref={mainContentRef}
       >
         <Topbar
@@ -396,10 +397,26 @@ function App() {
           <PageChalkLoader active={pageLoading} />
           {!pageLoading && view === "admin" && <AdminDashboard db={db} update={update} />}
           {!pageLoading && view === "dashboard" && <DashboardPage {...pageProps} />}
+          {!pageLoading && view === "my-day" && (
+            <ComingSoonPage
+              eyebrow="Planning"
+              title="My Day"
+              lead="A focused place to organize your teaching day."
+              description="Soon you’ll be able to manage a to-do list, review organized events, and plan your next day—all in one clear view."
+            />
+          )}
           {!pageLoading && view === "students" && <Students {...pageProps} />}
           {!pageLoading && view === "add-student" && <AddStudentPage {...pageProps} />}
           {!pageLoading && view === "lessons" && <LessonsLibraryPage setToast={setToast} navigate={navigate} />}
           {!pageLoading && view === "create-lessons" && <CreateLessonsPage db={db} setToast={setToast} navigate={navigate} />}
+          {!pageLoading && view === "quiz-test" && (
+            <ComingSoonPage
+              eyebrow="Assessments"
+              title="Quiz / Test"
+              lead="Build and assign quizzes and tests from here soon."
+              description="This section will let you create quizzes, run tests, and review results."
+            />
+          )}
           {!pageLoading && view === "attendance" && <AttendancePage db={db} setToast={setToast} navigate={navigate} />}
           {!pageLoading && view === "calendar" && (
             <React.Suspense fallback={<PageChalkLoader active />}>
@@ -1847,6 +1864,7 @@ function StudentProfile({ student, onClose, onEdit, onDelete }) {
           <h2>{student.first} {student.last}</h2>
           <div className="mt-student-profile-grid">
             <p><strong>Standard / Form</strong><span>{student.classLabel || "Not set"}</span></p>
+            <p><strong>Gender</strong><span>{student.gender === "female" ? "Female" : student.gender === "male" ? "Male" : "Not set"}</span></p>
             <p><strong>School</strong><span>{student.schoolName || "Not set"}</span></p>
             <p><strong>Teacher</strong><span>{student.teacherName || "Not set"}</span></p>
             <p><strong>Age</strong><span>{student.age || "Not set"}</span></p>
