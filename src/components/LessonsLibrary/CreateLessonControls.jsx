@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, FileText, LayoutGrid, Play, Plus, Presentation } from "lucide-react";
+import { ChevronDown, ClipboardList, FileText, LayoutGrid, Play, Plus, Presentation } from "lucide-react";
 import { LESSON_CREATE_TYPE_KEY } from "../../utils/lessonsStorage";
 
 export function TemplatesButton() {
@@ -23,7 +23,20 @@ export function TemplatesButton() {
   );
 }
 
+const CREATE_TOAST = {
+  video: "Opening video lesson studio…",
+  document: "Opening document lesson studio…",
+  presentation: "Opening presentation lesson studio…",
+  plan: "Opening curriculum studio…",
+};
+
 const CREATE_OPTIONS = [
+  {
+    type: "plan",
+    label: "Curriculum",
+    desc: "Build a text curriculum",
+    icon: ClipboardList
+  },
   {
     type: "video",
     label: "Video Lesson",
@@ -66,13 +79,7 @@ export function CreateLessonDropdown({ navigate, setToast }) {
     } catch {
       /* ignore */
     }
-    setToast?.(
-      type === "video"
-        ? "Opening video lesson studio…"
-        : type === "document"
-          ? "Opening document lesson studio…"
-          : "Opening presentation lesson studio…"
-    );
+    setToast?.(CREATE_TOAST[type] || "Opening lesson studio…");
     navigate?.("create-lessons");
   }
 

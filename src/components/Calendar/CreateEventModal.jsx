@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { EVENT_SCOPES, EVENT_TYPE_OPTIONS, normalizeCalendarEvent } from "../../utils/calendarUtils";
+import Select from "../ui/Select";
 
 const emptyForm = {
   title: "",
@@ -107,43 +108,43 @@ export default function CreateEventModal({
             />
           </label>
 
-          <label className="field-label">
-            Type
-            <select value={form.type} onChange={e => update("type", e.target.value)}>
-              {EVENT_TYPE_OPTIONS.map(type => (
-                <option key={type.value} value={type.value}>
-                  {type.emoji} {type.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Select
+            label="Type"
+            value={form.type}
+            onChange={value => update("type", value)}
+            options={EVENT_TYPE_OPTIONS.map(type => ({
+              value: type.value,
+              label: `${type.emoji} ${type.label}`
+            }))}
+            searchPlaceholder="Search types"
+            allowClear={false}
+          />
 
-          <label className="field-label">
-            Scope
-            <select value={form.scope} onChange={e => update("scope", e.target.value)}>
-              {EVENT_SCOPES.map(scope => (
-                <option key={scope.value} value={scope.value}>
-                  {scope.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Select
+            label="Scope"
+            value={form.scope}
+            onChange={value => update("scope", value)}
+            options={EVENT_SCOPES.map(scope => ({
+              value: scope.value,
+              label: scope.label
+            }))}
+            searchPlaceholder="Search scopes"
+            allowClear={false}
+          />
 
           {form.scope === "class" ? (
-            <label className="field-label">
-              Class / subject
-              <select value={form.classId} onChange={e => update("classId", e.target.value)}>
-                {classes.length ? (
-                  classes.map(item => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))
-                ) : (
-                  <option value="">No classes yet</option>
-                )}
-              </select>
-            </label>
+            <Select
+              label="Class / subject"
+              value={form.classId}
+              onChange={value => update("classId", value)}
+              options={
+                classes.length
+                  ? classes.map(item => ({ value: item, label: item }))
+                  : [{ value: "", label: "No classes yet" }]
+              }
+              searchPlaceholder="Search classes"
+              allowClear={false}
+            />
           ) : null}
 
           <div className="cal-create-grid">

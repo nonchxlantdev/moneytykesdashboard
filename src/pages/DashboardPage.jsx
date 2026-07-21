@@ -198,7 +198,7 @@ export default function DashboardPage({ dashboard, db, navigate }) {
           <article className="mt-card-panel dash-home-card">
             <div className="mt-card-panel-header">
               <h3>Top students</h3>
-              <button type="button" className="mt-card-panel-link" onClick={() => navigate("leaderboard")}>
+              <button type="button" className="mt-card-panel-link" onClick={() => navigate("rewards")}>
                 View all
               </button>
             </div>

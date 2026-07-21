@@ -69,6 +69,7 @@ import "./components/ui.css";
 import "./components/ui/shell-components.css";
 import DashboardPage from "./pages/DashboardPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
+import QuizzesPage from "./pages/QuizzesPage";
 import PersonalizationSettings from "./components/admin/PersonalizationSettings";
 import StudentsDashboard from "./components/StudentsDashboard/StudentsDashboard";
 import PageChalkLoader from "./components/shared/PageChalkLoader";
@@ -294,6 +295,7 @@ function App() {
   }
 
   function navigate(nextView, options = {}) {
+    if (nextView === "quiz-test") nextView = "quizzes";
     if (pageLoadTimerRef.current) {
       window.clearTimeout(pageLoadTimerRef.current);
       pageLoadTimerRef.current = null;
@@ -383,7 +385,7 @@ function App() {
       />
       {menuOpen && <button className="sidebar-backdrop" type="button" aria-label="Close navigation menu" onClick={closeSidebarMenu} />}
       <main
-        className={`dashboard ${view === "game" ? "game-view" : ""} ${view === "dashboard" ? "dashboard-view" : ""} ${view === "students" ? "students-view" : ""} ${view === "attendance" ? "attendance-view" : ""} ${view === "add-student" ? "add-student-view" : ""} ${view === "lessons" ? "lessons-view" : ""} ${view === "create-lessons" ? "create-lessons-view" : ""} ${view === "calendar" ? "calendar-view" : ""} ${view === "my-day" || view === "quiz-test" ? "coming-soon-view" : ""}`}
+        className={`dashboard ${view === "game" ? "game-view" : ""} ${view === "dashboard" ? "dashboard-view" : ""} ${view === "students" ? "students-view" : ""} ${view === "attendance" ? "attendance-view" : ""} ${view === "add-student" ? "add-student-view" : ""} ${view === "lessons" ? "lessons-view" : ""} ${view === "create-lessons" ? "create-lessons-view" : ""} ${view === "calendar" ? "calendar-view" : ""} ${view === "rewards" ? "rewards-view" : ""} ${view === "quizzes" ? "quizzes-view" : ""} ${view === "my-day" ? "coming-soon-view" : ""}`}
         ref={mainContentRef}
       >
         <Topbar
@@ -409,14 +411,7 @@ function App() {
           {!pageLoading && view === "add-student" && <AddStudentPage {...pageProps} />}
           {!pageLoading && view === "lessons" && <LessonsLibraryPage setToast={setToast} navigate={navigate} />}
           {!pageLoading && view === "create-lessons" && <CreateLessonsPage db={db} setToast={setToast} navigate={navigate} />}
-          {!pageLoading && view === "quiz-test" && (
-            <ComingSoonPage
-              eyebrow="Assessments"
-              title="Quiz / Test"
-              lead="Build and assign quizzes and tests from here soon."
-              description="This section will let you create quizzes, run tests, and review results."
-            />
-          )}
+          {!pageLoading && view === "quizzes" && <QuizzesPage />}
           {!pageLoading && view === "attendance" && <AttendancePage db={db} setToast={setToast} navigate={navigate} />}
           {!pageLoading && view === "calendar" && (
             <React.Suspense fallback={<PageChalkLoader active />}>
@@ -429,7 +424,6 @@ function App() {
             </React.Suspense>
           )}
           {!pageLoading && view === "rewards" && <RewardsPage db={db} setToast={setToast} update={update} />}
-          {!pageLoading && view === "leaderboard" && <Leaderboard {...pageProps} />}
           {!pageLoading && view === "game" && <GameDashboard setToast={setToast} />}
         </div>
       </main>
@@ -610,7 +604,9 @@ function NavButton({ item, active, navigate, compact = false, showLabel = true, 
           <Icon size={ICON_SIZE} stroke={ICON_STROKE} aria-hidden="true" />
           {showLabel ? <span className="label nav-item-label">{item.label}</span> : null}
           {showLabel && badgeText ? (
-            <span className={`nav-item-badge ${item.badge?.variant || "gray"}`}>{badgeText}</span>
+            <span className={`nav-item-badge ${item.badge?.variant || "gray"} ${item.badge?.variant === "soon" ? "nav-soon-badge" : ""}`}>
+              {badgeText}
+            </span>
           ) : null}
         </>
       )}
@@ -814,7 +810,18 @@ function AdminDashboard({ db, update }) {
                 <Field label="Phone Number" type="tel" value={schoolForm.phone} onChange={phone => setSchoolForm({ ...schoolForm, phone })} required />
               </div>
               <Field label="Address" value={schoolForm.address} onChange={address => setSchoolForm({ ...schoolForm, address })} required />
-              <label className="field-label">Status<span className="input-without-icon"><select value={schoolForm.status} onChange={event => setSchoolForm({ ...schoolForm, status: event.target.value })} required><option value="active">Active</option><option value="inactive">Inactive</option></select></span></label>
+              <Select
+                label="Status"
+                value={schoolForm.status}
+                onChange={status => setSchoolForm({ ...schoolForm, status })}
+                options={[
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" }
+                ]}
+                required
+                allowClear={false}
+                searchPlaceholder="Search status"
+              />
               <div className="mt-admin-form-actions">
                 <button className="primary-action" type="submit">Save school</button>
                 <button className="secondary-action" type="button" onClick={() => setSchoolFormOpen(false)}>Cancel</button>
@@ -842,10 +849,41 @@ function AdminDashboard({ db, update }) {
               <Field label="Email Address" type="email" value={teacherForm.email} onChange={email => setTeacherForm({ ...teacherForm, email })} required />
               <Field label="Temporary Password" type="password" value={teacherForm.temporaryPassword} onChange={temporaryPassword => setTeacherForm({ ...teacherForm, temporaryPassword })} required />
               <div className="form-grid">
-                <label className="field-label">Assign School<span className="input-without-icon"><select value={teacherForm.schoolId} onChange={event => setTeacherForm({ ...teacherForm, schoolId: event.target.value })} required><option value="">Select school</option>{schools.map(school => <option key={school.id} value={school.id}>{school.name}</option>)}</select></span></label>
-                <label className="field-label">Role<span className="input-without-icon"><select value={teacherForm.role} onChange={event => setTeacherForm({ ...teacherForm, role: event.target.value })} required><option>Teacher</option><option>School Admin</option></select></span></label>
+                <Select
+                  label="Assign School"
+                  value={teacherForm.schoolId}
+                  onChange={schoolId => setTeacherForm({ ...teacherForm, schoolId })}
+                  options={schools.map(school => ({ value: String(school.id), label: school.name }))}
+                  placeholder="Select school"
+                  searchPlaceholder="Search schools"
+                  required
+                  allowClear={false}
+                />
+                <Select
+                  label="Role"
+                  value={teacherForm.role}
+                  onChange={role => setTeacherForm({ ...teacherForm, role })}
+                  options={[
+                    { value: "Teacher", label: "Teacher" },
+                    { value: "School Admin", label: "School Admin" }
+                  ]}
+                  required
+                  allowClear={false}
+                  searchPlaceholder="Search roles"
+                />
               </div>
-              <label className="field-label">Status<span className="input-without-icon"><select value={teacherForm.status} onChange={event => setTeacherForm({ ...teacherForm, status: event.target.value })} required><option value="active">Active</option><option value="inactive">Inactive</option></select></span></label>
+              <Select
+                label="Status"
+                value={teacherForm.status}
+                onChange={status => setTeacherForm({ ...teacherForm, status })}
+                options={[
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" }
+                ]}
+                required
+                allowClear={false}
+                searchPlaceholder="Search status"
+              />
               <div className="mt-admin-form-actions">
                 <button className="primary-action" type="submit">Save Teacher</button>
                 <button className="secondary-action" type="button" onClick={() => setTeacherFormOpen(false)}>Cancel</button>
@@ -1299,30 +1337,6 @@ function StudentForm({ db, update, editingStudent, onCancelEdit, onSuccess, full
   );
 }
 
-function Leaderboard({ dashboard, range, setRange }) {
-  return (
-    <div className="mt-page-content leaderboard-page">
-      <PageHeading eyebrow="Competition" title="Leaderboard" />
-      <article className="section-panel mt-card">
-        <div className="section-heading inline-control">
-          <h2>Top point earners</h2>
-          <select
-            className="mt-input"
-            value={range}
-            onChange={event => setRange(event.target.value)}
-            aria-label="Leaderboard range"
-          >
-            <option value="week">This week</option>
-            <option value="month">This month</option>
-            <option value="all">All time</option>
-          </select>
-        </div>
-        <EarnersList earners={dashboard.leaderboard} />
-      </article>
-    </div>
-  );
-}
-
 function GameDashboard({ setToast }) {
   const audioRef = useRef(null);
   const [stage, setStage] = useState("select");
@@ -1499,9 +1513,15 @@ function GameDashboard({ setToast }) {
               <strong>Number of Teams</strong>
               <span>Choose between 1 and 5 teams.</span>
             </div>
-            <select value={teamCount} onChange={event => updateTeamCount(event.target.value)}>
-              {[1, 2, 3, 4, 5].map(count => <option key={count} value={count}>{count}</option>)}
-            </select>
+            <Select
+              aria-label="Number of teams"
+              className="team-count-select"
+              value={String(teamCount)}
+              onChange={updateTeamCount}
+              options={[1, 2, 3, 4, 5].map(count => ({ value: String(count), label: String(count) }))}
+              searchPlaceholder="Search"
+              allowClear={false}
+            />
           </div>
           <div className="team-input-list">
             {teams.slice(0, teamCount).map((team, index) => (
@@ -1714,11 +1734,16 @@ function QuestionModal({ question, timeLeft, timerRunning, startTimer, showAnswe
           {isTimeUp && !showAnswer && <strong className="time-up-label">Time is up</strong>}
         </div>
         <div className="controller-row">
-          <label>
+          <label className="award-team-field">
             Award Team
-            <select value={selectedTeamId} onChange={event => setSelectedTeamId(Number(event.target.value))}>
-              {teams.map(team => <option value={team.id} key={team.id}>{team.name}</option>)}
-            </select>
+            <Select
+              aria-label="Award team"
+              value={String(selectedTeamId)}
+              onChange={value => setSelectedTeamId(Number(value))}
+              options={teams.map(team => ({ value: String(team.id), label: team.name }))}
+              searchPlaceholder="Search teams"
+              allowClear={false}
+            />
           </label>
           <button className="timer-start-button" type="button" onClick={startTimer} disabled={timerRunning || isTimeUp}>
             <Play /> {timerHasStarted ? "Resume Timer" : "Start Timer"}
@@ -1768,19 +1793,33 @@ function StudentListFilters({ schools, schoolFilter, setSchoolFilter, search, se
           aria-label="Search students"
         />
       </label>
-      <select className="students-filter-select" value={schoolFilter} onChange={event => setSchoolFilter(event.target.value)} aria-label="Filter by school" title={(schools || []).find(s => String(s.id) === schoolFilter)?.name || "All schools"}>
-        <option value="all">All schools</option>
-        {(schools || []).map(school => (
-          <option key={school.id} value={String(school.id)}>{school.name}</option>
-        ))}
-      </select>
+      <Select
+        className="students-filter-select"
+        aria-label="Filter by school"
+        value={schoolFilter}
+        onChange={setSchoolFilter}
+        options={[
+          { value: "all", label: "All schools" },
+          ...(schools || []).map(school => ({ value: String(school.id), label: school.name }))
+        ]}
+        searchPlaceholder="Search schools"
+        allowClear={false}
+      />
       {showStatus && (
-        <select className="students-filter-select" value={status} onChange={event => setStatus(event.target.value)} aria-label="Filter by status">
-          <option value="all">All statuses</option>
-          <option value="on_track">On Track</option>
-          <option value="at_risk">At Risk</option>
-          <option value="inactive">Inactive</option>
-        </select>
+        <Select
+          className="students-filter-select"
+          aria-label="Filter by status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            { value: "all", label: "All statuses" },
+            { value: "on_track", label: "On Track" },
+            { value: "at_risk", label: "At Risk" },
+            { value: "inactive", label: "Inactive" }
+          ]}
+          searchPlaceholder="Search status"
+          allowClear={false}
+        />
       )}
     </div>
   );
@@ -1882,23 +1921,6 @@ function StudentProfile({ student, onClose, onEdit, onDelete }) {
         <button className="secondary-action" type="button" onClick={onClose}>Close</button>
       </div>
     </article>
-  );
-}
-
-function EarnersList({ earners }) {
-  if (!earners.length) {
-    return <EmptyState title="No points awarded yet" text="Award points from Rewards to build the class leaderboard." />;
-  }
-  return (
-    <ol className="earners-list">
-      {earners.map((student, index) => (
-        <li key={student.id}>
-          <span className={`rank ${index === 0 ? "top" : index === 1 ? "second" : index === 2 ? "third" : ""}`}>{index + 1}</span>
-          <strong>{student.first} {student.last}</strong>
-          <em className="mt-data-num">{formatPoints(student.totalEarned || 0)}</em>
-        </li>
-      ))}
-    </ol>
   );
 }
 

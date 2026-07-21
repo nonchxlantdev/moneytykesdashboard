@@ -70,9 +70,9 @@
 .page-chalk .class-selector {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 0;
   min-height: 36px;
-  padding: 0 12px 0 14px;
+  padding: 0;
   border-radius: 10px;
   background: color-mix(in srgb, var(--header-text) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--header-text) 22%, transparent);
@@ -80,69 +80,48 @@
   color: var(--header-text);
 }
 
-.page-chalk .class-selector-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--header-text);
-  white-space: nowrap;
+.page-chalk .class-selector-dd {
+  gap: 0;
+  min-width: 11rem;
 }
 
-.page-chalk .class-selector-field {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  min-width: 7.5rem;
-}
-
-.page-chalk .class-selector-field::after {
-  content: "";
-  position: absolute;
-  right: 2px;
-  top: 50%;
-  width: 6px;
-  height: 6px;
-  border-right: 1.5px solid var(--header-text);
-  border-bottom: 1.5px solid var(--header-text);
-  transform: translateY(-60%) rotate(45deg);
-  pointer-events: none;
-  opacity: 0.85;
-}
-
-.page-chalk .class-selector select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  display: block;
-  width: 100%;
-  margin: 0;
-  padding: 0 18px 0 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent !important;
-  background-color: transparent !important;
-  color: var(--header-text) !important;
-  font-size: 12px;
-  font-weight: 700;
-  font-family: inherit;
-  line-height: 1.2;
-  cursor: pointer;
-  outline: none;
-  box-shadow: none;
-  color-scheme: dark;
-}
-
-.page-chalk .class-selector select::-ms-expand {
+.page-chalk .class-selector-dd .mt-dd-label {
   display: none;
 }
 
-.page-chalk .class-selector.is-placeholder select {
-  opacity: 0.88;
+.page-chalk .class-selector-dd .mt-dd-trigger {
+  min-height: 34px;
+  padding: 0 10px 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--header-text);
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: none;
 }
 
-.page-chalk .class-selector select option {
+.page-chalk .class-selector-dd .mt-dd-trigger.is-open,
+.page-chalk .class-selector-dd .mt-dd-trigger:focus-visible {
+  box-shadow: none;
+  border: 0;
+}
+
+.page-chalk .class-selector-dd .mt-dd-trigger-text.is-placeholder,
+.page-chalk .class-selector.is-placeholder .mt-dd-trigger-text {
+  opacity: 0.88;
+  color: var(--header-text);
+  font-weight: 700;
+}
+
+.page-chalk .class-selector-dd .mt-dd-trigger-actions,
+.page-chalk .class-selector-dd .mt-dd-chevron {
+  color: var(--header-text);
+}
+
+.page-chalk .class-selector-dd .mt-dd-popover {
+  min-width: 14rem;
   color: var(--mt-ink, #1c2b2a);
-  background: #fff;
-  color-scheme: light;
 }
 
 .page-chalk .btn,
@@ -239,7 +218,12 @@
     width: 100%;
   }
 
-  .page-chalk .class-selector select {
+  .page-chalk .class-selector-dd,
+  .page-chalk .class-selector-dd .mt-dd-trigger {
+    width: 100%;
+  }
+
+  .page-chalk .class-selector-dd .mt-dd-trigger {
     min-height: 44px;
     font-size: 16px;
   }

@@ -782,7 +782,13 @@
   font-weight: 700;
 }
 
-.team-count-row select {
+.team-count-row .team-count-select,
+.team-count-row .mt-dd-search {
+  width: auto;
+  min-width: 5.5rem;
+}
+
+.team-count-row .mt-dd-trigger {
   min-height: 62px;
   padding: 0 24px;
   color: #fff;
@@ -791,6 +797,11 @@
   border-radius: 18px;
   font-size: 25px;
   font-weight: 900;
+}
+
+.team-count-row .mt-dd-trigger-text,
+.team-count-row .mt-dd-chevron {
+  color: #fff;
 }
 
 .team-input-list {
@@ -1759,7 +1770,17 @@
   font-size: 16px;
 }
 
-.controller-row select {
+.controller-row .award-team-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.controller-row .mt-dd-search {
+  width: 100%;
+}
+
+.controller-row .mt-dd-trigger {
   width: 100%;
   min-height: 58px;
   color: #fff;
@@ -1768,6 +1789,11 @@
   border-radius: 12px;
   font-size: 22px;
   font-weight: 900;
+}
+
+.controller-row .mt-dd-trigger-text,
+.controller-row .mt-dd-chevron {
+  color: #fff;
 }
 
 .controller-row button {
@@ -2031,8 +2057,12 @@
     grid-template-columns: 44px minmax(0, 1fr);
   }
 
-  .team-count-row select {
+  .team-count-row .team-count-select,
+  .team-count-row .mt-dd-search {
     grid-column: 1 / -1;
+  }
+
+  .team-count-row .mt-dd-trigger {
     min-height: 52px;
   }
 
@@ -3002,7 +3032,7 @@
   }
 
   .react-app .dashboard.game-view .controller-row button,
-  .react-app .dashboard.game-view .controller-row select,
+  .react-app .dashboard.game-view .controller-row .mt-dd-trigger,
   .react-app .dashboard.game-view .timer-start-button {
     min-height: 50px;
     font-size: 16px;

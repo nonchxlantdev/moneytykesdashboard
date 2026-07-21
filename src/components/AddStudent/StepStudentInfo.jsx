@@ -1,3 +1,5 @@
+import Select from "../ui/Select";
+
 const AVATAR_FILES = [
   "bullbasaur.png",
   "charmander.png",
@@ -13,6 +15,11 @@ const AVATAR_FILES = [
 function avatarSrc(fileName) {
   return `${import.meta.env.BASE_URL}avatars/${fileName}`;
 }
+
+const GENDER_OPTIONS = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" }
+];
 
 export default function StepStudentInfo({ data, update, error, isEditing = false }) {
   return (
@@ -51,18 +58,18 @@ export default function StepStudentInfo({ data, update, error, isEditing = false
             required={!isEditing}
           />
         </label>
-        <label className="wizard-field">
-          <span>Gender</span>
-          <select
+        <div className="wizard-field">
+          <Select
+            label="Gender"
             value={data.gender}
-            onChange={event => update({ gender: event.target.value })}
+            onChange={gender => update({ gender })}
+            options={GENDER_OPTIONS}
+            placeholder="Select gender"
+            searchPlaceholder="Search"
             required
-          >
-            <option value="" disabled>Select gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-          </select>
-        </label>
+            allowClear={false}
+          />
+        </div>
         <label className="wizard-field">
           <span>Age</span>
           <input

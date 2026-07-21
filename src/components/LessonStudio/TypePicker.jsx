@@ -1,6 +1,13 @@
-import { FileText, Play, Presentation } from "lucide-react";
+import { ClipboardList, FileText, Play, Presentation } from "lucide-react";
 
 const TYPES = [
+  {
+    id: "plan",
+    label: "Curriculum",
+    desc: "Build a text curriculum",
+    icon: ClipboardList,
+    tone: "plan"
+  },
   {
     id: "video",
     label: "Video Lesson",

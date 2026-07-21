@@ -38,6 +38,11 @@
   box-sizing: border-box;
 }
 
+/* Center welcome in the visible chalk zone (board extends under Events rail) */
+.react-app .dashboard-view .chalkboard-copy {
+  right: var(--mt-events-rail-width, 0px);
+}
+
 /* Keep clock + eraser in the visible chalk zone (not under Events) */
 .react-app .dashboard-view .chalkboard-clock {
   right: calc(var(--mt-events-rail-width) + 22px);

@@ -1,8 +1,15 @@
 import { Check } from "lucide-react";
 import FavoriteStarButton from "../LessonsLibrary/FavoriteStarButton";
+import Select from "../ui/Select";
 import ContentSourceField from "./ContentSourceField";
 import LessonPlanFields from "./LessonPlanFields";
 import TypePicker from "./TypePicker";
+
+const STATUS_OPTIONS = [
+  { value: "published", label: "Published" },
+  { value: "completed", label: "Completed" },
+  { value: "draft", label: "Inactive" }
+];
 
 export default function LessonForm({
   data,
@@ -31,16 +38,14 @@ export default function LessonForm({
         {isEditing ? (
           <div className="studio-edit-controls">
             <div className="studio-field">
-              <label htmlFor="studio-status">Lesson Status</label>
-              <select
-                id="studio-status"
+              <Select
+                label="Lesson Status"
                 value={data.status}
-                onChange={event => update({ status: event.target.value })}
-              >
-                <option value="published">Published</option>
-                <option value="completed">Completed</option>
-                <option value="draft">Inactive</option>
-              </select>
+                onChange={status => update({ status })}
+                options={STATUS_OPTIONS}
+                searchPlaceholder="Search status"
+                allowClear={false}
+              />
             </div>
             <FavoriteStarButton
               active={data.isFavorite}
@@ -64,18 +69,14 @@ export default function LessonForm({
         </div>
 
         <div className="studio-field">
-          <label htmlFor="studio-subject">Subject</label>
-          <select
-            id="studio-subject"
+          <Select
+            label="Subject"
             value={data.subject}
-            onChange={event => update({ subject: event.target.value })}
-          >
-            {subjectOptions.map(subject => (
-              <option key={subject} value={subject}>
-                {subject}
-              </option>
-            ))}
-          </select>
+            onChange={subject => update({ subject })}
+            options={subjectOptions.map(subject => ({ value: subject, label: subject }))}
+            searchPlaceholder="Search subjects"
+            allowClear={false}
+          />
         </div>
 
         <ContentSourceField
@@ -96,6 +97,7 @@ export default function LessonForm({
           }}
           onChange={update}
           errors={planErrors}
+          isPrimary={data.type === "plan"}
         />
 
         <div className="studio-field">

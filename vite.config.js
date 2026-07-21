@@ -5,6 +5,9 @@ import { resolve } from "node:path";
 
 export default defineConfig({
   base: "/moneytykesdashboard/",
+  resolve: {
+    dedupe: ["react", "react-dom"]
+  },
   plugins: [
     react(),
     {

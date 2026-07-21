@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, ClipboardCheck, Clock3, UserPlus, Users } from "lucide-react";
 import ClassSelector from "../shared/ClassSelector";
+import CoinSpinner from "../shared/CoinSpinner";
 import PageChalkBanner from "../shared/PageChalkBanner";
 import RosterEmptyState from "./RosterEmptyState";
 import RosterTable from "./RosterTable";
@@ -217,7 +218,8 @@ export default function StudentsDashboard({
           />
 
           {loading ? (
-            <div className="empty-box">
+            <div className="empty-box roster-loading">
+              <CoinSpinner size={48} label="Loading roster" />
               <div className="t">Loading roster…</div>
             </div>
           ) : !classFilter ? (

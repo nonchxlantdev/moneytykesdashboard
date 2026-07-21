@@ -327,6 +327,11 @@
   text-align: center;
 }
 
+.students-dash .empty-box.roster-loading {
+  gap: 14px;
+  padding: 48px 20px;
+}
+
 .students-dash .empty-box .t {
   font-size: 16px;
   font-weight: 700;

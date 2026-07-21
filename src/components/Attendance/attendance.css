@@ -111,6 +111,15 @@
   color: var(--mt-ink-muted, #8a9693);
 }
 
+.attendance-dash .filters-row .field > .mt-dd-search {
+  width: 100%;
+  min-width: 11rem;
+}
+
+.attendance-dash .filters-row .field > .mt-dd-search .mt-dd-trigger {
+  min-height: 40px;
+}
+
 .attendance-dash .select-wrap {
   position: relative;
   display: flex;

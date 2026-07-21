@@ -15,6 +15,7 @@ export const TEMP_SUBJECT_OPTIONS = [
   "Math",
   "English",
   "Literature",
+  "Belizean History",
   "History",
   "Science",
   "Geography",
@@ -24,6 +25,7 @@ export const TEMP_SUBJECT_OPTIONS = [
 
 export const CONTENT_TYPE_OPTIONS = [
   { value: "all", label: "All Types" },
+  { value: "plan", label: "Curriculum" },
   { value: "video", label: "Videos" },
   { value: "document", label: "Documents" },
   { value: "presentation", label: "Presentations" }

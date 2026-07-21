@@ -8,6 +8,7 @@
 
 const STORAGE_KEY = "moneytykes.teacher.dashboard.v3";
 const SEED_MARKER = "moneytykes.seed.demo.v5";
+const LESSONS_SEED_MARKER = "moneytykes.seed.lessons.curriculum.v5";
 const CALENDAR_KEY = "calendar_events";
 const REWARDS_BANK_KEY = "rewards_bank";
 const CREATED_LESSONS_KEY = "created_lessons";
@@ -197,6 +198,134 @@ function buildCreatedLessons(todayDate) {
   return [
     {
       id: 8001,
+      title: "Fraction Friends",
+      subject: "Math",
+      description: "Curriculum cards for introducing fractions with pizza slices.",
+      type: "plan",
+      status: "Published",
+      objective:
+        "Students will name unit fractions (1/2, 1/3, 1/4) and show each with a drawing.",
+      materials: "Paper “pizza” circles, scissors, fraction labels, markers",
+      activitySteps:
+        "<p><strong>Key idea:</strong> A fraction names <em>equal parts</em> of a whole.</p><ol><li>Show a whole pizza circle. Ask: “What does whole mean?”</li><li>Fold into <u>2 equal parts</u>. Label each part <strong>1/2</strong>.</li><li>Fold another into <strong>3</strong> equal parts → <strong>1/3</strong>.</li><li>Fold into <strong>4</strong> equal parts → <strong>1/4</strong>.</li></ol><p><strong>Talking point:</strong> 1/2 is larger than 1/4 because the pieces are bigger when there are fewer equal parts.</p>",
+      wrapUp:
+        "Exit ticket: Draw 1/2 and 1/4. Which piece is larger? Why?",
+      tags: "fractions, math",
+      isFavorite: true,
+      assignedCount: 24,
+      createdAt: iso(addDays(todayDate, -16))
+    },
+    {
+      id: 8002,
+      title: "Sentence Builders",
+      subject: "English",
+      description: "Curriculum cards for subject–verb–object sentences.",
+      type: "plan",
+      status: "Published",
+      objective:
+        "Students will write a complete sentence with a clear subject, verb, and object.",
+      materials: "Word cards (subjects, verbs, objects), mini whiteboards, markers",
+      activitySteps:
+        "<p><strong>Sentence pattern:</strong> <em>Who</em> + <em>did what</em> + <em>to what/whom</em>.</p><p>Example: <u>The dog</u> <strong>chased</strong> <u>the ball</u>.</p><ul><li><strong>Subject</strong> — who or what the sentence is about</li><li><strong>Verb</strong> — the action</li><li><strong>Object</strong> — who/what receives the action</li></ul><p>Build 3 sentences with word cards, then fix one run-on together on the board.</p>",
+      wrapUp:
+        "Share aloud. Class spots subject, verb, and object with three claps.",
+      tags: "grammar, sentences, english",
+      isFavorite: true,
+      assignedCount: 20,
+      createdAt: iso(addDays(todayDate, -14))
+    },
+    {
+      id: 8003,
+      title: "Battle of St. George's Caye",
+      subject: "Belizean History",
+      description: "Curriculum cards for the 1798 battle and why it is remembered.",
+      type: "plan",
+      status: "Published",
+      objective:
+        "Students will retell what happened at the Battle of St. George's Caye (1798) and why Belizeans remember it.",
+      materials: "Belize map, timeline strip, short reading excerpt, flag image",
+      activitySteps:
+        "<p><strong>When:</strong> <u>10 September 1798</u></p><p><strong>Where:</strong> St. George's Caye, off the coast of Belize</p><ol><li><strong>Baymen</strong> and their allies defended the settlement.</li><li>A <strong>Spanish fleet</strong> tried to take control of the area.</li><li>The defenders held their ground — the attack did not succeed.</li></ol><p><em>Why it matters:</em> Belizeans remember this as a story of courage, unity, and defending home. It is marked each year on <strong>St. George's Caye Day</strong>.</p>",
+      wrapUp:
+        "Two-sentence summary: What happened? Why does it matter to Belize?",
+      tags: "belize, history, st george's caye",
+      isFavorite: true,
+      assignedCount: 18,
+      createdAt: iso(addDays(todayDate, -12))
+    },
+    {
+      id: 8004,
+      title: "Anancy Story Circle",
+      subject: "Literature",
+      description: "Caribbean folktale curriculum for plot and moral.",
+      type: "plan",
+      status: "Published",
+      objective:
+        "Students will identify the trickster character, the problem, and the moral in an Anancy story.",
+      materials: "Printed Anancy tale (or oral telling), character name cards, moral stems",
+      activitySteps:
+        "<p><strong>Who is Anancy?</strong> A clever <em>spider trickster</em> in Caribbean folktales — smart, funny, and sometimes too crafty.</p><ul><li><strong>Character</strong> — Who is trying to get something?</li><li><strong>Problem</strong> — What goes wrong or what do they want?</li><li><strong>Trick</strong> — What clever (or sneaky) move happens?</li><li><strong>Moral</strong> — What lesson should listeners take away?</li></ul><p>After the story, act out the “clever moment” in pairs, then finish: <u>“The moral of this Anancy story is…”</u></p>",
+      wrapUp:
+        "Finish the stem: “The moral of this Anancy story is…”",
+      tags: "literature, anancy, folktale",
+      isFavorite: false,
+      assignedCount: 15,
+      createdAt: iso(addDays(todayDate, -11))
+    },
+    {
+      id: 8005,
+      title: "Needs vs Wants Discussion",
+      subject: "Financial Literacy",
+      description: "Guide students to sort everyday choices into needs and wants.",
+      type: "plan",
+      status: "Published",
+      objective:
+        "Students will explain the difference between a need and a want using real-life examples.",
+      materials: "Whiteboard, sticky notes, picture cards of everyday items",
+      activitySteps:
+        "1. Ask: What is something you need every day?\n2. Sort picture cards into Needs and Wants together.\n3. Debate 2 tricky items as a class (phone data, sneakers, lunch).\n4. Students write one need and one want they have this week.",
+      wrapUp: "Exit ticket: Name one need, one want, and why each matters.",
+      tags: "needs, wants, discussion",
+      isFavorite: false,
+      assignedCount: 22,
+      createdAt: iso(addDays(todayDate, -10))
+    },
+    {
+      id: 8006,
+      title: "Piggy Bank Goals",
+      subject: "Saving",
+      description: "Help students set a short savings goal and track progress.",
+      type: "plan",
+      status: "Published",
+      objective: "Students will set a simple savings goal and list steps to reach it.",
+      materials: "Goal worksheets, crayons, sample piggy bank or jar",
+      activitySteps:
+        "1. Share a teacher savings story (small goal).\n2. Students choose a goal under $20.\n3. Break the goal into weekly save amounts.\n4. Decorate a goal tracker to take home.",
+      wrapUp: "Pair share: What will you skip buying to save faster?",
+      tags: "saving, goals",
+      isFavorite: false,
+      assignedCount: 18,
+      createdAt: iso(addDays(todayDate, -9))
+    },
+    {
+      id: 8007,
+      title: "Classroom Store Role Play",
+      subject: "Money Basics",
+      description: "Run a mini classroom store using cash and change.",
+      type: "plan",
+      status: "Published",
+      objective: "Students will practice making change and comparing prices.",
+      materials: "Play money, price tags, classroom store items",
+      activitySteps:
+        "1. Set up a classroom store with 6–8 items.\n2. Give each student play money.\n3. Take turns shopping and making change.\n4. Discuss which purchases were needs vs wants.",
+      wrapUp: "Exit ticket: What is one tip for making change carefully?",
+      tags: "role play, change, needs",
+      isFavorite: false,
+      assignedCount: 16,
+      createdAt: iso(addDays(todayDate, -7))
+    },
+    {
+      id: 8008,
       title: "What is Money?",
       subject: "Money Basics",
       description: "A friendly intro to what money is and why we use it.",
@@ -209,30 +338,12 @@ function buildCreatedLessons(todayDate) {
       activitySteps: "Watch the clip, then discuss where we see money every day.",
       wrapUp: "Students name three uses of money.",
       tags: "money, beginner",
-      isFavorite: true,
+      isFavorite: false,
       assignedCount: 8,
       createdAt: iso(addDays(todayDate, -12))
     },
     {
-      id: 8002,
-      title: "Saving vs Spending",
-      subject: "Saving",
-      description: "Comparing choices between saving and spending.",
-      type: "video",
-      status: "Published",
-      youtubeUrl: "https://www.youtube.com/watch?v=DrQBO7Bun9c",
-      durationSeconds: 280,
-      objective: "Explain the difference between saving and spending.",
-      materials: "Piggy bank demo",
-      activitySteps: "Sort picture cards into 'save' and 'spend'.",
-      wrapUp: "Share one thing you'd save for.",
-      tags: "saving, choices",
-      isFavorite: false,
-      assignedCount: 18,
-      createdAt: iso(addDays(todayDate, -8))
-    },
-    {
-      id: 8003,
+      id: 8009,
       title: "Budgeting Basics Worksheet",
       subject: "Budgeting",
       description: "Printable worksheet to build a simple weekly budget.",
@@ -248,10 +359,10 @@ function buildCreatedLessons(todayDate) {
       tags: "budget, worksheet",
       isFavorite: false,
       assignedCount: 12,
-      createdAt: iso(addDays(todayDate, -5))
+      createdAt: iso(addDays(todayDate, -4))
     },
     {
-      id: 8004,
+      id: 8010,
       title: "Needs vs Wants (Slides)",
       subject: "Money Basics",
       description: "Slide deck sorting everyday items into needs and wants.",
@@ -265,27 +376,10 @@ function buildCreatedLessons(todayDate) {
       activitySteps: "Vote on each slide: need or want?",
       wrapUp: "List two needs and two wants.",
       tags: "needs, wants",
-      isFavorite: true,
-      assignedCount: 20,
-      createdAt: iso(addDays(todayDate, -3))
-    },
-    {
-      id: 8005,
-      title: "Earning Money (Draft)",
-      subject: "Earning",
-      description: "Ways kids can earn and the value of work.",
-      type: "video",
-      status: "Draft",
-      youtubeUrl: "https://www.youtube.com/watch?v=Ff4tXWKbFPk",
-      durationSeconds: 300,
-      objective: "Describe ways to earn money.",
-      materials: "",
-      activitySteps: "Brainstorm chores that could earn pocket money.",
-      wrapUp: "",
-      tags: "earning",
       isFavorite: false,
-      assignedCount: 0,
-      createdAt: iso(addDays(todayDate, -1))
+      assignedCount: 20,
+      createdAt: iso(addDays(todayDate, -3)),
+      completedAt: iso(addDays(todayDate, -2))
     }
   ];
 }
@@ -325,6 +419,35 @@ function looksLikeDemoRoster(existing) {
         || (student.first === "Imani" && student.last === "Chanda")
     )
   );
+}
+
+function isDemoLessonId(id) {
+  const numericId = Number(id);
+  return Number.isFinite(numericId) && numericId >= 8000 && numericId < 9000;
+}
+
+/**
+ * Replace seeded demo lessons (ids 8000–8999) with the latest curriculum pack.
+ * Keeps any teacher-created lessons outside that id range.
+ */
+function refreshDemoCurriculumLessons() {
+  if (localStorage.getItem(LESSONS_SEED_MARKER)) return;
+
+  try {
+    const existing = JSON.parse(localStorage.getItem(CREATED_LESSONS_KEY) || "[]");
+    const teacherLessons = Array.isArray(existing)
+      ? existing.filter(lesson => !isDemoLessonId(lesson?.id))
+      : [];
+    const demoLessons = buildCreatedLessons(new Date());
+    localStorage.setItem(CREATED_LESSONS_KEY, JSON.stringify([...demoLessons, ...teacherLessons]));
+  } catch {
+    // Ignore parse errors — leave teacher data alone.
+  }
+
+  ["v1", "v2", "v3", "v4"].forEach(version => {
+    localStorage.removeItem(`moneytykes.seed.lessons.curriculum.${version}`);
+  });
+  localStorage.setItem(LESSONS_SEED_MARKER, "1");
 }
 
 function syncDemoRoster(existing) {
@@ -378,9 +501,12 @@ function syncDemoRoster(existing) {
 /**
  * Seed demo data once. Safe no-op for real teacher data.
  * v4 resets the demo roster to exactly 8 students so counts match.
+ * Curriculum lessons refresh once for demo libraries (ids 8000–8999).
  */
 export function seedMockData() {
   try {
+    refreshDemoCurriculumLessons();
+
     if (localStorage.getItem(SEED_MARKER)) return;
 
     let existing = null;

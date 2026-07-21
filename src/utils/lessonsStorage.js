@@ -11,13 +11,14 @@ export function formatLessonStatus(status) {
 
 /**
  * Infer content type for type-aware library cards.
- * Existing studio lessons are video-first; document/presentation land when those flows ship.
  * @param {object} lesson
- * @returns {"video"|"document"|"presentation"}
+ * @returns {"video"|"document"|"presentation"|"plan"}
  */
 export function resolveLessonType(lesson) {
   const raw = String(lesson?.type || lesson?.contentType || "").toLowerCase();
-  if (raw === "video" || raw === "document" || raw === "presentation") return raw;
+  if (raw === "video" || raw === "document" || raw === "presentation" || raw === "plan") {
+    return raw;
+  }
   if (lesson?.slideCount != null || lesson?.fileFormat === "PPT" || lesson?.fileFormat === "PPTX") {
     return "presentation";
   }

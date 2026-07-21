@@ -69,8 +69,18 @@
   box-shadow: 0 8px 20px rgba(28, 43, 42, 0.04);
 }
 
-.lessons-lib .ll-field select,
+.lessons-lib .ll-field .mt-dd-search,
 .lessons-lib .ll-search {
+  min-height: 38px;
+  box-sizing: border-box;
+}
+
+.lessons-lib .ll-field {
+  min-width: 140px;
+  flex: 0 1 180px;
+}
+
+.lessons-lib .ll-field .mt-dd-trigger {
   min-height: 38px;
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--icon-accent) 18%, transparent);
@@ -78,13 +88,6 @@
   color: var(--mt-ink, #1c2b2a);
   font-size: 13px;
   font-weight: 600;
-  box-sizing: border-box;
-}
-
-.lessons-lib .ll-field select {
-  min-width: 140px;
-  padding: 0 12px;
-  cursor: pointer;
 }
 
 .lessons-lib .ll-search {
@@ -265,6 +268,11 @@
   color: color-mix(in srgb, var(--gold-accent) 40%, #5a3718);
 }
 
+.cm-icon.plan {
+  background: color-mix(in srgb, #0aabb5 16%, transparent);
+  color: #0a8a92;
+}
+
 .cm-item strong {
   display: block;
   font-size: 13px;
@@ -443,6 +451,10 @@
 
 .lr-thumb.slides-thumb {
   background: color-mix(in srgb, var(--gold-accent) 18%, #fff);
+}
+
+.lr-thumb.plan-thumb {
+  background: color-mix(in srgb, #0aabb5 12%, #fff);
 }
 
 .yt-play.sm {
@@ -708,6 +720,10 @@
   background: color-mix(in srgb, var(--gold-accent) 18%, #fff);
 }
 
+.plan-thumb {
+  background: color-mix(in srgb, #0aabb5 12%, #fff);
+}
+
 .yt-play {
   position: relative;
   z-index: 1;
@@ -737,6 +753,11 @@
 .file-icon.slides {
   background: color-mix(in srgb, var(--gold-accent) 30%, transparent);
   color: color-mix(in srgb, var(--gold-accent) 40%, #5a3718);
+}
+
+.file-icon.plan {
+  background: color-mix(in srgb, #0aabb5 16%, transparent);
+  color: #0a8a92;
 }
 
 .lc-type-badge,
@@ -771,6 +792,10 @@
   color: color-mix(in srgb, var(--gold-accent) 35%, #5a3718);
 }
 
+.lc-type-badge.plan {
+  color: #0a8a92;
+}
+
 .lc-duration,
 .lc-filetype {
   right: 10px;
@@ -785,7 +810,8 @@
 }
 
 .doc-thumb .lc-filetype,
-.slides-thumb .lc-filetype {
+.slides-thumb .lc-filetype,
+.plan-thumb .lc-filetype {
   background: rgba(28, 43, 42, 0.78);
 }
 
@@ -1007,7 +1033,7 @@
   }
 
   /* Prevent iOS zoom-on-focus */
-  .lessons-lib .ll-field select,
+  .lessons-lib .ll-field .mt-dd-trigger,
   .lessons-lib .ll-search input {
     font-size: 16px;
   }

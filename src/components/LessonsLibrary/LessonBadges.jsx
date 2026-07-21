@@ -21,8 +21,24 @@ export function StatusBadge({ status, label }) {
 
 export function TypeBadge({ type }) {
   const tone =
-    type === "video" ? "rose" : type === "document" ? "info" : type === "presentation" ? "warning" : "default";
+    type === "video"
+      ? "rose"
+      : type === "document"
+        ? "info"
+        : type === "presentation"
+          ? "warning"
+          : type === "plan"
+            ? "teal"
+            : "default";
   const label =
-    type === "video" ? "Video" : type === "document" ? "Document" : type === "presentation" ? "Slides" : type;
+    type === "video"
+      ? "Video"
+      : type === "document"
+        ? "Document"
+        : type === "presentation"
+          ? "Slides"
+          : type === "plan"
+            ? "Curriculum"
+            : type;
   return <Badge tone={tone}>{label}</Badge>;
 }

@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import Select from "../ui/Select";
 import { CONTENT_TYPE_OPTIONS } from "./useLessonsLibrary";
 import { CreateLessonDropdown, TemplatesButton } from "./CreateLessonControls";
 
@@ -15,36 +16,33 @@ export default function LessonsToolbar({
 }) {
   return (
     <div className="lessons-toolbar-card">
-      <label className="ll-field">
-        <span className="sr-only">Subject</span>
-        <select
-          value={subject}
-          onChange={event => onSubjectChange(event.target.value)}
+      <div className="ll-field">
+        <Select
           aria-label="Filter by subject"
-        >
-          <option value="All Subjects">All Subjects</option>
-          {subjectOptions.map(option => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </label>
+          value={subject}
+          onChange={onSubjectChange}
+          options={[
+            { value: "All Subjects", label: "All Subjects" },
+            ...subjectOptions.map(option => ({ value: option, label: option }))
+          ]}
+          searchPlaceholder="Search subjects"
+          allowClear={false}
+        />
+      </div>
 
-      <label className="ll-field">
-        <span className="sr-only">Content type</span>
-        <select
-          value={contentType}
-          onChange={event => onContentTypeChange(event.target.value)}
+      <div className="ll-field">
+        <Select
           aria-label="Filter by content type"
-        >
-          {CONTENT_TYPE_OPTIONS.map(option => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </label>
+          value={contentType}
+          onChange={onContentTypeChange}
+          options={CONTENT_TYPE_OPTIONS.map(option => ({
+            value: option.value,
+            label: option.label
+          }))}
+          searchPlaceholder="Search types"
+          allowClear={false}
+        />
+      </div>
 
       <label className="ll-search">
         <Search size={15} aria-hidden="true" />

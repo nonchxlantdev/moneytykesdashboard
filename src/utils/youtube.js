@@ -61,11 +61,16 @@ export async function fetchYoutubeOEmbed(url) {
 }
 
 /**
- * Basic markdown-like formatting for lesson descriptions.
+ * Format lesson text for display. Rich Notes may already be HTML.
  * @param {string} text
  */
 export function formatLessonText(text) {
   if (!text) return "";
+  if (/<[a-z][\s\S]*>/i.test(text)) {
+    return String(text)
+      .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+      .replace(/\son\w+=(["']).*?\1/gi, "");
+  }
   return text
     .split("\n")
     .map(line => {

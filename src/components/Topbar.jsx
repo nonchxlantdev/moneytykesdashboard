@@ -11,7 +11,7 @@ const PAGE_TITLES = {
   attendance: "Attendance",
   calendar: "Calendar",
   rewards: "Rewards",
-  leaderboard: "Leaderboard",
+  quizzes: "Quizzes & Tests",
   game: "Money Moves Live"
 };
 

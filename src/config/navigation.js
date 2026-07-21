@@ -4,7 +4,6 @@ import {
   IconCalendar,
   IconClipboardList,
   IconLayoutDashboard,
-  IconMedal,
   IconShield,
   IconSun,
   IconTrophy,
@@ -25,17 +24,22 @@ export const navSections = [
     items: [
       { id: "dashboard", label: "Dashboard", view: "dashboard", icon: IconLayoutDashboard },
       { id: "my-day", label: "My Day", view: "my-day", icon: IconSun },
-      { id: "calendar", label: "Calendar", view: "calendar", icon: IconCalendar },
-      { id: "students", label: "Students", view: "students", icon: IconUsers },
-      { id: "lessons", label: "Lessons", view: "lessons", icon: IconBook },
-      { id: "quiz-test", label: "Quiz/Test", view: "quiz-test", icon: IconClipboardList },
-      { id: "rewards", label: "Rewards", view: "rewards", icon: IconTrophy }
+      { id: "calendar", label: "Calendar", view: "calendar", icon: IconCalendar }
     ]
   },
   {
     label: "Classroom",
     items: [
-      { id: "leaderboard", label: "Leaderboard", view: "leaderboard", icon: IconMedal },
+      { id: "students", label: "Students", view: "students", icon: IconUsers },
+      { id: "lessons", label: "Lessons", view: "lessons", icon: IconBook },
+      {
+        id: "quizzes",
+        label: "Quizzes & Tests",
+        view: "quizzes",
+        icon: IconClipboardList,
+        badge: { text: "Soon", variant: "soon" }
+      },
+      { id: "rewards", label: "Rewards", view: "rewards", icon: IconTrophy },
       { id: "game", label: "Game", view: "game", icon: IconCalculator }
     ]
   },

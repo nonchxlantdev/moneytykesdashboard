@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import Select from "../ui/Select";
 
 export default function AttendanceFilters({
   mode,
@@ -19,26 +19,24 @@ export default function AttendanceFilters({
   recordExists,
   onEdit
 }) {
+  const classOptions = classes.map(item => ({
+    value: item.id,
+    label: item.name
+  }));
+
   if (mode === "report") {
     return (
       <div className="filters-row">
         <div className="field">
-          <label htmlFor="att-report-class">Class</label>
-          <div className="select-wrap">
-            <select
-              id="att-report-class"
-              value={reportClassId}
-              onChange={event => onReportClassChange(event.target.value)}
-            >
-              <option value="">Select class</option>
-              {classes.map(item => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown size={16} aria-hidden="true" />
-          </div>
+          <Select
+            label="Class"
+            value={reportClassId}
+            onChange={onReportClassChange}
+            options={classOptions}
+            placeholder="Select class"
+            searchPlaceholder="Search classes"
+            allowClear={false}
+          />
         </div>
         <div className="field">
           <label htmlFor="att-report-start">From</label>
@@ -84,22 +82,15 @@ export default function AttendanceFilters({
   return (
     <div className="filters-row">
       <div className="field">
-        <label htmlFor="att-take-class">Class</label>
-        <div className="select-wrap">
-          <select
-            id="att-take-class"
-            value={classId}
-            onChange={event => onClassChange(event.target.value)}
-          >
-            <option value="">Select class</option>
-            {classes.map(item => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
-          <ChevronDown size={16} aria-hidden="true" />
-        </div>
+        <Select
+          label="Class"
+          value={classId}
+          onChange={onClassChange}
+          options={classOptions}
+          placeholder="Select class"
+          searchPlaceholder="Search classes"
+          allowClear={false}
+        />
       </div>
       <div className="field">
         <label htmlFor="att-take-date">Date</label>

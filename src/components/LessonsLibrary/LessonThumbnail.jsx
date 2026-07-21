@@ -1,4 +1,4 @@
-import { FileText, Play, Presentation } from "lucide-react";
+import { ClipboardList, FileText, Play, Presentation } from "lucide-react";
 
 function formatDuration(seconds) {
   if (seconds == null || !Number.isFinite(Number(seconds))) return null;
@@ -33,6 +33,16 @@ export default function LessonThumbnail({ lesson }) {
           <span className="lc-filetype">
             {lesson.slideCount != null ? `${lesson.slideCount} slides` : "Presentation"}
           </span>
+        </div>
+      );
+    case "plan":
+      return (
+        <div className="lc-thumb plan-thumb">
+          <div className="file-icon plan" aria-hidden="true">
+            <ClipboardList size={28} />
+          </div>
+          <span className="lc-type-badge plan">Curriculum</span>
+          <span className="lc-filetype">Curriculum</span>
         </div>
       );
     case "video":

@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, FileText, Presentation, Plus, Play } from "lucide-react";
+import { ChevronDown, ClipboardList, FileText, Presentation, Plus, Play } from "lucide-react";
 
 const OPTIONS = [
+  {
+    type: "plan",
+    label: "Curriculum",
+    desc: "Build a text curriculum",
+    icon: ClipboardList
+  },
   {
     type: "video",
     label: "Video Lesson",

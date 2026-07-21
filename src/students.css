@@ -694,13 +694,16 @@
   margin-bottom: 0;
 }
 
-.students-filter-bar .student-tools select,
+.students-filter-bar .student-tools .mt-dd-search.students-filter-select,
 .students-filter-bar .students-filter-select {
   width: 100%;
   min-width: 0;
   max-width: 100%;
+}
+
+.students-filter-bar .students-filter-select .mt-dd-trigger {
   min-height: 40px;
-  padding: 0 28px 0 12px;
+  padding: 0 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -709,10 +712,6 @@
   border: 1px solid var(--border-subtle, var(--line));
   border-radius: 10px;
   font-size: 13px;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
   cursor: pointer;
 }
 

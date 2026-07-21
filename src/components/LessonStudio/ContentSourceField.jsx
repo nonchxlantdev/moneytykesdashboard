@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { FileUp, Play } from "lucide-react";
+import CoinSpinner from "../shared/CoinSpinner";
 
 function StudioDropzone({ hint, accept, onFileSelected, fileName, isStoring }) {
   const inputRef = useRef(null);
@@ -49,6 +50,7 @@ function StudioDropzone({ hint, accept, onFileSelected, fileName, isStoring }) {
       <FileUp size={22} aria-hidden="true" />
       <strong>{isStoring ? "Saving file locally…" : fileName || "Choose a file"}</strong>
       <span>{isStoring ? "Keep this page open until saving finishes." : hint}</span>
+      {isStoring ? <CoinSpinner size={28} label="Saving file" className="studio-dropzone-coin" /> : null}
     </div>
   );
 }
@@ -61,6 +63,10 @@ export default function ContentSourceField({
   fileName,
   isStoring = false
 }) {
+  if (type === "plan") {
+    return null;
+  }
+
   if (type === "video") {
     return (
       <div className="studio-field">

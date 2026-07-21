@@ -1,3 +1,5 @@
+import Select from "../ui/Select";
+
 const STANDARDS = ["N/A", "Standard 1", "Standard 2", "Standard 3", "Standard 4", "Standard 5", "Standard 6"];
 const FORMS = ["N/A", "Form 1", "Form 2", "Form 3", "Form 4", "Form 5"];
 
@@ -12,70 +14,66 @@ export default function StepSchoolInfo({ data, update, schools, teachers, naviga
       <p className="wizard-step-lead">Where this student learns and who guides them.</p>
 
       <div className="wizard-grid two">
-        <label className="wizard-field">
-          <span>Standard</span>
-          <select
+        <div className="wizard-field">
+          <Select
+            label="Standard"
             value={data.standard || "N/A"}
-            onChange={event => {
-              const value = event.target.value === "N/A" ? "" : event.target.value;
+            onChange={raw => {
+              const value = raw === "N/A" ? "" : raw;
               update({ standard: value, form: value ? "" : data.form });
             }}
-          >
-            {STANDARDS.map(option => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="wizard-field">
-          <span>Form</span>
-          <select
+            options={STANDARDS.map(option => ({ value: option, label: option }))}
+            searchPlaceholder="Search standards"
+            allowClear={false}
+          />
+        </div>
+        <div className="wizard-field">
+          <Select
+            label="Form"
             value={data.form || "N/A"}
-            onChange={event => {
-              const value = event.target.value === "N/A" ? "" : event.target.value;
+            onChange={raw => {
+              const value = raw === "N/A" ? "" : raw;
               update({ form: value, standard: value ? "" : data.standard });
             }}
-          >
-            {FORMS.map(option => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </label>
+            options={FORMS.map(option => ({ value: option, label: option }))}
+            searchPlaceholder="Search forms"
+            allowClear={false}
+          />
+        </div>
       </div>
 
       <div className="wizard-grid two">
-        <label className="wizard-field">
-          <span>School</span>
-          <select
-            value={data.schoolId}
-            onChange={event => update({ schoolId: event.target.value, teacherId: "" })}
-          >
-            <option value="">Select school</option>
-            {schools.map(school => (
-              <option key={school.id} value={String(school.id)}>
-                {school.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="wizard-field">
-          <span>Teacher</span>
-          <select
-            value={data.teacherId}
-            onChange={event => update({ teacherId: event.target.value })}
+        <div className="wizard-field">
+          <Select
+            label="School"
+            value={data.schoolId ? String(data.schoolId) : ""}
+            onChange={schoolId => update({ schoolId, teacherId: "" })}
+            options={schools.map(school => ({
+              value: String(school.id),
+              label: school.name
+            }))}
+            placeholder="Select school"
+            searchPlaceholder="Search schools"
+            required
+            allowClear={false}
+          />
+        </div>
+        <div className="wizard-field">
+          <Select
+            label="Teacher"
+            value={data.teacherId ? String(data.teacherId) : ""}
+            onChange={teacherId => update({ teacherId })}
+            options={schoolTeachers.map(teacher => ({
+              value: String(teacher.id),
+              label: `${teacher.firstName} ${teacher.lastName}`
+            }))}
+            placeholder={data.schoolId ? "Select teacher" : "Select a school first"}
+            searchPlaceholder="Search teachers"
             disabled={!data.schoolId}
-          >
-            <option value="">{data.schoolId ? "Select teacher" : "Select a school first"}</option>
-            {schoolTeachers.map(teacher => (
-              <option key={teacher.id} value={String(teacher.id)}>
-                {teacher.firstName} {teacher.lastName}
-              </option>
-            ))}
-          </select>
-        </label>
+            required
+            allowClear={false}
+          />
+        </div>
       </div>
 
       <p className="wizard-inline-note">

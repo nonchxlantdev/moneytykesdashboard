@@ -11,9 +11,10 @@ import { storeLessonFile } from "../../utils/lessonFileStorage";
 import { fetchYoutubeOEmbed, isValidYoutubeUrl, youtubeThumbnail } from "../../utils/youtube";
 import { TEMP_SUBJECT_OPTIONS } from "../LessonsLibrary/useLessonsLibrary";
 import { validateLessonPlan } from "./LessonPlanFields";
+import { isBlankRichText } from "./NotesRichEditor";
 
 const EMPTY_FORM = {
-  type: "video",
+  type: "plan",
   title: "",
   subject: "Financial Literacy",
   status: "draft",
@@ -146,7 +147,7 @@ export default function useLessonStudioForm() {
       subject: data.subject || "General",
       description:
         data.objective.trim() ||
-        "Your lesson plan or description will appear here as you type.",
+        "Your curriculum or description will appear here as you type.",
       status: data.status,
       statusLabel,
       isFavorite: data.isFavorite,
@@ -182,7 +183,7 @@ export default function useLessonStudioForm() {
       const createType = sessionStorage.getItem(LESSON_CREATE_TYPE_KEY);
       if (createType) {
         sessionStorage.removeItem(LESSON_CREATE_TYPE_KEY);
-        if (createType === "video" || createType === "document" || createType === "presentation") {
+        if (createType === "video" || createType === "document" || createType === "presentation" || createType === "plan") {
           setData(current => ({ ...EMPTY_FORM, type: createType, subject: current.subject }));
         }
       }
@@ -251,6 +252,10 @@ export default function useLessonStudioForm() {
   }
 
   async function setSourceValue(value) {
+    if (data.type === "plan") {
+      return;
+    }
+
     if (data.type === "video") {
       update({ sourceValue: value });
       return;
@@ -351,7 +356,7 @@ export default function useLessonStudioForm() {
       return { ok: false, error: "Please wait for the file to finish saving." };
     }
 
-    if (requiresCompleteLesson) {
+    if (requiresCompleteLesson && data.type !== "plan") {
       const errors = validateForPublish();
       if (Object.keys(errors).length > 0) {
         return { ok: false, error: "Complete the lesson plan before publishing.", planErrors: errors };
@@ -374,7 +379,7 @@ export default function useLessonStudioForm() {
     const lessonPlan = {
       objective: data.objective.trim(),
       materials: data.materials.trim(),
-      activitySteps: data.activitySteps.trim(),
+      activitySteps: isBlankRichText(data.activitySteps) ? "" : String(data.activitySteps).trim(),
       wrapUp: data.wrapUp.trim()
     };
 
@@ -412,7 +417,7 @@ export default function useLessonStudioForm() {
           : null,
       fileSize:
         data.type === "document" || data.type === "presentation" ? data.fileSize : null,
-      sourceValue: data.sourceValue
+      sourceValue: data.type === "plan" ? "" : data.sourceValue
     };
 
     if (editingId != null) {
