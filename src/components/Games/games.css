@@ -1,0 +1,638 @@
+/* Games library, start/teams panels, and viewport-fit board sizing.
+   Board art, colors, and scoring/timer behavior stay unchanged. */
+
+/* Flush chalk header to the top edge (same as Lessons / Rewards / Quizzes) */
+.react-app .dashboard.game-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding-top: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.react-app .game-view .topbar {
+  display: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+}
+
+.react-app .game-view .page-swap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  padding: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  width: 100% !important;
+  overflow: hidden;
+}
+
+.game-page-main,
+.games-page-main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.games-library {
+  background: var(--right-panel-bg, #f5f7fb);
+  overflow: hidden;
+}
+
+.games-library > .page-chalk {
+  flex: 0 0 auto;
+  width: 100%;
+  margin: 0;
+}
+
+.games-library-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 22px 28px 32px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0;
+  justify-content: start;
+  justify-items: stretch;
+  align-self: flex-start;
+}
+
+.game-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid var(--card-border, #e1e6f0);
+  border-radius: 16px;
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  color: var(--mt-ink, #10162f);
+  font: inherit;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.game-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.game-card:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--gold-accent, #ffc928) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.game-card.coming-soon {
+  cursor: default;
+  border-style: dashed;
+  background: var(--cream, #f7f4ee);
+}
+
+.game-card.coming-soon:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.game-card-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--gold-accent, #ffc928) 22%, #fff);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.game-card-icon.muted {
+  background: color-mix(in srgb, var(--mt-ink-muted, #8a9693) 12%, #fff);
+  opacity: 0.85;
+}
+
+.game-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.game-card p {
+  margin: 0;
+  color: var(--mt-ink-muted, #5f6f6c);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.game-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  color: color-mix(in srgb, var(--navy, #10162f) 85%, #000);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.game-card-cta.muted {
+  color: var(--mt-ink-muted, #8a9693);
+  font-weight: 700;
+}
+
+/* Start + Enter Teams panels */
+.game-step {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 18px 18px 24px;
+}
+
+.game-step.active {
+  display: flex;
+}
+
+.game-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, var(--navy, #10162f), #1c2f52 55%, #2a1f3d);
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--gold-accent, #ffc928) 35%, transparent);
+  color: #fff;
+  overflow: hidden;
+}
+
+.game-panel-center {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: clamp(20px, 4vw, 40px);
+  text-align: center;
+  overflow: auto;
+}
+
+.game-panel-center img {
+  width: min(280px, 72vw);
+  align-self: center;
+}
+
+.team-setup-heading {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: center;
+}
+
+.game-panel h2 {
+  max-width: 18ch;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.05;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.game-panel-lead {
+  margin: 0;
+  max-width: 36rem;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  font-weight: 650;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.game-panel .eyebrow,
+.game-panel .game-kicker {
+  color: color-mix(in srgb, var(--gold-accent, #ffc928) 88%, #fff);
+}
+
+.game-start-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 22px;
+  color: #4a3a12;
+  background: var(--gold-accent, #ffc928);
+  border: 0;
+  border-radius: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--gold-accent, #ffc928) 28%, transparent);
+  cursor: pointer;
+}
+
+.game-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.game-kicker::before,
+.game-kicker::after {
+  display: block;
+  width: min(88px, 18vw);
+  height: 2px;
+  content: "";
+  background: linear-gradient(90deg, transparent, var(--gold-accent, #ffc928));
+}
+
+.game-kicker::after {
+  background: linear-gradient(90deg, var(--gold-accent, #ffc928), transparent);
+}
+
+.game-kicker svg {
+  color: var(--gold-accent, #ffc928);
+}
+
+.team-form {
+  width: min(720px, 100%);
+  min-width: 0;
+  display: grid;
+  gap: 0;
+  padding: 22px 24px;
+  background: color-mix(in srgb, #10162f 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold-accent, #ffc928) 28%, rgba(255, 255, 255, 0.2));
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.28);
+  text-align: left;
+}
+
+.team-count-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 180px);
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.team-count-row strong {
+  display: block;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+}
+
+.team-count-row > div > span {
+  display: block;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.team-count-row .mt-dd-trigger {
+  min-height: 48px;
+  color: #fff;
+  background: rgba(5, 13, 40, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 850;
+}
+
+.team-count-row .mt-dd-trigger-text,
+.team-count-row .mt-dd-chevron {
+  color: #fff;
+}
+
+.team-input-list {
+  display: grid;
+  gap: 12px;
+  padding-top: 18px;
+}
+
+.team-name-row {
+  display: grid;
+  grid-template-columns: 42px 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.team-number {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: var(--gold-accent, #ffc928);
+  background: color-mix(in srgb, var(--gold-accent, #ffc928) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold-accent, #ffc928) 28%, transparent);
+  border-radius: 10px;
+  font-weight: 900;
+}
+
+.team-name-row > svg {
+  color: var(--gold-accent, #ffc928);
+  justify-self: center;
+}
+
+.team-name-row input {
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  box-sizing: border-box;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.team-name-row input::placeholder {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.team-note {
+  margin: 16px 0 14px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.team-open-board {
+  width: 100%;
+  min-height: 56px;
+  font-size: 1.05rem;
+}
+
+/* Board screen — flex fit only (no color/icon/logic changes) */
+.money-moves-live.game-page-main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 12px 12px 16px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.money-moves-live .money-live-header,
+.money-moves-live .game-toolbar {
+  flex: 0 0 auto;
+}
+
+.money-moves-live .money-live-layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(150px, 14vw, 190px);
+  gap: 12px;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.money-moves-live .money-board-zone {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.money-moves-live .live-board.game-board {
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  overflow: hidden;
+  align-content: stretch;
+}
+
+.money-moves-live .live-board .game-column {
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto repeat(5, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.money-moves-live .live-board .game-column header {
+  min-height: 0;
+  height: auto;
+}
+
+.money-moves-live .live-board .money-tile {
+  min-height: 0;
+  height: 100%;
+  font-size: clamp(13px, 1.6vw, 28px);
+}
+
+.money-moves-live .game-rules-panel {
+  min-height: 0;
+  overflow: auto;
+}
+
+.money-moves-live .money-live-footer {
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .game-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .money-moves-live .money-live-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .money-moves-live .game-rules-panel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 160px;
+  }
+}
+
+@media (max-width: 640px) {
+  .game-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .games-library-body {
+    padding: 16px 12px 96px;
+  }
+
+  .team-count-row {
+    grid-template-columns: 1fr;
+  }
+
+  .team-count-row .mt-dd-search,
+  .team-count-row .team-count-select {
+    grid-column: 1 / -1;
+  }
+
+  .money-moves-live .game-rules-panel {
+    grid-template-columns: 1fr;
+    max-height: 140px;
+  }
+
+  .money-moves-live .money-live-footer {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet portrait — iPad / Android (768–1024 CSS px) */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  .games-library-body {
+    padding: 18px 20px 28px;
+  }
+
+  .game-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: none;
+  }
+
+  .game-step {
+    padding: 14px 14px 18px;
+  }
+
+  .game-panel-center {
+    padding: clamp(18px, 3vw, 28px);
+    gap: 14px;
+  }
+
+  .game-panel h2 {
+    font-size: clamp(1.6rem, 4.2vw, 2.4rem);
+  }
+
+  .team-form {
+    width: min(640px, 100%);
+  }
+
+  .team-count-row {
+    grid-template-columns: minmax(0, 1fr) minmax(110px, 160px);
+  }
+
+  .money-moves-live.game-page-main {
+    padding: 10px 10px 12px;
+  }
+
+  .money-moves-live .money-live-layout {
+    grid-template-columns: minmax(0, 1fr) clamp(140px, 18vw, 180px);
+    gap: 10px;
+  }
+
+  .money-moves-live .live-board.game-board {
+    gap: 5px;
+  }
+
+  .money-moves-live .live-board .money-tile {
+    font-size: clamp(12px, 1.8vw, 22px);
+  }
+}
+
+/* Tablet landscape — iPad / Android (1024–1366 CSS px, short height) */
+@media (min-width: 1024px) and (max-width: 1366px) and (max-height: 1024px) {
+  .game-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .game-step {
+    padding: 12px 14px 16px;
+  }
+
+  .game-panel-center {
+    justify-content: center;
+    padding: clamp(16px, 2.5vw, 28px);
+    gap: 12px;
+  }
+
+  .game-panel h2 {
+    font-size: clamp(1.5rem, 3.2vw, 2.35rem);
+  }
+
+  .game-panel-center img {
+    width: min(200px, 28vw);
+  }
+
+  .money-moves-live.game-page-main {
+    padding: 8px 10px 10px;
+  }
+
+  .money-moves-live .money-live-layout {
+    grid-template-columns: minmax(0, 1fr) clamp(150px, 16vw, 200px);
+    gap: 8px;
+  }
+
+  .money-moves-live .live-board.game-board {
+    gap: 4px;
+  }
+
+  .money-moves-live .live-board .game-column {
+    gap: 4px;
+  }
+
+  .money-moves-live .live-board .money-tile {
+    font-size: clamp(11px, 1.35vw, 22px);
+  }
+
+  .money-moves-live .game-rules-panel {
+    font-size: 0.85rem;
+  }
+}
+
+/* Touch targets on coarse pointers (iPad / Android tablets) */
+@media (hover: none) and (pointer: coarse) {
+  .game-card {
+    min-height: 160px;
+    padding: 24px 18px;
+  }
+
+  .game-start-button,
+  .team-open-board {
+    min-height: 52px;
+  }
+
+  .team-name-row input,
+  .team-count-row .mt-dd-trigger {
+    min-height: 48px;
+  }
+
+  .money-moves-live .live-board .money-tile {
+    touch-action: manipulation;
+  }
+}

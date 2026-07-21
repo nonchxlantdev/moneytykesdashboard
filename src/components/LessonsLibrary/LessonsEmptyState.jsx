@@ -7,7 +7,7 @@ export default function LessonsEmptyState() {
       <Library className="empty-icon" size={28} strokeWidth={1.75} aria-hidden="true" />
       <EmptyBox
         title="No lessons in your library yet"
-        description="Videos, documents, and presentations you add will appear here."
+        description="Class lessons, videos, and presentations you add will appear here."
       />
     </div>
   );

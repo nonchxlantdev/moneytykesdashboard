@@ -40,7 +40,7 @@ export const navSections = [
         badge: { text: "Soon", variant: "soon" }
       },
       { id: "rewards", label: "Rewards", view: "rewards", icon: IconTrophy },
-      { id: "game", label: "Game", view: "game", icon: IconCalculator }
+      { id: "game", label: "Games", view: "game", icon: IconCalculator }
     ]
   },
   {

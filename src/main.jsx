@@ -7,7 +7,6 @@ import {
   Calculator,
   CalendarDays,
   Camera,
-  Check,
   ChevronRight,
   ChevronLeft,
   ClipboardCheck,
@@ -70,7 +69,11 @@ import "./components/ui/shell-components.css";
 import DashboardPage from "./pages/DashboardPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import QuizzesPage from "./pages/QuizzesPage";
-import PersonalizationSettings from "./components/admin/PersonalizationSettings";
+import GamesLibrary from "./components/Games/GamesLibrary";
+import "./components/Games/games.css";
+import HowToTour from "./components/Help/HowToTour";
+import { hasSeenHowTo } from "./data/helpTips";
+import AdminDashboard from "./components/admin/AdminDashboard";
 import StudentsDashboard from "./components/StudentsDashboard/StudentsDashboard";
 import PageChalkLoader from "./components/shared/PageChalkLoader";
 import AddStudentWizard from "./components/AddStudent/AddStudentWizard";
@@ -121,8 +124,6 @@ const financialTips = [
   "Confidence with money grows through practice."
 ];
 
-const emptySchoolForm = { name: "", contactPerson: "", email: "", phone: "", address: "", status: "active" };
-const emptyTeacherForm = { firstName: "", lastName: "", email: "", temporaryPassword: "", schoolId: "", role: "Teacher", status: "active" };
 const emptyStudentForm = { first: "", last: "", email: "", age: "", dateOfBirth: "", classLabel: "", schoolId: "", teacherId: "", guardian: "", phone: "", photo: "" };
 const studentGradeOptions = ["Form 1", "Form 2", "Form 3", "Form 4", "Form 5", "Standard 1", "Standard 2", "Standard 3", "Standard 4", "Standard 5"];
 const studentAvatars = [
@@ -198,6 +199,7 @@ function App() {
   const [db, setDb] = useState(loadDatabase);
   const [view, setView] = useState("dashboard");
   const [currentTip, setCurrentTip] = useState(() => randomFinancialTip());
+  const [howToOpen, setHowToOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
@@ -266,6 +268,22 @@ function App() {
     };
   }, [isLoginRoute]);
 
+  // First-login spotlight walkthrough (once until Skip/Finish)
+  useEffect(() => {
+    if (isLoginRoute) return undefined;
+    if (hasSeenHowTo()) return undefined;
+    // Expand sidebar so nav targets are easy to see
+    setSidebarHidden(false);
+    setView("dashboard");
+    const timer = window.setTimeout(() => setHowToOpen(true), 700);
+    return () => window.clearTimeout(timer);
+  }, [isLoginRoute]);
+
+  function openHowToWalkthrough() {
+    setSidebarHidden(false);
+    setView("dashboard");
+    setHowToOpen(true);
+  }
   const dashboard = useMemo(() => buildDashboard(db, range), [db, range]);
 
   function update(mutator, message) {
@@ -382,10 +400,11 @@ function App() {
         collapsed={sidebarHidden}
         toggleCollapsed={() => setSidebarHidden(!sidebarHidden)}
         closeMenu={closeSidebarMenu}
+        onOpenHowTo={openHowToWalkthrough}
       />
       {menuOpen && <button className="sidebar-backdrop" type="button" aria-label="Close navigation menu" onClick={closeSidebarMenu} />}
       <main
-        className={`dashboard ${view === "game" ? "game-view" : ""} ${view === "dashboard" ? "dashboard-view" : ""} ${view === "students" ? "students-view" : ""} ${view === "attendance" ? "attendance-view" : ""} ${view === "add-student" ? "add-student-view" : ""} ${view === "lessons" ? "lessons-view" : ""} ${view === "create-lessons" ? "create-lessons-view" : ""} ${view === "calendar" ? "calendar-view" : ""} ${view === "rewards" ? "rewards-view" : ""} ${view === "quizzes" ? "quizzes-view" : ""} ${view === "my-day" ? "coming-soon-view" : ""}`}
+        className={`dashboard ${view === "game" ? "game-view" : ""} ${view === "dashboard" ? "dashboard-view" : ""} ${view === "students" ? "students-view" : ""} ${view === "attendance" ? "attendance-view" : ""} ${view === "add-student" ? "add-student-view" : ""} ${view === "lessons" ? "lessons-view" : ""} ${view === "create-lessons" ? "create-lessons-view" : ""} ${view === "calendar" ? "calendar-view" : ""} ${view === "rewards" ? "rewards-view" : ""} ${view === "quizzes" ? "quizzes-view" : ""} ${view === "my-day" ? "coming-soon-view" : ""} ${view === "admin" ? "admin-view" : ""}`}
         ref={mainContentRef}
       >
         <Topbar
@@ -432,6 +451,14 @@ function App() {
         <EventsRail calendarEvents={calendarEvents} navigate={navigate} currentTip={currentTip} />
       )}
 
+      <HowToTour
+        open={howToOpen}
+        onClose={() => setHowToOpen(false)}
+        onBeforeStep={() => {
+          if (view !== "dashboard") setView("dashboard");
+        }}
+      />
+
       <MobileTabBar
         view={view}
         menuOpen={menuOpen}
@@ -443,7 +470,7 @@ function App() {
   );
 }
 
-function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, closeMenu }) {
+function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, closeMenu, onOpenHowTo }) {
   const logoSrc = `${import.meta.env.BASE_URL}Logo.png`;
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
@@ -455,7 +482,11 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
   }
 
   return (
-    <aside className={`sidebar ${open ? "open" : ""} ${collapsed ? "collapsed" : ""}`} aria-label="Primary navigation">
+    <aside
+      className={`sidebar ${open ? "open" : ""} ${collapsed ? "collapsed" : ""}`}
+      data-tour="sidebar"
+      aria-label="Primary navigation"
+    >
       <button
         className="sidebar-toggle"
         type="button"
@@ -493,19 +524,48 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
                   navigate={navigate}
                   showLabel={!collapsed}
                   collapsed={collapsed}
+                  tourId={
+                    item.view === "students"
+                      ? "nav-students"
+                      : item.view === "lessons"
+                        ? "nav-lessons"
+                        : item.view === "rewards"
+                          ? "nav-rewards"
+                          : item.view === "game"
+                            ? "nav-games"
+                            : item.view === "calendar"
+                              ? "nav-calendar"
+                              : undefined
+                  }
                 />
               ))}
               {section.label === "System" ? (
-                <button
-                  type="button"
-                  className="nav-item sidebar-logout"
-                  title="Log out"
-                  aria-label="Log out"
-                  onClick={() => setLogoutConfirmOpen(true)}
-                >
-                  <LogOut size={ICON_SIZE} strokeWidth={ICON_STROKE} aria-hidden="true" />
-                  {!collapsed ? <span className="label nav-item-label">Log out</span> : null}
-                </button>
+                <>
+                  <button
+                    type="button"
+                    className="nav-item"
+                    title="How To walkthrough"
+                    aria-label="How To walkthrough"
+                    data-tour="nav-howto"
+                    onClick={() => {
+                      closeMenu?.();
+                      onOpenHowTo?.();
+                    }}
+                  >
+                    <Lightbulb size={ICON_SIZE} strokeWidth={ICON_STROKE} aria-hidden="true" />
+                    {!collapsed ? <span className="label nav-item-label">How To</span> : null}
+                  </button>
+                  <button
+                    type="button"
+                    className="nav-item sidebar-logout"
+                    title="Log out"
+                    aria-label="Log out"
+                    onClick={() => setLogoutConfirmOpen(true)}
+                  >
+                    <LogOut size={ICON_SIZE} strokeWidth={ICON_STROKE} aria-hidden="true" />
+                    {!collapsed ? <span className="label nav-item-label">Log out</span> : null}
+                  </button>
+                </>
               ) : null}
             </div>
           </nav>
@@ -582,7 +642,7 @@ function MobileTabBar({ view, menuOpen, navigate, onOpenMenu }) {
   );
 }
 
-function NavButton({ item, active, navigate, compact = false, showLabel = true, collapsed = false }) {
+function NavButton({ item, active, navigate, compact = false, showLabel = true, collapsed = false, tourId }) {
   const Icon = item.icon;
   const className = compact ? "mobile-tab" : "nav-item";
   const badgeText = item.badge?.text ?? (item.badge?.count != null ? String(item.badge.count) : null);
@@ -594,6 +654,7 @@ function NavButton({ item, active, navigate, compact = false, showLabel = true, 
       title={item.label}
       aria-label={collapsed || compact ? item.label : undefined}
       aria-current={active ? "page" : undefined}
+      data-tour={tourId || undefined}
       onClick={() => navigate(item.view)}
       {...(compact ? {} : { ...buttonTap })}
     >
@@ -612,330 +673,6 @@ function NavButton({ item, active, navigate, compact = false, showLabel = true, 
       )}
     </motion.button>
   );
-}
-
-function AdminDashboard({ db, update }) {
-  const schools = db.schools || [];
-  const teachers = db.teachers || [];
-  const [schoolFormOpen, setSchoolFormOpen] = useState(false);
-  const [teacherFormOpen, setTeacherFormOpen] = useState(false);
-  const [editingSchoolId, setEditingSchoolId] = useState(null);
-  const [editingTeacherId, setEditingTeacherId] = useState(null);
-  const [schoolForm, setSchoolForm] = useState(emptySchoolForm);
-  const [teacherForm, setTeacherForm] = useState(emptyTeacherForm);
-  const [schoolError, setSchoolError] = useState("");
-  const [teacherError, setTeacherError] = useState("");
-
-  // TODO: connect total students count from Supabase or student records later if records move outside local dashboard state.
-  const totalStudents = db.students.length;
-  const activeTeachers = teachers.filter(teacher => teacher.status === "active").length;
-
-  const stats = [
-    { title: "Schools", value: schools.length, subtext: "Registered schools", icon: School },
-    { title: "Teachers", value: teachers.length, subtext: "Teacher accounts", icon: Users },
-    { title: "Students", value: totalStudents, subtext: "Across all schools", icon: GraduationCap },
-    { title: "Active Accounts", value: activeTeachers, subtext: "Able to log in", icon: Check }
-  ];
-
-  function openSchoolForm(school) {
-    setSchoolError("");
-    if (school) {
-      setEditingSchoolId(school.id);
-      setSchoolForm({ name: school.name, contactPerson: school.contactPerson, email: school.email, phone: school.phone, address: school.address, status: school.status });
-    } else {
-      setEditingSchoolId(null);
-      setSchoolForm(emptySchoolForm);
-    }
-    setSchoolFormOpen(true);
-  }
-
-  function saveSchool(event) {
-    event.preventDefault();
-    if (!schoolForm.name.trim() || !schoolForm.contactPerson.trim() || !schoolForm.email.trim() || !schoolForm.phone.trim() || !schoolForm.address.trim()) {
-      setSchoolError("All school fields are required.");
-      return;
-    }
-    if (!isValidEmail(schoolForm.email)) {
-      setSchoolError("Please enter a valid school email.");
-      return;
-    }
-    update(next => {
-      if (editingSchoolId) {
-        next.schools = next.schools.map(school => school.id === editingSchoolId ? { ...school, ...schoolForm, name: schoolForm.name.trim() } : school);
-        next.teachers = next.teachers.map(teacher => teacher.schoolId === editingSchoolId ? { ...teacher, schoolName: schoolForm.name.trim() } : teacher);
-        return;
-      }
-      next.schools.push({ id: Date.now(), ...schoolForm, name: schoolForm.name.trim(), createdAt: today() });
-    }, editingSchoolId ? "School updated" : "School added");
-    setSchoolFormOpen(false);
-    setEditingSchoolId(null);
-    setSchoolForm(emptySchoolForm);
-  }
-
-  function openTeacherForm(teacher) {
-    setTeacherError("");
-    if (!schools.length) {
-      setTeacherError("Create a school before adding a teacher.");
-      return;
-    }
-    if (teacher) {
-      setEditingTeacherId(teacher.id);
-      setTeacherForm({ firstName: teacher.firstName, lastName: teacher.lastName, email: teacher.email, temporaryPassword: "********", schoolId: String(teacher.schoolId), role: teacher.role, status: teacher.status });
-    } else {
-      setEditingTeacherId(null);
-      setTeacherForm(emptyTeacherForm);
-    }
-    setTeacherFormOpen(true);
-  }
-
-  function createTeacherAccount(nextTeacher) {
-    // TODO: create teacher auth user in Supabase.
-    // TODO: save teacher profile to Supabase.
-    // TODO: link teacher auth user to assigned school.
-    update(next => {
-      if (editingTeacherId) {
-        next.teachers = next.teachers.map(teacher => teacher.id === editingTeacherId ? { ...teacher, ...nextTeacher } : teacher);
-        return;
-      }
-      next.teachers.push({ id: Date.now(), ...nextTeacher, createdAt: today() });
-    }, editingTeacherId ? "Teacher updated" : "Teacher added");
-  }
-
-  function saveTeacher(event) {
-    event.preventDefault();
-    if (!teacherForm.firstName.trim() || !teacherForm.lastName.trim()) {
-      setTeacherError("First and last name are required.");
-      return;
-    }
-    if (!teacherForm.email.trim() || !isValidEmail(teacherForm.email)) {
-      setTeacherError("Please enter a valid teacher email.");
-      return;
-    }
-    if (!teacherForm.temporaryPassword.trim()) {
-      setTeacherError("Temporary password is required for new teachers.");
-      return;
-    }
-    const school = schools.find(item => item.id === Number(teacherForm.schoolId));
-    if (!school) {
-      setTeacherError("Please assign a school.");
-      return;
-    }
-    createTeacherAccount({
-      firstName: teacherForm.firstName.trim(),
-      lastName: teacherForm.lastName.trim(),
-      email: teacherForm.email.trim(),
-      schoolId: school.id,
-      schoolName: school.name,
-      role: teacherForm.role,
-      status: teacherForm.status
-    });
-    setTeacherFormOpen(false);
-    setEditingTeacherId(null);
-    setTeacherForm(emptyTeacherForm);
-  }
-
-  function toggleSchoolStatus(id) {
-    update(next => {
-      next.schools = next.schools.map(school => school.id === id ? { ...school, status: school.status === "active" ? "inactive" : "active" } : school);
-    }, "School status updated");
-  }
-
-  function toggleTeacherStatus(id) {
-    update(next => {
-      next.teachers = next.teachers.map(teacher => teacher.id === id ? { ...teacher, status: teacher.status === "active" ? "inactive" : "active" } : teacher);
-    }, "Teacher status updated");
-  }
-
-  function deleteSchool(id) {
-    if (!window.confirm("Delete this school? Assigned local teacher records will also be removed.")) return;
-    update(next => {
-      next.schools = next.schools.filter(school => school.id !== id);
-      next.teachers = next.teachers.filter(teacher => teacher.schoolId !== id);
-    }, "School deleted");
-    if (editingSchoolId === id) {
-      setSchoolFormOpen(false);
-      setEditingSchoolId(null);
-      setSchoolForm(emptySchoolForm);
-    }
-  }
-
-  function deleteTeacher(id) {
-    if (!window.confirm("Delete this teacher account from local admin records?")) return;
-    update(next => {
-      next.teachers = next.teachers.filter(teacher => teacher.id !== id);
-    }, "Teacher deleted");
-    if (editingTeacherId === id) {
-      setTeacherFormOpen(false);
-      setEditingTeacherId(null);
-      setTeacherForm(emptyTeacherForm);
-    }
-  }
-
-  return (
-    <div className="mt-admin-page">
-      <PageHeading eyebrow="Admin" title="Admin Dashboard" />
-      <p className="mt-admin-subtitle">Manage schools and teacher accounts.</p>
-
-      <section className="mt-admin-stats" aria-label="Admin statistics">
-        {stats.map(stat => {
-          const Icon = stat.icon;
-          return (
-            <article className="mt-admin-stat-card" key={stat.title}>
-              <span><Icon /></span>
-              <div>
-                <strong>{stat.value}</strong>
-                <p>{stat.title}</p>
-                <small>{stat.subtext}</small>
-              </div>
-            </article>
-          );
-        })}
-      </section>
-
-      <section className="mt-admin-grid">
-        <article className="mt-admin-card">
-          <div className="mt-admin-card-header">
-            <div><h2>Schools</h2><p>Add and manage participating schools.</p></div>
-            <button className="primary-action mt-admin-primary" type="button" onClick={() => openSchoolForm()}>Add school</button>
-          </div>
-          {schoolFormOpen && (
-            <form className="mt-admin-form" onSubmit={saveSchool}>
-              {schoolError && <p className="mt-admin-error">{schoolError}</p>}
-              <div className="form-grid">
-                <Field label="School Name" value={schoolForm.name} onChange={name => setSchoolForm({ ...schoolForm, name })} required />
-                <Field label="Contact Person" value={schoolForm.contactPerson} onChange={contactPerson => setSchoolForm({ ...schoolForm, contactPerson })} required />
-              </div>
-              <div className="form-grid">
-                <Field label="Email" type="email" value={schoolForm.email} onChange={email => setSchoolForm({ ...schoolForm, email })} required />
-                <Field label="Phone Number" type="tel" value={schoolForm.phone} onChange={phone => setSchoolForm({ ...schoolForm, phone })} required />
-              </div>
-              <Field label="Address" value={schoolForm.address} onChange={address => setSchoolForm({ ...schoolForm, address })} required />
-              <Select
-                label="Status"
-                value={schoolForm.status}
-                onChange={status => setSchoolForm({ ...schoolForm, status })}
-                options={[
-                  { value: "active", label: "Active" },
-                  { value: "inactive", label: "Inactive" }
-                ]}
-                required
-                allowClear={false}
-                searchPlaceholder="Search status"
-              />
-              <div className="mt-admin-form-actions">
-                <button className="primary-action" type="submit">Save school</button>
-                <button className="secondary-action" type="button" onClick={() => setSchoolFormOpen(false)}>Cancel</button>
-                {editingSchoolId && <button className="secondary-action mt-admin-danger" type="button" onClick={() => deleteSchool(editingSchoolId)}>Delete school</button>}
-              </div>
-            </form>
-          )}
-          <AdminSchoolTable schools={schools} editSchool={openSchoolForm} deleteSchool={deleteSchool} />
-        </article>
-
-        <article className="mt-admin-card">
-          <div className="mt-admin-card-header">
-            <div><h2>Teachers</h2><p>Create teacher accounts and assign them to a school.</p></div>
-            <button className="primary-action mt-admin-primary" type="button" onClick={() => openTeacherForm()} disabled={!schools.length} title={!schools.length ? "Create a school before adding a teacher" : "Add teacher"}>Add teacher</button>
-          </div>
-          {!schools.length && <p className="mt-admin-note">Create a school first so each teacher can be assigned during setup.</p>}
-          {teacherError && !teacherFormOpen && <p className="mt-admin-error">{teacherError}</p>}
-          {teacherFormOpen && (
-            <form className="mt-admin-form" onSubmit={saveTeacher}>
-              {teacherError && <p className="mt-admin-error">{teacherError}</p>}
-              <div className="form-grid">
-                <Field label="First Name" value={teacherForm.firstName} onChange={firstName => setTeacherForm({ ...teacherForm, firstName })} required />
-                <Field label="Last Name" value={teacherForm.lastName} onChange={lastName => setTeacherForm({ ...teacherForm, lastName })} required />
-              </div>
-              <Field label="Email Address" type="email" value={teacherForm.email} onChange={email => setTeacherForm({ ...teacherForm, email })} required />
-              <Field label="Temporary Password" type="password" value={teacherForm.temporaryPassword} onChange={temporaryPassword => setTeacherForm({ ...teacherForm, temporaryPassword })} required />
-              <div className="form-grid">
-                <Select
-                  label="Assign School"
-                  value={teacherForm.schoolId}
-                  onChange={schoolId => setTeacherForm({ ...teacherForm, schoolId })}
-                  options={schools.map(school => ({ value: String(school.id), label: school.name }))}
-                  placeholder="Select school"
-                  searchPlaceholder="Search schools"
-                  required
-                  allowClear={false}
-                />
-                <Select
-                  label="Role"
-                  value={teacherForm.role}
-                  onChange={role => setTeacherForm({ ...teacherForm, role })}
-                  options={[
-                    { value: "Teacher", label: "Teacher" },
-                    { value: "School Admin", label: "School Admin" }
-                  ]}
-                  required
-                  allowClear={false}
-                  searchPlaceholder="Search roles"
-                />
-              </div>
-              <Select
-                label="Status"
-                value={teacherForm.status}
-                onChange={status => setTeacherForm({ ...teacherForm, status })}
-                options={[
-                  { value: "active", label: "Active" },
-                  { value: "inactive", label: "Inactive" }
-                ]}
-                required
-                allowClear={false}
-                searchPlaceholder="Search status"
-              />
-              <div className="mt-admin-form-actions">
-                <button className="primary-action" type="submit">Save Teacher</button>
-                <button className="secondary-action" type="button" onClick={() => setTeacherFormOpen(false)}>Cancel</button>
-                {editingTeacherId && <button className="secondary-action mt-admin-danger" type="button" onClick={() => deleteTeacher(editingTeacherId)}>Delete Teacher</button>}
-              </div>
-            </form>
-          )}
-          <AdminTeacherTable teachers={teachers} editTeacher={openTeacherForm} deleteTeacher={deleteTeacher} />
-        </article>
-      </section>
-
-      <PersonalizationSettings />
-    </div>
-  );
-}
-
-function AdminSchoolTable({ schools, editSchool, deleteSchool }) {
-  if (!schools.length) return <EmptyState title="No schools yet" text="Add a school when you are ready to start onboarding." />;
-  return (
-    <div className="mt-admin-table-wrap">
-      <div className="mt-admin-table mt-admin-schools-table">
-        <div className="mt-admin-table-head"><span>School Name</span><span>Contact Person</span><span>Phone</span><span>Status</span><span>Actions</span></div>
-        {schools.map(school => (
-          <div className="mt-admin-table-row" key={school.id}>
-            <strong>{school.name}</strong><span>{school.contactPerson || "Not set"}</span><span>{school.phone || "Optional"}</span><StatusBadge status={school.status} />
-            <div className="mt-admin-actions"><button type="button" onClick={() => editSchool(school)}>Edit</button><button className="mt-admin-danger" type="button" onClick={() => deleteSchool(school.id)}>Delete</button></div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function AdminTeacherTable({ teachers, editTeacher, deleteTeacher }) {
-  if (!teachers.length) return <EmptyState title="No teachers yet" text="Create teacher accounts after schools are added." />;
-  return (
-    <div className="mt-admin-table-wrap">
-      <div className="mt-admin-table mt-admin-teachers-table">
-        <div className="mt-admin-table-head"><span>Teacher Name</span><span>School</span><span>Role</span><span>Status</span><span>Actions</span></div>
-        {teachers.map(teacher => (
-          <div className="mt-admin-table-row" key={teacher.id}>
-            <strong>{teacher.firstName} {teacher.lastName}</strong><span>{teacher.schoolName}</span><span>{teacher.role}</span><StatusBadge status={teacher.status} />
-            <div className="mt-admin-actions"><button type="button" onClick={() => editTeacher(teacher)}>Edit</button><button className="mt-admin-danger" type="button" onClick={() => deleteTeacher(teacher.id)}>Delete</button></div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function StatusBadge({ status }) {
-  return <span className={`mt-status-badge mt-status-${status}`}>{status === "active" ? "Active" : "Inactive"}</span>;
 }
 
 function Students({ db, update, studentFocus, setStudentFocus, navigate, setToast }) {
@@ -1468,79 +1205,94 @@ function GameDashboard({ setToast }) {
 
   if (stage === "select") {
     return (
-      <section className="game-select-screen page-swap">
+      <>
         <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
-        <div className="game-select-intro">
-          <p className="mt-eyebrow">Classroom games</p>
-          <h2>Choose a game to start</h2>
-          <p>Pick a classroom game, then set up teams and open the board.</p>
-        </div>
-        <button className="game-choice-card mt-card" type="button" onClick={openLoading}>
-          <span><Calculator /></span>
-          <strong>Money Moves</strong>
-          <small>Fast questions, timed answers, and team point scoring.</small>
-          <ChevronRight />
-        </button>
-      </section>
+        <GamesLibrary
+          onSelectGame={gameId => {
+            if (gameId === "money-moves") openLoading();
+          }}
+        />
+      </>
     );
   }
 
   if (stage === "loading") {
     return (
-      <section className="money-loading-screen page-swap">
+      <section className="game-page-main game-step active">
         <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
-        <img src={assetPath("Logo.png")} alt="MoneyTykes" />
-        <p className="eyebrow">Money Moves Live</p>
-        <h2>Build Your Team Score. Win Your Future.</h2>
-        <button className="game-start-button" type="button" onClick={startSetup}><Play /> Start Game</button>
+        <div className="game-panel">
+          <div className="game-panel-center">
+            <img src={assetPath("Logo.png")} alt="MoneyTykes" />
+            <p className="eyebrow">Money Moves Live</p>
+            <h2>Build Your Team Score. Win Your Future.</h2>
+            <p className="game-panel-lead">Get ready to pick categories, race the timer, and award points to your teams.</p>
+            <button className="game-start-button" type="button" onClick={startSetup}>
+              <Play /> Start Game
+            </button>
+          </div>
+        </div>
       </section>
     );
   }
 
   if (stage === "teams") {
     return (
-      <section className="team-setup-screen page-swap">
+      <section className="game-page-main game-step active">
         <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
-        <div className="team-setup-heading">
-          <p className="game-kicker"><BarChart3 /> Money Moves Live</p>
-          <h2>Enter Teams</h2>
-          <p>Add between 1 and 5 teams before the board opens.</p>
-        </div>
-        <form className="team-form" onSubmit={beginGame}>
-          <div className="team-count-row">
-            <span className="team-count-icon"><Users /></span>
-            <div>
-              <strong>Number of Teams</strong>
-              <span>Choose between 1 and 5 teams.</span>
+        <div className="game-panel">
+          <div className="game-panel-center">
+            <div className="team-setup-heading">
+              <p className="game-kicker">
+                <BarChart3 /> Money Moves Live
+              </p>
+              <h2>Enter Teams</h2>
+              <p className="game-panel-lead">Add between 1 and 5 teams before the board opens.</p>
             </div>
-            <Select
-              aria-label="Number of teams"
-              className="team-count-select"
-              value={String(teamCount)}
-              onChange={updateTeamCount}
-              options={[1, 2, 3, 4, 5].map(count => ({ value: String(count), label: String(count) }))}
-              searchPlaceholder="Search"
-              allowClear={false}
-            />
+            <form className="team-form" onSubmit={beginGame}>
+              <div className="team-count-row">
+                <div>
+                  <strong>Number of Teams</strong>
+                  <span>Choose between 1 and 5 teams.</span>
+                </div>
+                <Select
+                  aria-label="Number of teams"
+                  className="team-count-select"
+                  value={String(teamCount)}
+                  onChange={updateTeamCount}
+                  options={[1, 2, 3, 4, 5].map(count => ({ value: String(count), label: String(count) }))}
+                  searchPlaceholder="Search"
+                  allowClear={false}
+                />
+              </div>
+              <div className="team-input-list">
+                {teams.slice(0, teamCount).map((team, index) => (
+                  <label className="team-name-row" key={team.id}>
+                    <span className="team-number">{index + 1}</span>
+                    <Users />
+                    <input
+                      value={team.name}
+                      onChange={event => updateTeamName(index, event.target.value)}
+                      placeholder={`Team ${index + 1}`}
+                    />
+                  </label>
+                ))}
+              </div>
+              <p className="team-note">You can rename teams now and edit them before opening the board.</p>
+              <button className="game-start-button team-open-board" type="submit">
+                <Play /> Open Board
+              </button>
+            </form>
           </div>
-          <div className="team-input-list">
-            {teams.slice(0, teamCount).map((team, index) => (
-              <label className="team-name-row" key={team.id}>
-                <span className="team-number">{index + 1}</span>
-                <Users />
-                <input value={team.name} onChange={event => updateTeamName(index, event.target.value)} placeholder={`Team ${index + 1}`} />
-              </label>
-            ))}
-          </div>
-          <p className="team-note">You can rename teams now and edit them before opening the board.</p>
-          <button className="game-start-button team-open-board" type="submit"><Play /> Open Board</button>
-        </form>
+        </div>
       </section>
     );
   }
 
   return (
-    <section className="money-moves-live page-swap" style={{ "--game-bg": `url("${assetPath("gamebackground.png")}")` }}>
+    <section
+      className="money-moves-live game-page-main"
+      style={{ "--game-bg": `url("${assetPath("gamebackground.png")}")` }}
+    >
       <audio ref={audioRef} src={assetPath("gamebackgroundaudio.mp3")} loop preload="auto" />
       <header className="money-live-header">
         <div className="money-live-title">

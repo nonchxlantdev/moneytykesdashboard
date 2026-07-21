@@ -41,7 +41,7 @@ function fileMetaFromName(fileName, type) {
     .split(".")
     .pop()
     ?.toUpperCase();
-  if (type === "document") {
+  if (type === "document" || type === "plan") {
     return {
       fileName,
       fileFormat: ext || "PDF",
@@ -183,8 +183,9 @@ export default function useLessonStudioForm() {
       const createType = sessionStorage.getItem(LESSON_CREATE_TYPE_KEY);
       if (createType) {
         sessionStorage.removeItem(LESSON_CREATE_TYPE_KEY);
-        if (createType === "video" || createType === "document" || createType === "presentation" || createType === "plan") {
-          setData(current => ({ ...EMPTY_FORM, type: createType, subject: current.subject }));
+        if (createType === "video" || createType === "presentation" || createType === "plan" || createType === "document") {
+          const normalizedType = createType === "document" ? "plan" : createType;
+          setData(current => ({ ...EMPTY_FORM, type: normalizedType, subject: current.subject }));
         }
       }
     } catch {
@@ -234,8 +235,9 @@ export default function useLessonStudioForm() {
   }, [data.sourceValue, data.type]);
 
   function selectType(type) {
+    const normalizedType = type === "document" ? "plan" : type;
     update({
-      type,
+      type: normalizedType,
       sourceValue: "",
       videoThumbnailUrl: null,
       durationSeconds: null,
@@ -252,39 +254,35 @@ export default function useLessonStudioForm() {
   }
 
   async function setSourceValue(value) {
-    if (data.type === "plan") {
-      return;
-    }
-
     if (data.type === "video") {
       update({ sourceValue: value });
       return;
     }
 
     if (value && typeof value === "object" && value.name) {
+      const isClassLesson = data.type === "plan" || data.type === "document";
       const extension = String(value.name).split(".").pop()?.toLowerCase();
-      const allowed =
-        data.type === "document"
-          ? new Set(["pdf"])
-          : new Set(["pdf", "ppt", "pptx"]);
+      const allowed = isClassLesson
+        ? new Set(["pdf"])
+        : new Set(["pdf", "ppt", "pptx"]);
       if (!allowed.has(extension)) {
         setFileError(
-          data.type === "document"
+          isClassLesson
             ? "Documents must be a PDF. Export from Word or Google Docs as PDF first."
             : "Upload a PDF, PPT, or PPTX file."
         );
         return;
       }
 
-      const maxBytes = data.type === "document" ? 20 * 1024 * 1024 : 30 * 1024 * 1024;
+      const maxBytes = isClassLesson ? 20 * 1024 * 1024 : 30 * 1024 * 1024;
       if (value.size > maxBytes) {
         setFileError(
-          `${data.type === "document" ? "Documents" : "Presentations"} must be ${data.type === "document" ? "20" : "30"}MB or smaller.`
+          `${isClassLesson ? "Documents" : "Presentations"} must be ${isClassLesson ? "20" : "30"}MB or smaller.`
         );
         return;
       }
 
-      const meta = fileMetaFromName(value.name, data.type);
+      const meta = fileMetaFromName(value.name, isClassLesson ? "plan" : data.type);
       setFileError("");
       setIsStoringFile(true);
       try {
@@ -330,8 +328,6 @@ export default function useLessonStudioForm() {
    */
   function save(mode) {
     const selectedStatus = mode === "selected" ? data.status : mode;
-    const requiresCompleteLesson =
-      selectedStatus === "published" || selectedStatus === "completed";
 
     if (!data.title.trim()) {
       return { ok: false, error: "Lesson title is required." };
@@ -341,29 +337,11 @@ export default function useLessonStudioForm() {
       return { ok: false, error: "Please enter a valid YouTube URL." };
     }
 
-    if (
-      requiresCompleteLesson &&
-      (data.type === "document" || data.type === "presentation") &&
-      !data.fileId
-    ) {
-      return {
-        ok: false,
-        error: `Upload a ${data.type === "document" ? "PDF document" : "presentation"} before publishing.`
-      };
-    }
-
     if (isStoringFile) {
       return { ok: false, error: "Please wait for the file to finish saving." };
     }
 
-    if (requiresCompleteLesson && data.type !== "plan") {
-      const errors = validateForPublish();
-      if (Object.keys(errors).length > 0) {
-        return { ok: false, error: "Complete the lesson plan before publishing.", planErrors: errors };
-      }
-    } else {
-      setPlanErrors({});
-    }
+    setPlanErrors({});
 
     const status =
       selectedStatus === "published"
@@ -384,7 +362,7 @@ export default function useLessonStudioForm() {
     };
 
     const payload = {
-      type: data.type,
+      type: data.type === "document" ? "plan" : data.type,
       title: data.title.trim(),
       subject: data.subject,
       // Keep description synced to objective for library card snippets / legacy readers
@@ -401,23 +379,32 @@ export default function useLessonStudioForm() {
       thumbnail: data.type === "video" ? data.videoThumbnailUrl || youtubeThumbnail(data.sourceValue) : null,
       videoThumbnailUrl: data.type === "video" ? data.videoThumbnailUrl : null,
       durationSeconds: data.type === "video" ? data.durationSeconds : null,
-      pageCount: data.type === "document" ? data.pageCount : null,
+      pageCount: data.type === "plan" || data.type === "document" ? data.pageCount : null,
       slideCount: data.type === "presentation" ? data.slideCount : null,
       fileFormat:
-        data.type === "document" || data.type === "presentation" ? data.fileFormat : null,
+        data.type === "plan" || data.type === "document" || data.type === "presentation"
+          ? data.fileFormat
+          : null,
       fileName:
-        data.type === "document" || data.type === "presentation"
+        data.type === "plan" || data.type === "document" || data.type === "presentation"
           ? data.fileName || data.sourceValue || null
           : null,
       fileId:
-        data.type === "document" || data.type === "presentation" ? data.fileId : null,
+        data.type === "plan" || data.type === "document" || data.type === "presentation"
+          ? data.fileId
+          : null,
       fileMimeType:
-        data.type === "document" || data.type === "presentation"
+        data.type === "plan" || data.type === "document" || data.type === "presentation"
           ? data.fileMimeType
           : null,
       fileSize:
-        data.type === "document" || data.type === "presentation" ? data.fileSize : null,
-      sourceValue: data.type === "plan" ? "" : data.sourceValue
+        data.type === "plan" || data.type === "document" || data.type === "presentation"
+          ? data.fileSize
+          : null,
+      sourceValue:
+        data.type === "plan" || data.type === "document"
+          ? data.fileName || data.sourceValue || ""
+          : data.sourceValue
     };
 
     if (editingId != null) {

@@ -1,84 +1,163 @@
 .admin-personalization {
-  margin-top: 20px;
+  margin-top: 0;
+  padding: 18px 20px 20px;
 }
 
-.admin-theme-title {
+.admin-personalization-head h2 {
   margin: 0 0 4px;
   font-size: 15px;
-  font-weight: 700;
-  color: var(--mt-ink, #1c2b2a);
+  font-weight: 800;
+  color: var(--mt-ink, #10162f);
 }
 
-.admin-card-sub {
-  margin: 0 0 14px;
+.admin-personalization-head p {
+  margin: 0 0 16px;
   font-size: 13px;
-  color: var(--mt-ink-muted, #8a9693);
+  line-height: 1.4;
+  color: var(--mt-ink-muted, #5f6f6c);
 }
 
-.theme-grid {
+.theme-thumb-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
 }
 
-.theme-option {
-  border: 2px solid transparent;
-  border-radius: 12px;
-  padding: 12px;
+.theme-thumb-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  border: 2px solid var(--card-border, #e1e6f0);
+  border-radius: 14px;
+  padding: 10px 10px 12px;
   background: #fff;
   cursor: pointer;
-  text-align: left;
-  box-shadow: 0 1px 0 rgba(28, 43, 42, 0.04);
+  font: inherit;
+  color: inherit;
   transition:
     border-color 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.15s ease;
+    background 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
-.theme-option:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(28, 43, 42, 0.08);
+.theme-thumb-card:hover {
+  box-shadow: 0 6px 16px rgba(16, 22, 47, 0.08);
 }
 
-.theme-option.selected {
-  border-color: var(--icon-accent, #0b7d70);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--icon-accent, #0b7d70) 35%, transparent);
+.theme-thumb-card.selected {
+  border-color: var(--icon-accent, #006d77);
+  background: color-mix(in srgb, var(--icon-accent, #006d77) 6%, #fff);
 }
 
-.theme-swatches {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 8px;
-}
-
-.theme-swatches span {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  display: inline-block;
-  border: 1px solid rgba(28, 43, 42, 0.08);
-}
-
-.theme-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--mt-ink, #1c2b2a);
-}
-
-.theme-badge {
-  display: inline-block;
-  margin-top: 4px;
-  font-size: 10px;
+.thumb-rec {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
   font-weight: 700;
-  color: #0b7d70;
-  background: #d8eae4;
-  padding: 2px 6px;
-  border-radius: 6px;
+  color: #fff;
+  background: var(--icon-accent, #006d77);
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
 }
 
-@media (max-width: 720px) {
-  .theme-grid {
+.thumb-mock {
+  width: 100%;
+  height: 76px;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.thumb-sidebar {
+  width: 28%;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  box-sizing: border-box;
+}
+
+.thumb-active-pill {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+}
+
+.thumb-line {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  width: 80%;
+}
+
+.thumb-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #f5f7fb;
+}
+
+.thumb-header {
+  height: 18px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.thumb-gold-dot {
+  display: block;
+  height: 6px;
+}
+
+.thumb-content {
+  flex: 1;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+.thumb-card-block {
+  display: block;
+  flex: 1;
+  border-radius: 4px;
+  background: #fff;
+  border: 1px solid #e1e6f0;
+}
+
+.thumb-btn {
+  display: block;
+  height: 8px;
+  width: 42%;
+  border-radius: 4px;
+  align-self: flex-end;
+}
+
+.thumb-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mt-ink, #10162f);
+  text-align: center;
+}
+
+@media (max-width: 960px) {
+  .theme-thumb-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .theme-thumb-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -11,19 +11,23 @@ export function formatLessonStatus(status) {
 
 /**
  * Infer content type for type-aware library cards.
+ * Legacy "document" lessons map to the merged class lesson ("plan").
  * @param {object} lesson
- * @returns {"video"|"document"|"presentation"|"plan"}
+ * @returns {"video"|"presentation"|"plan"}
  */
 export function resolveLessonType(lesson) {
   const raw = String(lesson?.type || lesson?.contentType || "").toLowerCase();
-  if (raw === "video" || raw === "document" || raw === "presentation" || raw === "plan") {
+  if (raw === "document" || raw === "plan") {
+    return "plan";
+  }
+  if (raw === "video" || raw === "presentation") {
     return raw;
   }
   if (lesson?.slideCount != null || lesson?.fileFormat === "PPT" || lesson?.fileFormat === "PPTX") {
     return "presentation";
   }
   if (lesson?.pageCount != null || lesson?.fileFormat === "PDF" || lesson?.fileFormat === "DOC" || lesson?.fileFormat === "DOCX") {
-    return "document";
+    return "plan";
   }
   return "video";
 }

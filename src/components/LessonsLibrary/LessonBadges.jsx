@@ -23,22 +23,18 @@ export function TypeBadge({ type }) {
   const tone =
     type === "video"
       ? "rose"
-      : type === "document"
-        ? "info"
-        : type === "presentation"
-          ? "warning"
-          : type === "plan"
-            ? "teal"
-            : "default";
+      : type === "presentation"
+        ? "warning"
+        : type === "plan" || type === "document"
+          ? "teal"
+          : "default";
   const label =
     type === "video"
       ? "Video"
-      : type === "document"
-        ? "Document"
-        : type === "presentation"
-          ? "Slides"
-          : type === "plan"
-            ? "Curriculum"
-            : type;
+      : type === "presentation"
+        ? "Slides"
+        : type === "plan" || type === "document"
+          ? "Class Lesson"
+          : type;
   return <Badge tone={tone}>{label}</Badge>;
 }

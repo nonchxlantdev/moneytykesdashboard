@@ -142,16 +142,20 @@ export default function DashboardPage({ dashboard, db, navigate }) {
 
   return (
     <div className="dash-home">
-      <ChalkboardHeader
-        teacherName={teacherName}
-        classId={classId}
-        userId={teacherId}
-      />
+      <div data-tour="chalkboard">
+        <ChalkboardHeader
+          teacherName={teacherName}
+          classId={classId}
+          userId={teacherId}
+        />
+      </div>
 
       <div className="dash-home-main">
-        <SegmentedProgress title="This month's class status" segments={segments} />
+        <div data-tour="class-status">
+          <SegmentedProgress title="This month's class status" segments={segments} />
+        </div>
 
-        <section className="dash-home-mid">
+        <section className="dash-home-mid" data-tour="dash-mid">
           <article className="mt-card-panel dash-home-card">
             <div className="mt-card-panel-header">
               <h3>Recent tasks</h3>

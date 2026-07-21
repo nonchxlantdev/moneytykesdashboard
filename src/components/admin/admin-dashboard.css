@@ -1,0 +1,458 @@
+/**
+ * Admin Dashboard — compact layout + chalk flush header.
+ */
+
+.admin-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Flush chalk header (same pattern as Rewards / Lessons / Students) */
+.react-app .dashboard.admin-view {
+  padding-top: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: 28px !important;
+}
+
+.react-app .admin-view .topbar {
+  display: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+}
+
+.react-app .admin-view .page-swap {
+  padding: 0 0 28px !important;
+  max-width: none !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.admin-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 18px 28px 0;
+  box-sizing: border-box;
+}
+
+.admin-dash .form-card {
+  background: #fff;
+  border: 1px solid var(--card-border, #e1e6f0);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(16, 22, 47, 0.04);
+}
+
+/* —— Stat strip —— */
+.stat-strip {
+  display: flex;
+  background: #fff;
+  border: 1px solid var(--card-border, #e1e6f0);
+  border-radius: 14px;
+  padding: 14px 0;
+}
+
+.strip-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  border-right: 1px solid var(--card-border, #e1e6f0);
+  min-width: 0;
+}
+
+.strip-item:last-child {
+  border-right: none;
+}
+
+.strip-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--icon-accent, #006d77) 12%, #fff);
+  color: var(--icon-accent, #006d77);
+  flex-shrink: 0;
+}
+
+.strip-item strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--mt-ink, #10162f);
+}
+
+.strip-item span {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mt-ink-muted, #5f6f6c);
+}
+
+/* —— Manage card (Schools / Teachers tabs) —— */
+.manage-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.manage-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--card-border, #e1e6f0);
+}
+
+.manage-tab {
+  flex: 1;
+  padding: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-gray, #5f6f6c);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.manage-tab.active {
+  color: var(--icon-accent, #006d77);
+  border-bottom-color: var(--icon-accent, #006d77);
+}
+
+.manage-panel {
+  padding: 16px 18px 18px;
+}
+
+.admin-inline-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--card-border, #e1e6f0);
+}
+
+.admin-form-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff1f0;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.admin-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-note {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--mt-ink-muted, #5f6f6c);
+}
+
+.admin-empty {
+  padding: 22px 8px;
+  text-align: center;
+}
+
+.admin-empty strong {
+  display: block;
+  font-size: 14px;
+  color: var(--mt-ink, #10162f);
+}
+
+.admin-empty p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--mt-ink-muted, #5f6f6c);
+}
+
+.admin-add-btn {
+  width: 100%;
+  margin-top: 14px;
+  justify-content: center;
+}
+
+.admin-dash .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border, #e1e6f0);
+  background: #fff;
+  color: var(--mt-ink, #10162f);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.admin-dash .btn.primary-gold {
+  background: var(--gold-accent, #f6cc69);
+  color: #1c2b2a;
+  border-color: color-mix(in srgb, var(--gold-accent, #f6cc69) 55%, #8a5a18);
+}
+
+.admin-dash .btn.primary-gold:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-dash .btn.danger-btn {
+  background: #dc2626;
+  color: #fff;
+  border-color: #b91c1c;
+}
+
+/* —— Compact rows —— */
+.compact-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.compact-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--card-border, #e1e6f0);
+}
+
+.compact-row:last-child {
+  border-bottom: none;
+}
+
+.cr-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--icon-accent, #006d77) 12%, #fff);
+  color: var(--icon-accent, #006d77);
+  flex-shrink: 0;
+}
+
+.cr-text {
+  min-width: 0;
+}
+
+.cr-text strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 750;
+  color: var(--mt-ink, #10162f);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cr-text span {
+  display: block;
+  font-size: 12px;
+  color: var(--mt-ink-muted, #5f6f6c);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-status-badge {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.admin-status-active {
+  background: color-mix(in srgb, var(--icon-accent, #006d77) 14%, #fff);
+  color: var(--icon-accent, #006d77);
+}
+
+.admin-status-inactive {
+  background: #f1f3f7;
+  color: #6b7280;
+}
+
+/* Overflow menu (same pattern as Rewards; scoped so Admin works without rewards.css) */
+.admin-dash .rw-overflow {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.admin-dash .rw-overflow-trigger {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--mt-ink-muted, #8a9693);
+  cursor: pointer;
+}
+
+.admin-dash .rw-overflow-trigger:hover,
+.admin-dash .rw-overflow.open .rw-overflow-trigger {
+  background: color-mix(in srgb, var(--icon-accent) 10%, transparent);
+  color: var(--mt-ink, #1c2b2a);
+}
+
+.admin-dash .rw-overflow-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 20;
+  min-width: 148px;
+  padding: 6px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 14%, transparent);
+  box-shadow: 0 12px 28px rgba(28, 43, 42, 0.12);
+}
+
+.admin-dash .rw-overflow-item {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--mt-ink, #1c2b2a);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.admin-dash .rw-overflow-item:hover {
+  background: color-mix(in srgb, var(--right-panel-bg) 70%, #fff);
+}
+
+.admin-dash .rw-overflow-item.danger {
+  color: #b91c1c;
+}
+
+/* Confirm delete modal styles when rewards.css is not loaded */
+.rw-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(16, 22, 47, 0.45);
+}
+
+.rw-modal-card {
+  width: min(100%, 420px);
+  padding: 22px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 20px 48px rgba(16, 22, 47, 0.22);
+  text-align: center;
+}
+
+.rw-modal-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: #fff1f0;
+  color: #dc2626;
+}
+
+.rw-modal-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+  color: var(--mt-ink, #1c2b2a);
+}
+
+.rw-modal-card p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--mt-ink-secondary, #5a6b68);
+}
+
+.rw-modal-item {
+  margin-top: 8px !important;
+}
+
+.rw-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.rw-modal-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border, #e1e6f0);
+  background: #fff;
+  color: var(--mt-ink, #10162f);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.rw-modal-actions .btn.danger-btn {
+  background: #dc2626;
+  color: #fff;
+  border-color: #b91c1c;
+}
+
+@media (max-width: 720px) {
+  .admin-body {
+    padding: 14px 16px 0;
+  }
+
+  .stat-strip {
+    flex-wrap: wrap;
+    padding: 8px 0;
+  }
+
+  .strip-item {
+    flex: 1 1 45%;
+    padding: 10px 14px;
+    border-right: none;
+    border-bottom: 1px solid var(--card-border, #e1e6f0);
+  }
+
+  .strip-item:nth-last-child(-n + 2) {
+    border-bottom: none;
+  }
+}

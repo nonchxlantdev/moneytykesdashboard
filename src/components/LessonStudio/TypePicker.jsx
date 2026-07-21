@@ -1,10 +1,10 @@
-import { ClipboardList, FileText, Play, Presentation } from "lucide-react";
+import { ClipboardList, Play, Presentation } from "lucide-react";
 
 const TYPES = [
   {
     id: "plan",
-    label: "Curriculum",
-    desc: "Build a text curriculum",
+    label: "Build a Class Lesson",
+    desc: "Build a text lesson plan",
     icon: ClipboardList,
     tone: "plan"
   },
@@ -14,13 +14,6 @@ const TYPES = [
     desc: "Link a YouTube video",
     icon: Play,
     tone: "video"
-  },
-  {
-    id: "document",
-    label: "Document",
-    desc: "Upload a PDF (required)",
-    icon: FileText,
-    tone: "doc"
   },
   {
     id: "presentation",
@@ -36,7 +29,7 @@ export default function TypePicker({ selected, onSelect }) {
     <div className="type-picker" role="radiogroup" aria-label="Lesson content type">
       {TYPES.map(type => {
         const Icon = type.icon;
-        const active = selected === type.id;
+        const active = selected === type.id || (type.id === "plan" && selected === "document");
         return (
           <button
             key={type.id}

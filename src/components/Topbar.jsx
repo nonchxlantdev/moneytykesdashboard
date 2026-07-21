@@ -12,7 +12,7 @@ const PAGE_TITLES = {
   calendar: "Calendar",
   rewards: "Rewards",
   quizzes: "Quizzes & Tests",
-  game: "Money Moves Live"
+  game: "Games"
 };
 
 const PAGE_SUBTITLES = {

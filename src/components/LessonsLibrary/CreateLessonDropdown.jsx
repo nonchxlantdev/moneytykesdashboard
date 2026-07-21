@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, ClipboardList, FileText, Presentation, Plus, Play } from "lucide-react";
+import { ChevronDown, ClipboardList, Presentation, Plus, Play } from "lucide-react";
 
 const OPTIONS = [
   {
     type: "plan",
-    label: "Curriculum",
-    desc: "Build a text curriculum",
+    label: "Build a Class Lesson",
+    desc: "Build a text lesson plan",
     icon: ClipboardList
   },
   {
@@ -13,12 +13,6 @@ const OPTIONS = [
     label: "Video Lesson",
     desc: "Link a YouTube video",
     icon: Play
-  },
-  {
-    type: "document",
-    label: "Document",
-    desc: "Upload a PDF (required)",
-    icon: FileText
   },
   {
     type: "presentation",
@@ -53,13 +47,13 @@ export default function CreateLessonDropdown({ onSelectType }) {
   return (
     <div className={`create-dropdown ${open ? "open" : ""}`} ref={wrapRef}>
       <button
-        type="button"
         className="btn primary-gold"
+        type="button"
         aria-expanded={open}
         aria-haspopup="menu"
-        onClick={() => setOpen(current => !current)}
+        onClick={() => setOpen(value => !value)}
       >
-        <Plus size={15} strokeWidth={2.5} />
+        <Plus size={15} />
         Create Lesson
         <ChevronDown size={14} className="chev" />
       </button>
@@ -71,20 +65,18 @@ export default function CreateLessonDropdown({ onSelectType }) {
               <button
                 key={option.type}
                 type="button"
-                className="cm-item"
                 role="menuitem"
+                className="create-menu-item"
                 onClick={() => {
                   setOpen(false);
                   onSelectType?.(option.type);
                 }}
               >
-                <span className={`cm-icon ${option.type}`} aria-hidden="true">
-                  <Icon size={16} />
-                </span>
-                <div>
+                <Icon size={16} aria-hidden="true" />
+                <span>
                   <strong>{option.label}</strong>
-                  <small>{option.desc}</small>
-                </div>
+                  <em>{option.desc}</em>
+                </span>
               </button>
             );
           })}

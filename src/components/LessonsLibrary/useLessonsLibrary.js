@@ -25,9 +25,8 @@ export const TEMP_SUBJECT_OPTIONS = [
 
 export const CONTENT_TYPE_OPTIONS = [
   { value: "all", label: "All Types" },
-  { value: "plan", label: "Curriculum" },
+  { value: "plan", label: "Class Lessons" },
   { value: "video", label: "Videos" },
-  { value: "document", label: "Documents" },
   { value: "presentation", label: "Presentations" }
 ];
 

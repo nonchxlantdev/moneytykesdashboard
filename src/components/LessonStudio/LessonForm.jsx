@@ -25,6 +25,9 @@ export default function LessonForm({
   onSaveDraft,
   onPublish
 }) {
+  const isClassLesson = data.type === "plan" || data.type === "document";
+  const sourceError = data.type === "video" ? urlError : fileError;
+
   return (
     <div className="lesson-form">
       <section className="studio-section">
@@ -79,14 +82,17 @@ export default function LessonForm({
           />
         </div>
 
-        <ContentSourceField
-          type={data.type}
-          value={data.sourceValue}
-          fileName={data.fileName}
-          error={data.type === "video" ? urlError : fileError}
-          isStoring={isStoringFile}
-          onChange={setSourceValue}
-        />
+        {/* Video / presentation source stays in details; class-lesson PDF is its own section */}
+        {!isClassLesson ? (
+          <ContentSourceField
+            type={data.type}
+            value={data.sourceValue}
+            fileName={data.fileName}
+            error={sourceError}
+            isStoring={isStoringFile}
+            onChange={setSourceValue}
+          />
+        ) : null}
 
         <LessonPlanFields
           value={{
@@ -97,7 +103,7 @@ export default function LessonForm({
           }}
           onChange={update}
           errors={planErrors}
-          isPrimary={data.type === "plan"}
+          isPrimary
         />
 
         <div className="studio-field">
@@ -113,6 +119,26 @@ export default function LessonForm({
           />
         </div>
       </section>
+
+      {isClassLesson ? (
+        <section className="studio-section studio-doc-section">
+          <h2>
+            Lesson document <span className="field-optional">(optional)</span>
+          </h2>
+          <p className="studio-section-lead">
+            Attach a PDF if you want one ready when you start the lesson. You can skip this and add it later.
+          </p>
+          <ContentSourceField
+            type={data.type}
+            value={data.sourceValue}
+            fileName={data.fileName}
+            error={fileError}
+            isStoring={isStoringFile}
+            showOptionalDocument
+            onChange={setSourceValue}
+          />
+        </section>
+      ) : null}
 
       <div className="studio-actions">
         {isEditing ? (

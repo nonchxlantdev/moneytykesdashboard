@@ -54,14 +54,16 @@ export function validateLessonPlan(data) {
   return errors;
 }
 
-export default function LessonPlanFields({ value, onChange, errors = {}, isPrimary = false }) {
-  const required = !isPrimary;
+export default function LessonPlanFields({ value, onChange, errors = {}, isPrimary = true }) {
+  const required = false;
   const notesErrorId = errors.activitySteps ? "lp-activity-steps-error" : undefined;
   const notesHintId = "lp-activity-steps-hint";
 
   return (
     <div className={`lesson-plan-group ${isPrimary ? "is-primary" : ""}`}>
-      <p className="lp-heading">Curriculum</p>
+      <p className="lp-heading">
+        Lesson plan <span className="field-optional">(optional fields)</span>
+      </p>
 
       <LPField
         id="lp-objective"

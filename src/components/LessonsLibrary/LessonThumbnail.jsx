@@ -1,4 +1,4 @@
-import { ClipboardList, FileText, Play, Presentation } from "lucide-react";
+import { ClipboardList, Play, Presentation } from "lucide-react";
 
 function formatDuration(seconds) {
   if (seconds == null || !Number.isFinite(Number(seconds))) return null;
@@ -10,16 +10,18 @@ function formatDuration(seconds) {
 
 export default function LessonThumbnail({ lesson }) {
   switch (lesson.type) {
+    case "plan":
     case "document":
       return (
-        <div className="lc-thumb doc-thumb">
-          <div className="file-icon doc" aria-hidden="true">
-            <FileText size={28} />
+        <div className="lc-thumb plan-thumb">
+          <div className="file-icon plan" aria-hidden="true">
+            <ClipboardList size={28} />
           </div>
-          <span className="lc-type-badge doc">Document</span>
+          <span className="lc-type-badge plan">Class Lesson</span>
           <span className="lc-filetype">
-            {lesson.fileFormat || "PDF"}
-            {lesson.pageCount != null ? ` · ${lesson.pageCount} pages` : ""}
+            {lesson.fileName
+              ? `${lesson.fileFormat || "PDF"}${lesson.pageCount != null ? ` · ${lesson.pageCount} pages` : ""}`
+              : "Class Lesson"}
           </span>
         </div>
       );
@@ -33,16 +35,6 @@ export default function LessonThumbnail({ lesson }) {
           <span className="lc-filetype">
             {lesson.slideCount != null ? `${lesson.slideCount} slides` : "Presentation"}
           </span>
-        </div>
-      );
-    case "plan":
-      return (
-        <div className="lc-thumb plan-thumb">
-          <div className="file-icon plan" aria-hidden="true">
-            <ClipboardList size={28} />
-          </div>
-          <span className="lc-type-badge plan">Curriculum</span>
-          <span className="lc-filetype">Curriculum</span>
         </div>
       );
     case "video":

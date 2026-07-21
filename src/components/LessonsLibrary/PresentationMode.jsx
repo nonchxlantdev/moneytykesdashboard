@@ -53,7 +53,8 @@ export default function PresentationMode({ lesson, isPreview = false, onClose, o
   const [cardFlipped, setCardFlipped] = useState(false);
   const allVisited = visitedSteps.size >= steps.length;
   const activeStep = steps[currentStep];
-  const isPlanLesson = lesson?.type === "plan";
+  const isPlanLesson = lesson?.type === "plan" || lesson?.type === "document";
+  const useFlashcards = isPlanLesson && !lesson?.fileId;
   const isPdf =
     localFile?.type === "application/pdf" ||
     String(localFile?.name || lesson?.fileName || "")
@@ -69,7 +70,7 @@ export default function PresentationMode({ lesson, isPreview = false, onClose, o
       if (event.key === "Escape") onClose?.();
       if (event.key === "ArrowRight") next();
       if (event.key === "ArrowLeft") prev();
-      if (isPlanLesson && (event.key === " " || event.key === "Enter")) {
+      if (useFlashcards && (event.key === " " || event.key === "Enter")) {
         event.preventDefault();
         setCardFlipped(current => !current);
       }
@@ -81,10 +82,10 @@ export default function PresentationMode({ lesson, isPreview = false, onClose, o
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
     };
-  }, [next, prev, onClose, isPlanLesson]);
+  }, [next, prev, onClose, useFlashcards]);
 
   useEffect(() => {
-    if (lesson?.type === "video" || lesson?.type === "plan" || !lesson?.fileId) {
+    if (lesson?.type === "video" || !lesson?.fileId) {
       setLocalFile(null);
       setLocalFileUrl(null);
       setFileLoadError("");
@@ -148,7 +149,7 @@ export default function PresentationMode({ lesson, isPreview = false, onClose, o
   return createPortal(
     <div className={`present-portal ${isPreview ? "is-preview" : ""}`} data-theme={theme}>
       <div
-        className={`present-shell ${isPlanLesson ? "is-plan-lesson" : ""}`}
+        className={`present-shell ${useFlashcards ? "is-plan-lesson" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={isPreview ? "Lesson preview" : "Present to class"}
@@ -167,15 +168,15 @@ export default function PresentationMode({ lesson, isPreview = false, onClose, o
             <p className={`pt-eyebrow ${isPreview ? "preview" : ""}`}>
               {isPreview ? (
                 <Eye size={14} aria-hidden="true" />
-              ) : isPlanLesson ? (
+              ) : useFlashcards ? (
                 <ClipboardList size={14} aria-hidden="true" />
               ) : (
                 <MonitorPlay size={14} aria-hidden="true" />
               )}
               {isPreview
                 ? "Preview Mode"
-                : isPlanLesson
-                  ? "Curriculum"
+                : useFlashcards
+                  ? "Class Lesson"
                   : "Present to Class"}
             </p>
             <h1>{lesson.title}</h1>
@@ -191,9 +192,9 @@ export default function PresentationMode({ lesson, isPreview = false, onClose, o
           </button>
         </header>
 
-        {isPlanLesson ? (
+        {useFlashcards ? (
           <div className="present-body is-flashcards">
-            <section className="flash-deck" aria-label="Curriculum cards">
+            <section className="flash-deck" aria-label="Lesson cards">
               <div className="flash-stack" aria-hidden="true">
                 <span className="flash-stack-card back-2" />
                 <span className="flash-stack-card back-1" />
@@ -326,8 +327,8 @@ export default function PresentationMode({ lesson, isPreview = false, onClose, o
               )}
             </section>
 
-            <aside className="present-nav" aria-label="Curriculum">
-              <p className="pn-heading">Curriculum</p>
+            <aside className="present-nav" aria-label="Lesson plan">
+              <p className="pn-heading">Lesson plan</p>
               {stepNav}
 
               <div className="present-plan-copy">

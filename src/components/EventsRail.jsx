@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { BookOpen } from "lucide-react";
 import { eventTypeMeta, formatTime12, getUpcomingEvents } from "../utils/calendarUtils";
 import "../dashboard-v2.css";
 
@@ -102,7 +103,7 @@ export default function EventsRail({ calendarEvents = [], navigate, currentTip }
   const tipText = currentTip || "Encourage small savings habits today for a brighter tomorrow.";
 
   return (
-    <aside className="dash-home-rail" aria-label="Events and shortcuts">
+    <aside className="dash-home-rail" data-tour="events-rail" aria-label="Events and shortcuts">
       <div className="dash-home-rail-inner mt-card-panel">
         <section className="dash-home-rail-section dash-home-rail-events" aria-label="Events">
           <div className="mt-card-panel-header">
@@ -168,6 +169,22 @@ export default function EventsRail({ calendarEvents = [], navigate, currentTip }
               </li>
             ))}
           </ul>
+          <a
+            className="dash-501-btn"
+            href="https://501academy.edu.bz/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="dash-501-btn-top">
+              <span className="dash-501-btn-icon" aria-hidden="true">
+                <BookOpen size={18} strokeWidth={2.25} />
+              </span>
+              <strong>501 Academy</strong>
+            </span>
+            <span className="dash-501-btn-desc">
+              Check resources here to keep lessons aligned.
+            </span>
+          </a>
         </section>
 
         <article className="dash-home-rail-tip" aria-label="Daily tip">

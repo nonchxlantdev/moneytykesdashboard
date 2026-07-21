@@ -76,16 +76,33 @@
   color: var(--mt-ink-muted, #8a9693);
 }
 
+.studio-section h2 .field-optional {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 600;
+}
+
+.studio-section-lead {
+  margin: -4px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.studio-doc-section .studio-optional-doc {
+  margin-top: 4px;
+}
+
 /* Type picker */
 .type-picker {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
-@media (min-width: 960px) {
+@media (max-width: 760px) {
   .type-picker {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 }
 
@@ -230,6 +247,13 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--mt-ink-muted, #8a9693);
+}
+
+.lp-heading .field-optional {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 600;
+  font-size: 11px;
 }
 
 .lesson-plan-group.is-primary {

@@ -1,4 +1,4 @@
-import { ClipboardList, FileText, Play, Presentation } from "lucide-react";
+import { ClipboardList, Play, Presentation } from "lucide-react";
 
 function formatDuration(seconds) {
   if (seconds == null || !Number.isFinite(Number(seconds))) return null;
@@ -11,11 +11,12 @@ function formatDuration(seconds) {
 /** Compact 120×68 thumbnail for list rows — no type/page-count badges. */
 export default function LessonRowThumbnail({ lesson }) {
   switch (lesson.type) {
+    case "plan":
     case "document":
       return (
-        <div className="lr-thumb doc-thumb">
-          <div className="file-icon doc sm" aria-hidden="true">
-            <FileText size={18} />
+        <div className="lr-thumb plan-thumb">
+          <div className="file-icon plan sm" aria-hidden="true">
+            <ClipboardList size={18} />
           </div>
         </div>
       );
@@ -24,14 +25,6 @@ export default function LessonRowThumbnail({ lesson }) {
         <div className="lr-thumb slides-thumb">
           <div className="file-icon slides sm" aria-hidden="true">
             <Presentation size={18} />
-          </div>
-        </div>
-      );
-    case "plan":
-      return (
-        <div className="lr-thumb plan-thumb">
-          <div className="file-icon plan sm" aria-hidden="true">
-            <ClipboardList size={18} />
           </div>
         </div>
       );
