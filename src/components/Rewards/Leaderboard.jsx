@@ -12,7 +12,7 @@ export default function Leaderboard({ students = [], timeframe, onTimeframeChang
   const maxPoints = sorted[0]?.points || 1;
 
   return (
-    <section className="rw-card rw-leaderboard">
+    <section className="rw-card rw-leaderboard" data-tour="rewards-leaderboard">
       <div className="rw-card-head">
         <h2>Leaderboard</h2>
         <div className="rw-range-toggle" role="group" aria-label="Leaderboard timeframe">

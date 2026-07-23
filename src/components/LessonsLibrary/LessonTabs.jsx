@@ -3,7 +3,7 @@ import { STATUS_TABS } from "./useLessonsLibrary";
 
 export default function LessonTabs({ activeTab, onTabChange, viewMode, onViewModeChange }) {
   return (
-    <div className="lesson-tabs-row">
+    <div className="lesson-tabs-row" data-tour="lessons-tabs">
       <div className="filter-pills lesson-tabs" role="tablist" aria-label="Lesson status">
         {STATUS_TABS.map(label => (
           <button

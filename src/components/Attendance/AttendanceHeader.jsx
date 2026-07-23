@@ -7,6 +7,7 @@ export default function AttendanceHeader({ navigate }) {
       eyebrow="Roll call"
       title="Attendance"
       lead="Mark who’s here today, then review reports when you need them."
+      tourId="attendance-banner"
       actions={
         <>
           <button type="button" className="btn ghost" onClick={() => navigate("students")}>

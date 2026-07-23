@@ -65,7 +65,7 @@ export default function AttendancePage({ db, setToast, navigate }) {
       <AttendanceHeader navigate={navigate} />
 
       <div className="attendance-dash-body">
-        <div className="attendance-toolbar">
+        <div className="attendance-toolbar" data-tour="attendance-toolbar">
           <AttendanceTabs active={attendance.mode} onChange={attendance.setMode} />
           <AttendanceFilters
             mode={attendance.mode}

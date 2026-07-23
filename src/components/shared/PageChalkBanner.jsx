@@ -10,12 +10,13 @@ export default function PageChalkBanner({
   lead,
   subtitle,
   controls = null,
-  actions = null
+  actions = null,
+  tourId = "page-banner"
 }) {
   const supporting = subtitle || lead;
 
   return (
-    <header className="page-chalk">
+    <header className="page-chalk" data-tour={tourId || undefined}>
       <div className="page-chalk-copy">
         {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
         <h1>{title}</h1>

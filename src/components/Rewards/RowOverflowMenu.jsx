@@ -39,6 +39,7 @@ export default function RowOverflowMenu({ items = [] }) {
               key={item.label}
               type="button"
               role="menuitem"
+              title={item.title || item.label}
               className={`rw-overflow-item ${item.danger ? "danger" : ""}`}
               onClick={() => {
                 setOpen(false);

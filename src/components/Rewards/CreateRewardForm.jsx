@@ -14,6 +14,7 @@ export default function CreateRewardForm({ value, onChange, onSubmit, editingId,
   return (
     <form
       className="rw-card rw-create-form"
+      data-tour="rewards-create"
       onSubmit={event => {
         event.preventDefault();
         onSubmit?.();

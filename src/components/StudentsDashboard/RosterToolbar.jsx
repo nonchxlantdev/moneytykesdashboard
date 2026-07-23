@@ -8,7 +8,7 @@ export default function RosterToolbar({
   showingCount = 0
 }) {
   return (
-    <div className="toolbar">
+    <div className="toolbar" data-tour="students-roster-toolbar">
       <div className="search-box">
         <Search size={16} aria-hidden="true" />
         <input

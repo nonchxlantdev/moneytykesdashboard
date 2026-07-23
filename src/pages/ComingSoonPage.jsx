@@ -14,7 +14,7 @@ export default function ComingSoonPage({
   return (
     <div className="coming-soon-page">
       <PageChalkBanner eyebrow={eyebrow} title={title} lead={lead} />
-      <div className="coming-soon-body">
+      <div className="coming-soon-body" data-tour="coming-soon-body">
         <EmptyBox title="Coming soon" description={description} />
       </div>
     </div>

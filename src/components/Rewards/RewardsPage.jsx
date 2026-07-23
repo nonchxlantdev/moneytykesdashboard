@@ -51,7 +51,7 @@ export default function RewardsPage({ db, setToast, update }) {
       />
 
       <div className="rw-body">
-      <div className="rw-stats">
+      <div className="rw-stats" data-tour="rewards-stats">
         <StatCard
           label="Rewards in bank"
           value={rewards.stats.bankCount}

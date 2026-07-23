@@ -77,7 +77,7 @@ export function CreateLessonDropdown({ navigate, setToast }) {
   }
 
   return (
-    <div className={`create-dropdown ${open ? "open" : ""}`} ref={wrapRef}>
+    <div className={`create-dropdown ${open ? "open" : ""}`} ref={wrapRef} data-tour="lessons-create">
       <button
         className="btn primary-gold"
         type="button"

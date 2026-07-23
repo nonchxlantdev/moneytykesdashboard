@@ -41,7 +41,7 @@ export default function QuizzesLandingPage() {
       />
 
       <div className="quizzes-body">
-        <section className="soon-hero">
+        <section className="soon-hero" data-tour="quizzes-hero">
           <span className="soon-hero-badge">🚧 Coming Soon</span>
           <h2>Quizzes & Tests is on its way</h2>
           <p>
@@ -52,6 +52,7 @@ export default function QuizzesLandingPage() {
           <button
             type="button"
             className="btn primary-gold soon-hero-cta"
+            data-tour="quizzes-demo-cta"
             onClick={() => setDemoOpen(true)}
           >
             <Play size={16} />
@@ -59,7 +60,7 @@ export default function QuizzesLandingPage() {
           </button>
         </section>
 
-        <section className="quizzes-how" aria-labelledby="quizzes-how-title">
+        <section className="quizzes-how" aria-labelledby="quizzes-how-title" data-tour="quizzes-how">
           <div className="quizzes-how-head">
             <h2 id="quizzes-how-title">How it will work</h2>
             <p>Four steps from blank quiz to graded student record.</p>

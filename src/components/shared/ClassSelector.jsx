@@ -14,7 +14,7 @@ export default function ClassSelector({
   });
 
   return (
-    <div className={`class-selector ${!value ? "is-placeholder" : ""}`}>
+    <div className={`class-selector ${!value ? "is-placeholder" : ""}`} data-tour="students-class-filter">
       <DropdownSearch
         label={label}
         placeholder={placeholder}

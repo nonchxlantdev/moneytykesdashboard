@@ -12,7 +12,7 @@ export default function RollCall({
   onAddStudents
 }) {
   return (
-    <article className="roll-call-card">
+    <article className="roll-call-card" data-tour="attendance-roll-call">
       <div className="roll-call-head">
         <div className="roll-call-title">
           <h2>Roll Call</h2>

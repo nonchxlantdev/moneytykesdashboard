@@ -48,7 +48,7 @@ export default function AwardPointsForm({
   );
 
   return (
-    <section className="rw-card rw-award-form">
+    <section className="rw-card rw-award-form" data-tour="rewards-award">
       <div className="rw-card-head">
         <h2>Award points</h2>
       </div>

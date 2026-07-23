@@ -170,11 +170,21 @@ export default function StudentsDashboard({
         }
         actions={
           <>
-            <button type="button" className="btn ghost" onClick={() => navigate("attendance")}>
+            <button
+              type="button"
+              className="btn ghost"
+              data-tour="students-take-attendance"
+              onClick={() => navigate("attendance")}
+            >
               <ClipboardCheck size={16} />
               <span>Take Attendance</span>
             </button>
-            <button type="button" className="btn primary" onClick={() => navigate("add-student")}>
+            <button
+              type="button"
+              className="btn primary"
+              data-tour="students-add"
+              onClick={() => navigate("add-student")}
+            >
               <UserPlus size={16} />
               <span>Add Student</span>
             </button>
@@ -183,7 +193,7 @@ export default function StudentsDashboard({
       />
 
       <div className="students-dash-body">
-        <section className="stats-row" aria-label="Class roster summary">
+        <section className="stats-row" aria-label="Class roster summary" data-tour="students-stats">
           <StatCard label="TOTAL STUDENTS" value={stats.total} icon={Users} tone="total" />
           <StatCard
             label="AVG. ATTENDANCE"
@@ -199,7 +209,7 @@ export default function StudentsDashboard({
           />
         </section>
 
-        <section className="roster-card">
+        <section className="roster-card" data-tour="students-roster">
           <div className="roster-card-head">
             <div className="roster-title">
               <span className="roster-icon" aria-hidden="true">

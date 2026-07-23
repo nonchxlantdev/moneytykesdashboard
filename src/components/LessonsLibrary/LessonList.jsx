@@ -11,7 +11,7 @@ export default function LessonList({
   onDeleteRequest
 }) {
   return (
-    <div className="lesson-list" aria-label="Lesson list">
+    <div className="lesson-list" aria-label="Lesson list" data-tour="lessons-grid">
       {lessons.map(lesson => (
         <LessonRow
           key={lesson.id}

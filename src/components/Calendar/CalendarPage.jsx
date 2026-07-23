@@ -103,7 +103,7 @@ export default function CalendarPage({ db, setToast, focusDate, onFocusHandled }
         lead="Plan lessons, quizzes, and school events on one paper planner."
         actions={
           <>
-            <div className="calendar-view-toggle" role="tablist" aria-label="Calendar view">
+            <div className="calendar-view-toggle" role="tablist" aria-label="Calendar view" data-tour="calendar-view-toggle">
               <button
                 type="button"
                 role="tab"
@@ -132,7 +132,12 @@ export default function CalendarPage({ db, setToast, focusDate, onFocusHandled }
                 <List size={15} /> List
               </button>
             </div>
-            <button type="button" className="btn primary" onClick={() => openCreate()}>
+            <button
+              type="button"
+              className="btn primary"
+              data-tour="calendar-new-event"
+              onClick={() => openCreate()}
+            >
               <Plus size={15} /> New event
             </button>
           </>
@@ -140,7 +145,7 @@ export default function CalendarPage({ db, setToast, focusDate, onFocusHandled }
       />
 
       <div className="cal-planner-body">
-        <div className="cal-planner-main">
+        <div className="cal-planner-main" data-tour="calendar-grid">
           <CalendarGrid
             events={events}
             activeView={activeView}

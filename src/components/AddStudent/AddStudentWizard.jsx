@@ -136,9 +136,10 @@ export default function AddStudentWizard({
             ? "Update this student’s profile details below."
             : "Create a new student profile for your classroom."
         }
+        tourId="add-student-banner"
       />
 
-      <div className="add-student-wizard-body">
+      <div className="add-student-wizard-body" data-tour="add-student-form">
         <WizardProgress current={step} />
 
         <div className="wizard-layout">

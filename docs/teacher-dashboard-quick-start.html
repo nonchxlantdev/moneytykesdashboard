@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoneyTykes Teacher Dashboard — Quick Start Handout</title>
+  <style>
+    :root {
+      --navy: #10162f;
+      --teal: #006d77;
+      --teal-soft: #e6f7f5;
+      --gold: #ffc928;
+      --orange: #ff6b1a;
+      --gray: #5f6f6c;
+      --border: #e1e6f0;
+      --bg: #f5f7fb;
+      --white: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: var(--navy);
+      background: var(--bg);
+      line-height: 1.45;
+      font-size: 11pt;
+    }
+
+    .page {
+      max-width: 8.5in;
+      margin: 0 auto;
+      padding: 0.55in 0.6in 0.7in;
+      background: var(--white);
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--navy);
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .toolbar button {
+      appearance: none;
+      border: 0;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .toolbar span { opacity: 0.85; }
+
+    header.hero {
+      border-bottom: 4px solid var(--gold);
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      margin: 0 0 4px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--teal);
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 22pt;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--gray);
+      max-width: 38em;
+      font-size: 11pt;
+    }
+
+    h2 {
+      margin: 22px 0 8px;
+      font-size: 13pt;
+      color: var(--teal);
+    }
+
+    h3 {
+      margin: 0 0 4px;
+      font-size: 11pt;
+    }
+
+    .map {
+      display: grid;
+      grid-template-columns: 1.1fr 2fr;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .map-row {
+      display: contents;
+    }
+
+    .map-row > span {
+      padding: 8px 12px;
+      border-top: 1px solid var(--border);
+      font-size: 10pt;
+    }
+
+    .map-row:first-child > span { border-top: 0; }
+
+    .map-row > span:first-child {
+      font-weight: 700;
+      background: var(--teal-soft);
+      color: var(--teal);
+    }
+
+    .flow {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px 12px;
+      margin: 12px 0 0;
+      background: #fff;
+    }
+
+    .flow-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .num {
+      flex: 0 0 auto;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--teal);
+      color: #fff;
+      font-weight: 800;
+      font-size: 12px;
+      display: grid;
+      place-items: center;
+    }
+
+    .flow-summary {
+      margin: 0 0 10px;
+      color: var(--gray);
+      font-size: 10pt;
+    }
+
+    .steps {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .steps li {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 8px;
+      padding: 8px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .steps li:first-child { border-top: 0; }
+
+    .step-n {
+      font-weight: 800;
+      color: var(--teal);
+      font-size: 10pt;
+      padding-top: 1px;
+    }
+
+    .where {
+      display: inline-block;
+      margin: 2px 0 4px;
+      padding: 1px 8px;
+      border-radius: 999px;
+      background: var(--teal-soft);
+      color: var(--teal);
+      font-size: 8.5pt;
+      font-weight: 700;
+    }
+
+    .label {
+      font-size: 8.5pt;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--gray);
+      margin: 4px 0 0;
+    }
+
+    .outcome {
+      margin: 10px 0 0;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--gold) 28%, #fff);
+      border: 1px solid color-mix(in srgb, var(--gold) 55%, #fff);
+      font-size: 10pt;
+    }
+
+    .outcome strong { color: var(--navy); }
+
+    footer.note {
+      margin-top: 22px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 9.5pt;
+      color: var(--gray);
+    }
+
+    @media print {
+      body { background: #fff; }
+      .toolbar { display: none !important; }
+      .page {
+        max-width: none;
+        margin: 0;
+        padding: 0.4in 0.45in;
+      }
+      .flow { box-shadow: none; }
+      a { color: inherit; text-decoration: none; }
+    }
+
+    @page {
+      size: letter;
+      margin: 0.5in;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <span>MoneyTykes teacher handout — print or Save as PDF</span>
+    <button type="button" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+
+  <div class="page">
+    <header class="hero">
+      <p class="eyebrow">Teacher quick start</p>
+      <h1>How the MoneyTykes Teacher Dashboard works</h1>
+      <p class="lead">
+        A plain-language guide to everyday classroom workflows—sign in, know your class,
+        teach, reward, plan, and (for school leads) set up accounts.
+      </p>
+    </header>
+
+    <h2>Where things live</h2>
+    <div class="map" role="table" aria-label="Sidebar map">
+      <div class="map-row"><span>Dashboard</span><span>Class status, tasks, leaders, events</span></div>
+      <div class="map-row"><span>Students</span><span>Roster, profiles, add student, attendance</span></div>
+      <div class="map-row"><span>Lessons</span><span>Create, organize, and present class materials</span></div>
+      <div class="map-row"><span>Rewards</span><span>Templates, award points, leaderboard</span></div>
+      <div class="map-row"><span>Games</span><span>Run live classroom money games</span></div>
+      <div class="map-row"><span>Calendar</span><span>Schedule lessons, quizzes, reminders</span></div>
+      <div class="map-row"><span>Admin</span><span>Schools, teachers, theme personalization</span></div>
+    </div>
+
+    <h2>Six classroom workflows</h2>
+
+    <section class="flow">
+      <div class="flow-head">
+        <span class="num">1</span>
+        <div>
+          <h3>Start your day</h3>
+          <p class="flow-summary">Open the Dashboard to see class health, upcoming events, and quick shortcuts before the first lesson.</p>
+        </div>
+      </div>
+      <ol class="steps">
+        <li>
+          <span class="step-n">1</span>
+          <div>
+            <strong>Sign in</strong>
+            <div class="where">Login screen</div>
+            <p class="label">What you do</p>
+            <div>Teachers sign in to reach their classroom workspace.</div>
+            <p class="label">Why it helps</p>
+            <div>Each teacher sees their own class context and saved preferences.</div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">2</span>
+          <div>
+            <strong>Land on Dashboard</strong>
+            <div class="where">Dashboard</div>
+            <p class="label">What you do</p>
+            <div>Read the chalkboard greeting, this month’s class status, recent tasks, and top students.</div>
+            <p class="label">Why it helps</p>
+            <div>One glance shows progress on lessons, attendance, rewards, and tasks.</div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">3</span>
+          <div>
+            <strong>Check the Events rail</strong>
+            <div class="where">Right side of Dashboard</div>
+            <p class="label">What you do</p>
+            <div>Scan upcoming calendar items, use Quick actions, open 501 Academy resources, or read the daily tip.</div>
+            <p class="label">Why it helps</p>
+            <div>Shortcuts keep common actions one click away during a busy morning.</div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">4</span>
+          <div>
+            <strong>Replay the How To tour anytime</strong>
+            <div class="where">System → How To (sidebar)</div>
+            <p class="label">What you do</p>
+            <div>Walk through highlighted parts of the real screen if you need a refresher.</div>
+            <p class="label">Why it helps</p>
+            <div>New teachers get oriented without a separate training packet.</div>
+          </div>
+        </li>
+      </ol>
+      <p class="outcome"><strong>Done when:</strong> You know what needs attention today without digging through menus.</p>
+    </section>
+
+    <section class="flow">
+      <div class="flow-head">
+        <span class="num">2</span>
+        <div>
+          <h3>Know your class</h3>
+          <p class="flow-summary">Build and maintain the roster so every student can earn points, take attendance, and appear in reports.</p>
+        </div>
+      </div>
+      <ol class="steps">
+        <li>
+          <span class="step-n">1</span>
+          <div>
+            <strong>Open Students</strong>
+            <div class="where">Classroom → Students</div>
+            <p class="label">What you do</p>
+            <div>Browse the roster, search or filter, and open a student profile when needed.</div>
+            <p class="label">Why it helps</p>
+            <div>The roster is the source of truth for who is in your class.</div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">2</span>
+          <div>
+            <strong>Add a student</strong>
+            <div class="where">Add Student wizard</div>
+            <p class="label">What you do</p>
+            <div>Enter student details, guardian info, school/teacher assignment, then review and save.</div>
+            <p class="label">Why it helps</p>
+            <div>Structured steps reduce missing contact or school information.</div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">3</span>
+          <div>
+            <strong>Take attendance</strong>
+            <div class="where">Students → Attendance</div>
+            <p class="label">What you do</p>
+            <div>Mark present, late, or absent for the day (or class session).</div>
+            <p class="label">Why it helps</p>
+            <div>Attendance feeds class status and helps you spot patterns early.</div>
+          </div>
+        </li>
+      </ol>
+      <p class="outcome"><strong>Done when:</strong> A complete, up-to-date class list ready for teaching and rewards.</p>
+    </section>
+
+    <section class="flow">
+      <div class="flow-head">
+        <span class="num">3</span>
+        <div>
+          <h3>Teach financial literacy</h3>
+          <p class="flow-summary">Create lessons, start them with the class, and use games when you want an active money lesson.</p>
+        </div>
+      </div>
+      <ol class="steps">
+        <li>
+          <span class="step-n">1</span>
+          <div>
+            <strong>Browse Lessons</strong>
+            <div class="where">Classroom → Lessons</div>
+            <p class="label">What you do</p>
+            <div>Find existing lessons, favorite the ones you reuse, and open create controls.</div>
+            <p class="label">Why it helps</p>
+            <div>Your lesson library is the home for curriculum you teach repeatedly.</div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">2</span>
+          <div>
+            <strong>Build a lesson</strong>
+            <div class="where">Lesson Studio</div>
+            <p class="label">What you do</p>
+            <div>Choose a type (class lesson plan, video, or presentation), fill in details, and save.</div>
+            <p class="label">Why it helps</p>
+            <div>Different formats match how you actually teach—not one rigid template.</div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">3</span>
+          <div>
+            <strong>Start / present</strong>
+            <div class="where">Lessons library or presentation mode</div>
+            <p class="label">What you do</p>
+            <div>Launch the lesson when class begins so students follow along on the board.</div>
+            <p class="label">Why it helps</p>
+            <div>Teaching from the dashboard keeps materials and classroom flow together.</div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">4</span>
+          <div>
+            <strong>Play a classroom game</strong>
+            <div class="where">Classroom → Games</div>
+            <p class="label">What you do</p>
+            <div>Pick a game (for example Money Moves Live), set teams, and run it on the board.</div>
+            <p class="label">Why it helps</p>
+            <div>Games turn money concepts into lively practice, not only worksheets.</div>
+          </div>
+        </li>
+      </ol>
+      <p class="outcome"><strong>Done when:</strong> Students learn through planned lessons and classroom games.</p>
+    </section>
+
+    <section class="flow">
+      <div class="flow-head">
+        <span class="num">4</span>
+        <div>
+          <h3>Motivate with rewards</h3>
+          <p class="flow-summary">Define what students can earn, award points for good habits, and celebrate leaders.</p>
+        </div>
+      </div>
+      <ol class="steps">
+        <li>
+          <span class="step-n">1</span>
+          <div>
+            <strong>Create reward templates</strong>
+            <div class="where">Classroom → Rewards</div>
+            <p class="label">What you do</p>
+            <div>Name rewards, set point values, and keep a list of what students can work toward.</div>
+            <p class="label">Why it helps</p>
+            <div>Templates make awarding points fast and consistent every day.</div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">2</span>
+          <div>
+            <strong>Award points</strong>
+            <div class="where">Rewards → Award points</div>
+            <p class="label">What you do</p>
+            <div>Choose a student, pick a reward or amount, and confirm.</div>
+            <p class="label">Why it helps</p>
+            <div>Immediate feedback helps students connect effort with recognition.</div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">3</span>
+          <div>
+            <strong>Check the leaderboard</strong>
+            <div class="where">Rewards + Dashboard</div>
+            <p class="label">What you do</p>
+            <div>See who is ahead and celebrate progress with the class.</div>
+            <p class="label">Why it helps</p>
+            <div>Friendly competition keeps financial habits visible and fun.</div>
+          </div>
+        </li>
+      </ol>
+      <p class="outcome"><strong>Done when:</strong> A clear points economy that reinforces the behaviors you care about.</p>
+    </section>
+
+    <section class="flow">
+      <div class="flow-head">
+        <span class="num">5</span>
+        <div>
+          <h3>Plan the week</h3>
+          <p class="flow-summary">Use Calendar (and soon Quizzes &amp; Tests) to schedule lessons, quizzes, and reminders.</p>
+        </div>
+      </div>
+      <ol class="steps">
+        <li>
+          <span class="step-n">1</span>
+          <div>
+            <strong>Open Calendar</strong>
+            <div class="where">Main → Calendar</div>
+            <p class="label">What you do</p>
+            <div>View the month/week, create events, and edit or remove items when plans change.</div>
+            <p class="label">Why it helps</p>
+            <div>Events also surface on the Dashboard rail so you do not miss them.</div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">2</span>
+          <div>
+            <strong>Quizzes &amp; Tests (coming soon)</strong>
+            <div class="where">Classroom → Quizzes &amp; Tests</div>
+            <p class="label">What you do</p>
+            <div>Preview the upcoming quiz experience while the full feature is still rolling out.</div>
+            <p class="label">Why it helps</p>
+            <div>Assessment will sit next to lessons and calendar once ready.</div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">3</span>
+          <div>
+            <strong>My Day (coming soon)</strong>
+            <div class="where">Main → My Day</div>
+            <p class="label">What you do</p>
+            <div>A future home for personal to-dos and next-day planning.</div>
+            <p class="label">Why it helps</p>
+            <div>Keeps teacher planning separate from the live class roster tools.</div>
+          </div>
+        </li>
+      </ol>
+      <p class="outcome"><strong>Done when:</strong> A shared picture of what is coming up for your class.</p>
+    </section>
+
+    <section class="flow">
+      <div class="flow-head">
+        <span class="num">6</span>
+        <div>
+          <h3>School setup (Admin)</h3>
+          <p class="flow-summary">School leads manage schools and teacher accounts, and personalize the look of the dashboard.</p>
+        </div>
+      </div>
+      <ol class="steps">
+        <li>
+          <span class="step-n">1</span>
+          <div>
+            <strong>Manage schools</strong>
+            <div class="where">System → Admin → Schools tab</div>
+            <p class="label">What you do</p>
+            <div>Add or edit participating schools and their contact details.</div>
+            <p class="label">Why it helps</p>
+            <div>Students and teachers need a school to attach to during setup.</div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">2</span>
+          <div>
+            <strong>Manage teachers</strong>
+            <div class="where">System → Admin → Teachers tab</div>
+            <p class="label">What you do</p>
+            <div>Create teacher accounts, assign a school, or reassign when staff move.</div>
+            <p class="label">Why it helps</p>
+            <div>Each teacher account unlocks classroom tools for that school.</div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">3</span>
+          <div>
+            <strong>Personalize the look</strong>
+            <div class="where">Admin → Personalization</div>
+            <p class="label">What you do</p>
+            <div>Pick a color theme using the thumbnail previews (saved on this device).</div>
+            <p class="label">Why it helps</p>
+            <div>A familiar look helps teachers feel at home in the product.</div>
+          </div>
+        </li>
+      </ol>
+      <p class="outcome"><strong>Done when:</strong> Teachers are assigned to schools and the workspace matches your school brand.</p>
+    </section>
+
+    <footer class="note">
+      Tip: In the live dashboard, teachers can also run <strong>System → How To</strong> for an on-screen tour that highlights the real interface.
+      This handout is for training and onboarding conversations.
+    </footer>
+  </div>
+</body>
+</html>

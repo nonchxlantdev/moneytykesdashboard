@@ -44,6 +44,7 @@ import {
 import { moneyMoveQuestions } from "./moneyMoveQuestions";
 import LoginPage from "./pages/LoginPage";
 import RewardsPage from "./pages/RewardsPage";
+import ReportCardsPage from "./pages/ReportCardsPage";
 import AttendancePage from "./pages/Attendance";
 import CreateLessonsPage from "./pages/CreateLessonsPage";
 import LessonsLibraryPage from "./pages/LessonsLibraryPage";
@@ -78,6 +79,9 @@ import StudentsDashboard from "./components/StudentsDashboard/StudentsDashboard"
 import PageChalkLoader from "./components/shared/PageChalkLoader";
 import AddStudentWizard from "./components/AddStudent/AddStudentWizard";
 import { ThemeProvider } from "./themes/ThemeContext";
+import { getReportCardsForStudent, getTemplateForSchool, statusLabel } from "./utils/reportCardsStorage";
+import { downloadReportCardPdf } from "./utils/reportCardPdf";
+import "./components/ReportCards/report-cards.css";
 
 import { navSections, ICON_SIZE, ICON_STROKE } from "./config/navigation";
 import { buttonTap, fadeUp } from "./lib/motion";
@@ -281,7 +285,6 @@ function App() {
 
   function openHowToWalkthrough() {
     setSidebarHidden(false);
-    setView("dashboard");
     setHowToOpen(true);
   }
   const dashboard = useMemo(() => buildDashboard(db, range), [db, range]);
@@ -404,7 +407,7 @@ function App() {
       />
       {menuOpen && <button className="sidebar-backdrop" type="button" aria-label="Close navigation menu" onClick={closeSidebarMenu} />}
       <main
-        className={`dashboard ${view === "game" ? "game-view" : ""} ${view === "dashboard" ? "dashboard-view" : ""} ${view === "students" ? "students-view" : ""} ${view === "attendance" ? "attendance-view" : ""} ${view === "add-student" ? "add-student-view" : ""} ${view === "lessons" ? "lessons-view" : ""} ${view === "create-lessons" ? "create-lessons-view" : ""} ${view === "calendar" ? "calendar-view" : ""} ${view === "rewards" ? "rewards-view" : ""} ${view === "quizzes" ? "quizzes-view" : ""} ${view === "my-day" ? "coming-soon-view" : ""} ${view === "admin" ? "admin-view" : ""}`}
+        className={`dashboard ${view === "game" ? "game-view" : ""} ${view === "dashboard" ? "dashboard-view" : ""} ${view === "students" ? "students-view" : ""} ${view === "attendance" ? "attendance-view" : ""} ${view === "add-student" ? "add-student-view" : ""} ${view === "lessons" ? "lessons-view" : ""} ${view === "create-lessons" ? "create-lessons-view" : ""} ${view === "calendar" ? "calendar-view" : ""} ${view === "rewards" ? "rewards-view" : ""} ${view === "quizzes" ? "quizzes-view" : ""} ${view === "my-day" ? "coming-soon-view" : ""} ${view === "admin" ? "admin-view" : ""} ${view === "report-cards" ? "report-cards-view" : ""}`}
         ref={mainContentRef}
       >
         <Topbar
@@ -443,6 +446,7 @@ function App() {
             </React.Suspense>
           )}
           {!pageLoading && view === "rewards" && <RewardsPage db={db} setToast={setToast} update={update} />}
+          {!pageLoading && view === "report-cards" && <ReportCardsPage db={db} setToast={setToast} />}
           {!pageLoading && view === "game" && <GameDashboard setToast={setToast} />}
         </div>
       </main>
@@ -454,8 +458,13 @@ function App() {
       <HowToTour
         open={howToOpen}
         onClose={() => setHowToOpen(false)}
-        onBeforeStep={() => {
-          if (view !== "dashboard") setView("dashboard");
+        onBeforeStep={step => {
+          if (step?.view) setView(step.view);
+          if (step?.clickSelector) {
+            window.setTimeout(() => {
+              document.querySelector(step.clickSelector)?.click();
+            }, 80);
+          }
         }}
       />
 
@@ -524,19 +533,7 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
                   navigate={navigate}
                   showLabel={!collapsed}
                   collapsed={collapsed}
-                  tourId={
-                    item.view === "students"
-                      ? "nav-students"
-                      : item.view === "lessons"
-                        ? "nav-lessons"
-                        : item.view === "rewards"
-                          ? "nav-rewards"
-                          : item.view === "game"
-                            ? "nav-games"
-                            : item.view === "calendar"
-                              ? "nav-calendar"
-                              : undefined
-                  }
+                  tourId={item.tourId}
                 />
               ))}
               {section.label === "System" ? (
@@ -1641,6 +1638,10 @@ function StudentTable({ students, detailed = false, onView, onEdit, onDelete, li
 }
 
 function StudentProfile({ student, onClose, onEdit, onDelete }) {
+  const history = getReportCardsForStudent(student.id);
+  const school = { id: student.schoolId, name: student.schoolName };
+  const template = getTemplateForSchool(student.schoolId, school);
+
   return (
     <article className="section-panel mt-student-profile-card students-profile-panel">
       <div className="mt-student-profile-header">
@@ -1664,6 +1665,38 @@ function StudentProfile({ student, onClose, onEdit, onDelete }) {
             <p><strong>Points</strong><span>{formatPoints(student.balance || 0)}</span></p>
             <p><strong>Total Points Earned</strong><span>{formatPoints(student.totalEarned || 0)}</span></p>
             <p><strong>Status</strong><span>{labelStatus(student.status)}</span></p>
+          </div>
+
+          <div className="rc-history">
+            <h4>Report card history</h4>
+            {history.length ? (
+              <ul className="rc-history-list">
+                {history.map(card => (
+                  <li key={card.id}>
+                    <span>
+                      {card.schoolYear} · {card.term_or_terms} · {statusLabel(card.status)}
+                      {card.overallAvg != null ? ` · avg ${card.overallAvg}` : ""}
+                    </span>
+                    <button
+                      type="button"
+                      className="secondary-action"
+                      onClick={() =>
+                        downloadReportCardPdf({
+                          reportCard: card,
+                          student,
+                          template,
+                          className: student.classLabel
+                        })
+                      }
+                    >
+                      Export PDF
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="rc-muted" style={{ margin: 0 }}>No report cards yet for this student.</p>
+            )}
           </div>
         </div>
       </div>

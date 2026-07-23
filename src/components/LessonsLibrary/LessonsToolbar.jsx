@@ -15,7 +15,7 @@ export default function LessonsToolbar({
   setToast
 }) {
   return (
-    <div className="lessons-toolbar-card">
+    <div className="lessons-toolbar-card" data-tour="lessons-toolbar">
       <div className="ll-field">
         <Select
           aria-label="Filter by subject"

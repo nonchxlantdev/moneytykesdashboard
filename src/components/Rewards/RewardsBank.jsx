@@ -14,7 +14,7 @@ export default function RewardsBank({
     category === "All" ? rewards : rewards.filter(reward => reward.category === category);
 
   return (
-    <section className="rw-card rw-bank">
+    <section className="rw-card rw-bank" data-tour="rewards-bank">
       <div className="rw-card-head">
         <h2>Rewards Bank</h2>
         <span className="rw-bank-count">{rewards.length} saved</span>

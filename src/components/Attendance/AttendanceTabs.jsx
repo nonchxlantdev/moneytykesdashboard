@@ -2,7 +2,7 @@ import { ClipboardCheck, FileText } from "lucide-react";
 
 export default function AttendanceTabs({ active, onChange }) {
   return (
-    <div className="tab-group" role="tablist" aria-label="Attendance mode">
+    <div className="tab-group" role="tablist" aria-label="Attendance mode" data-tour="attendance-tabs">
       <button
         type="button"
         role="tab"

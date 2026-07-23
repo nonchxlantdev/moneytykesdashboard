@@ -8,7 +8,7 @@ export default function UpcomingPanel({ events = [], onSelect, onCreate }) {
   const upcoming = getUpcomingEvents(events, 8, 21);
 
   return (
-    <aside className="cal-upcoming">
+    <aside className="cal-upcoming" data-tour="calendar-upcoming">
       <header className="cal-upcoming-head">
         <div className="cal-upcoming-title">
           <span className="cal-upcoming-icon" aria-hidden="true">

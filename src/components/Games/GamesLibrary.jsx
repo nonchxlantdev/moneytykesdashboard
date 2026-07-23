@@ -4,7 +4,12 @@ import { CLASSROOM_GAMES } from "../../data/classroomGames";
 
 function GameCard({ game, onClick }) {
   return (
-    <button type="button" className="game-card" onClick={onClick}>
+    <button
+      type="button"
+      className="game-card"
+      data-tour={game.id === "money-moves" ? "games-money-moves" : undefined}
+      onClick={onClick}
+    >
       <div className="game-card-icon" aria-hidden="true">
         {game.icon}
       </div>
@@ -42,7 +47,7 @@ export default function GamesLibrary({ onSelectGame }) {
         subtitle="Pick a classroom game, then set up teams and open the board."
       />
       <div className="games-library-body">
-        <div className="game-grid">
+        <div className="game-grid" data-tour="games-grid">
           {CLASSROOM_GAMES.map(game => (
             <GameCard key={game.id} game={game} onClick={() => onSelectGame?.(game.id)} />
           ))}

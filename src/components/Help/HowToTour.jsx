@@ -1,7 +1,12 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { HOW_TO_STEPS, markHowToSeen } from "../../data/helpTips";
+import { ChevronLeft, ChevronRight, Compass, Lightbulb, X } from "lucide-react";
+import {
+  HOW_TO_OVERVIEW_STEPS,
+  HOW_TO_SECTIONS,
+  HOW_TO_TOPICS,
+  markHowToSeen
+} from "../../data/helpTips";
 import "./howto-tour.css";
 
 const PAD = 10;
@@ -68,7 +73,6 @@ function tooltipStyle(rect, placement) {
       width: maxW
     };
   }
-  // bottom
   return {
     top: Math.min(rect.bottom + gap, window.innerHeight - 200),
     left: Math.min(Math.max(12, rect.midX - maxW / 2), window.innerWidth - maxW - 12),
@@ -77,19 +81,32 @@ function tooltipStyle(rect, placement) {
 }
 
 /**
- * Spotlight walkthrough — highlights real UI regions on the page.
+ * How To — topic picker (sidebar areas) + spotlight walkthrough.
  */
 export default function HowToTour({ open, onClose, onBeforeStep }) {
+  const [phase, setPhase] = useState("picker"); // picker | tour
+  const [steps, setSteps] = useState(HOW_TO_OVERVIEW_STEPS);
+  const [tourTitle, setTourTitle] = useState("Full walkthrough");
   const [stepIndex, setStepIndex] = useState(0);
   const [rect, setRect] = useState(null);
-  const total = HOW_TO_STEPS.length;
-  const step = HOW_TO_STEPS[stepIndex] || HOW_TO_STEPS[0];
+
+  const topicsBySection = useMemo(() => {
+    return HOW_TO_SECTIONS.map(section => ({
+      section,
+      topics: HOW_TO_TOPICS.filter(topic => topic.section === section)
+    })).filter(group => group.topics.length);
+  }, []);
+
+  const total = steps.length;
+  const step = steps[stepIndex] || steps[0];
   const isFirst = stepIndex === 0;
   const isLast = stepIndex === total - 1;
 
   useEffect(() => {
     if (!open) return undefined;
+    setPhase("picker");
     setStepIndex(0);
+    setRect(null);
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     document.documentElement.classList.add("howto-active");
@@ -103,12 +120,14 @@ export default function HowToTour({ open, onClose, onBeforeStep }) {
   }, [open]);
 
   useLayoutEffect(() => {
-    if (!open || !step) return undefined;
+    if (!open || phase !== "tour" || !step) return undefined;
 
     onBeforeStep?.(step);
 
     let cancelled = false;
     let tries = 0;
+    const maxTries = step.clickSelector ? 20 : 12;
+    const startDelay = step.clickSelector ? 160 : 60;
 
     function refresh() {
       if (cancelled) return;
@@ -120,18 +139,16 @@ export default function HowToTour({ open, onClose, onBeforeStep }) {
       const el = document.querySelector(step.selector);
       if (el) {
         el.classList.add("howto-target-live");
-        // Fixed/sticky targets (Events rail, sidebar) are already on-screen —
-        // scrolling them recenters the page and looks like they were yanked out.
         if (!next?.fixed) {
           el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
         }
-      } else if (tries < 8) {
+      } else if (tries < maxTries) {
         tries += 1;
-        window.setTimeout(refresh, 80);
+        window.setTimeout(refresh, 90);
       }
     }
 
-    const timer = window.setTimeout(refresh, 40);
+    const timer = window.setTimeout(refresh, startDelay);
     window.addEventListener("resize", refresh);
     window.addEventListener("scroll", refresh, true);
 
@@ -141,40 +158,131 @@ export default function HowToTour({ open, onClose, onBeforeStep }) {
       window.removeEventListener("resize", refresh);
       window.removeEventListener("scroll", refresh, true);
     };
-  }, [open, step, stepIndex, onBeforeStep]);
+  }, [open, phase, step, stepIndex, onBeforeStep]);
 
   useEffect(() => {
     if (!open) return undefined;
     function onKey(event) {
-      if (event.key === "Escape") finish();
-      if (event.key === "ArrowRight") goNext();
-      if (event.key === "ArrowLeft") goBack();
+      if (event.key === "Escape") {
+        if (phase === "tour") backToPicker();
+        else finish();
+      }
+      if (phase === "tour") {
+        if (event.key === "ArrowRight") goNext();
+        if (event.key === "ArrowLeft") goBack();
+      }
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, stepIndex]);
+  }, [open, phase, stepIndex, total]);
 
-  if (!open || !step) return null;
+  if (!open) return null;
 
   function finish() {
     markHowToSeen();
     onClose?.();
   }
 
+  function backToPicker() {
+    document.querySelectorAll(".howto-target-live").forEach(node => {
+      node.classList.remove("howto-target-live");
+    });
+    setRect(null);
+    setPhase("picker");
+    setStepIndex(0);
+  }
+
+  function startTour(nextSteps, title) {
+    setSteps(nextSteps);
+    setTourTitle(title);
+    setStepIndex(0);
+    setPhase("tour");
+  }
+
+  function startFullWalkthrough() {
+    startTour(HOW_TO_OVERVIEW_STEPS, "Full walkthrough");
+  }
+
+  function startTopic(topic) {
+    startTour(topic.steps, topic.label);
+  }
+
   function goNext() {
     if (isLast) {
-      finish();
+      backToPicker();
       return;
     }
     setStepIndex(index => Math.min(total - 1, index + 1));
   }
 
   function goBack() {
+    if (isFirst) {
+      backToPicker();
+      return;
+    }
     setStepIndex(index => Math.max(0, index - 1));
   }
 
-  const tipStyle = tooltipStyle(rect, step.placement);
+  if (phase === "picker") {
+    return createPortal(
+      <div className="howto-spotlight howto-picker-mode" role="dialog" aria-modal="true" aria-labelledby="howto-picker-title">
+        <div className="howto-dim howto-dim-solid" onClick={finish} aria-hidden="true" />
+        <div className="howto-picker-card">
+          <header className="howto-card-head">
+            <p className="howto-card-progress">How To</p>
+            <button type="button" className="howto-close" aria-label="Close How To" onClick={finish}>
+              <X size={16} />
+            </button>
+          </header>
+          <h2 id="howto-picker-title">What would you like to learn?</h2>
+          <p className="howto-text">
+            Take the full walkthrough, or pick a sidebar area and we will highlight it on the real screen.
+          </p>
+
+          <button type="button" className="howto-topic-btn howto-topic-btn-primary" onClick={startFullWalkthrough}>
+            <Compass size={18} aria-hidden="true" />
+            <span>
+              <strong>Full walkthrough</strong>
+              <small>Dashboard highlights plus the main sidebar stops</small>
+            </span>
+          </button>
+
+          {topicsBySection.map(group => (
+            <div key={group.section} className="howto-topic-section">
+              <p className="howto-topic-section-label">{group.section}</p>
+              <div className="howto-topic-grid">
+                {group.topics.map(topic => (
+                  <button
+                    key={topic.id}
+                    type="button"
+                    className="howto-topic-btn"
+                    onClick={() => startTopic(topic)}
+                    title={topic.summary}
+                  >
+                    <Lightbulb size={16} aria-hidden="true" />
+                    <span>
+                      <strong>{topic.label}</strong>
+                      <small>{topic.summary}</small>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          <footer className="howto-footer">
+            <button type="button" className="btn howto-skip" onClick={finish}>
+              Close
+            </button>
+          </footer>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
+  const tipStyle = tooltipStyle(rect, step?.placement);
 
   return createPortal(
     <div className="howto-spotlight" role="dialog" aria-modal="true" aria-labelledby="howto-title">
@@ -196,7 +304,7 @@ export default function HowToTour({ open, onClose, onBeforeStep }) {
       <div className="howto-card" style={tipStyle}>
         <header className="howto-card-head">
           <p className="howto-card-progress">
-            {stepIndex + 1} / {total}
+            {tourTitle} · {stepIndex + 1} / {total}
           </p>
           <button type="button" className="howto-close" aria-label="Close walkthrough" onClick={finish}>
             <X size={16} />
@@ -205,16 +313,16 @@ export default function HowToTour({ open, onClose, onBeforeStep }) {
         <h2 id="howto-title">{step.title}</h2>
         <p className="howto-text">{step.body}</p>
         <footer className="howto-footer">
-          <button type="button" className="btn howto-skip" onClick={finish}>
-            Skip
+          <button type="button" className="btn howto-skip" onClick={backToPicker} title="Back to topic list">
+            Topics
           </button>
           <div className="howto-nav">
-            <button type="button" className="btn" onClick={goBack} disabled={isFirst}>
+            <button type="button" className="btn" onClick={goBack} title={isFirst ? "Back to topics" : "Previous step"}>
               <ChevronLeft size={16} aria-hidden="true" />
               Back
             </button>
-            <button type="button" className="btn primary-gold" onClick={goNext}>
-              {isLast ? "Finish" : "Next"}
+            <button type="button" className="btn primary-gold" onClick={goNext} title={isLast ? "Back to topics" : "Next step"}>
+              {isLast ? "Done" : "Next"}
               {!isLast ? <ChevronRight size={16} aria-hidden="true" /> : null}
             </button>
           </div>

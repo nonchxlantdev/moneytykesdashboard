@@ -37,7 +37,7 @@ export default function PersonalizationSettings() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <section className="admin-personalization form-card" aria-labelledby="admin-theme-heading">
+    <section className="admin-personalization form-card" aria-labelledby="admin-theme-heading" data-tour="admin-theme">
       <div className="admin-personalization-head">
         <h2 id="admin-theme-heading">Personalization</h2>
         <p>Choose a color scheme for the teacher dashboard. Your choice is saved on this device.</p>

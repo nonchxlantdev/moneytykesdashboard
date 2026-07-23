@@ -3,6 +3,7 @@ import {
   IconCalculator,
   IconCalendar,
   IconClipboardList,
+  IconFileCertificate,
   IconLayoutDashboard,
   IconShield,
   IconSun,
@@ -22,31 +23,40 @@ export const navSections = [
   {
     label: "Main",
     items: [
-      { id: "dashboard", label: "Dashboard", view: "dashboard", icon: IconLayoutDashboard },
-      { id: "my-day", label: "My Day", view: "my-day", icon: IconSun },
-      { id: "calendar", label: "Calendar", view: "calendar", icon: IconCalendar }
+      { id: "dashboard", label: "Dashboard", view: "dashboard", icon: IconLayoutDashboard, tourId: "nav-dashboard" },
+      { id: "my-day", label: "My Day", view: "my-day", icon: IconSun, tourId: "nav-my-day" },
+      { id: "calendar", label: "Calendar", view: "calendar", icon: IconCalendar, tourId: "nav-calendar" },
+      {
+        id: "report-cards",
+        label: "Report Cards",
+        view: "report-cards",
+        icon: IconFileCertificate,
+        badge: { text: "New", variant: "soon" },
+        tourId: "nav-report-cards"
+      }
     ]
   },
   {
     label: "Classroom",
     items: [
-      { id: "students", label: "Students", view: "students", icon: IconUsers },
-      { id: "lessons", label: "Lessons", view: "lessons", icon: IconBook },
+      { id: "students", label: "Students", view: "students", icon: IconUsers, tourId: "nav-students" },
+      { id: "lessons", label: "Lessons", view: "lessons", icon: IconBook, tourId: "nav-lessons" },
       {
         id: "quizzes",
         label: "Quizzes & Tests",
         view: "quizzes",
         icon: IconClipboardList,
-        badge: { text: "Soon", variant: "soon" }
+        badge: { text: "Soon", variant: "soon" },
+        tourId: "nav-quizzes"
       },
-      { id: "rewards", label: "Rewards", view: "rewards", icon: IconTrophy },
-      { id: "game", label: "Games", view: "game", icon: IconCalculator }
+      { id: "rewards", label: "Rewards", view: "rewards", icon: IconTrophy, tourId: "nav-rewards" },
+      { id: "game", label: "Games", view: "game", icon: IconCalculator, tourId: "nav-games" }
     ]
   },
   {
     label: "System",
     items: [
-      { id: "admin", label: "Admin", view: "admin", icon: IconShield }
+      { id: "admin", label: "Admin", view: "admin", icon: IconShield, tourId: "nav-admin" }
     ]
   }
 ];

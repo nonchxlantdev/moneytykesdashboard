@@ -57,7 +57,7 @@ export default function LessonsLibrary({ setToast, navigate }) {
       />
 
       <div className="lessons-lib-body">
-        <section className="stats-row lessons-stats" aria-label="Lessons summary">
+        <section className="stats-row lessons-stats" aria-label="Lessons summary" data-tour="lessons-stats">
           <StatCard
             label="TOTAL LESSONS"
             value={lib.stats.total}
@@ -120,7 +120,7 @@ export default function LessonsLibrary({ setToast, navigate }) {
               onDeleteRequest={lib.requestDelete}
             />
           ) : (
-            <div className="lesson-card-grid" aria-label="Lesson cards">
+            <div className="lesson-card-grid" aria-label="Lesson cards" data-tour="lessons-grid">
               {lib.filteredLessons.map(lesson => (
                 <LessonCard
                   key={lesson.id}

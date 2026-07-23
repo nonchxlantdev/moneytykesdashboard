@@ -11,7 +11,9 @@ import ConfirmDeleteModal from "../shared/ConfirmDeleteModal";
 import Select from "../ui/Select";
 import RowOverflowMenu from "../Rewards/RowOverflowMenu";
 import PersonalizationSettings from "./PersonalizationSettings";
+import ReportCardTemplateSettings from "./ReportCardTemplateSettings";
 import "./admin-dashboard.css";
+import "../ReportCards/report-cards.css";
 
 const emptySchoolForm = {
   name: "",
@@ -66,7 +68,7 @@ function StatusBadge({ status }) {
 
 function StatStrip({ stats }) {
   return (
-    <div className="stat-strip" aria-label="Admin statistics">
+    <div className="stat-strip" aria-label="Admin statistics" data-tour="admin-stats">
       {stats.map(stat => {
         const Icon = stat.icon;
         return (
@@ -107,7 +109,7 @@ export default function AdminDashboard({ db, update }) {
   const schools = db.schools || [];
   const teachers = db.teachers || [];
 
-  const [tab, setTab] = useState("schools");
+  const [tab, setTab] = useState("schools"); // schools | teachers | report-template
   const [schoolFormOpen, setSchoolFormOpen] = useState(false);
   const [teacherFormOpen, setTeacherFormOpen] = useState(false);
   const [editingSchoolId, setEditingSchoolId] = useState(null);
@@ -314,19 +316,20 @@ export default function AdminDashboard({ db, update }) {
       <PageChalkBanner
         eyebrow="SYSTEM"
         title="Admin Dashboard"
-        subtitle="Manage schools, teacher accounts, and dashboard personalization."
+        subtitle="Manage schools, teacher accounts, report card templates, and personalization."
       />
 
       <div className="admin-body">
         <StatStrip stats={stats} />
 
         <div className="form-card manage-card">
-          <div className="manage-tabs" role="tablist" aria-label="Manage schools and teachers">
+          <div className="manage-tabs" role="tablist" aria-label="Manage schools, teachers, and report cards" data-tour="admin-tabs">
             <button
               type="button"
               role="tab"
               aria-selected={tab === "schools"}
               className={tab === "schools" ? "manage-tab active" : "manage-tab"}
+              data-tour="admin-tab-schools"
               onClick={() => setTab("schools")}
             >
               Schools
@@ -336,9 +339,20 @@ export default function AdminDashboard({ db, update }) {
               role="tab"
               aria-selected={tab === "teachers"}
               className={tab === "teachers" ? "manage-tab active" : "manage-tab"}
+              data-tour="admin-tab-teachers"
               onClick={() => setTab("teachers")}
             >
               Teachers
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === "report-template"}
+              className={tab === "report-template" ? "manage-tab active" : "manage-tab"}
+              data-tour="admin-tab-template"
+              onClick={() => setTab("report-template")}
+            >
+              Report Card Template
             </button>
           </div>
 
@@ -357,7 +371,8 @@ export default function AdminDashboard({ db, update }) {
                 onEdit={openSchoolForm}
                 onDeleteRequest={confirmDeleteSchool}
               />
-            ) : (
+            ) : null}
+            {tab === "teachers" ? (
               <TeachersPanel
                 teachers={teachers}
                 schools={schools}
@@ -373,7 +388,8 @@ export default function AdminDashboard({ db, update }) {
                 onReassign={openTeacherForm}
                 onDeleteRequest={confirmDeleteTeacher}
               />
-            )}
+            ) : null}
+            {tab === "report-template" ? <ReportCardTemplateSettings schools={schools} teachers={teachers} /> : null}
           </div>
         </div>
 
@@ -494,7 +510,7 @@ function SchoolsPanel({
       )}
 
       {!formOpen ? (
-        <button className="btn primary-gold admin-add-btn" type="button" onClick={() => onOpenForm()}>
+        <button className="btn primary-gold admin-add-btn" type="button" data-tour="admin-add" onClick={() => onOpenForm()}>
           Add School
         </button>
       ) : null}
@@ -629,6 +645,7 @@ function TeachersPanel({
       {!formOpen ? (
         <button
           className="btn primary-gold admin-add-btn"
+          data-tour="admin-add"
           type="button"
           onClick={() => onOpenForm()}
           disabled={!schools.length}
