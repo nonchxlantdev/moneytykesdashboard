@@ -89,6 +89,7 @@ export default function ChalkboardHeader({
   return (
     <header
       className={`chalkboard-header ${animateIntro ? "is-writing" : "is-ready"}`}
+      data-tour="chalkboard"
       aria-label={`Class chalkboard. Welcome, ${teacherName}.`}
     >
       <div ref={containerRef} className="chalkboard-surface">

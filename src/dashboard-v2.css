@@ -28,14 +28,29 @@
   width: 100% !important;
 }
 
-/* Extend chalk flush under the Events column so the wood ledge meets the rail */
-.react-app .dashboard-view .page-swap .dash-home > .chalkboard-header {
+/* Extend chalk flush under the Events column so the wood ledge meets the rail.
+   Target both direct child and tour-wrapper cases so layout stays stable. */
+.react-app .dashboard-view .page-swap .dash-home > .chalkboard-header,
+.react-app .dashboard-view .page-swap .dash-home > [data-tour="chalkboard"] > .chalkboard-header,
+.react-app .dashboard-view .page-swap .dash-home > [data-tour="chalkboard"].chalkboard-header {
   width: calc(100% + var(--mt-events-rail-width));
   max-width: none;
   margin: 0 0 18px;
   border-radius: 0;
   border: 0;
   box-sizing: border-box;
+}
+
+.react-app .dashboard-view .page-swap .dash-home > [data-tour="chalkboard"]:not(.chalkboard-header) {
+  display: block;
+  width: calc(100% + var(--mt-events-rail-width));
+  max-width: none;
+  margin: 0 0 18px;
+}
+
+.react-app .dashboard-view .page-swap .dash-home > [data-tour="chalkboard"]:not(.chalkboard-header) > .chalkboard-header {
+  width: 100%;
+  margin: 0;
 }
 
 /* Center welcome in the visible chalk zone (board extends under Events rail) */
@@ -93,7 +108,10 @@
     padding-right: 0;
   }
 
-  .react-app .dashboard-view .page-swap .dash-home > .chalkboard-header {
+  .react-app .dashboard-view .page-swap .dash-home > .chalkboard-header,
+  .react-app .dashboard-view .page-swap .dash-home > [data-tour="chalkboard"] > .chalkboard-header,
+  .react-app .dashboard-view .page-swap .dash-home > [data-tour="chalkboard"].chalkboard-header,
+  .react-app .dashboard-view .page-swap .dash-home > [data-tour="chalkboard"]:not(.chalkboard-header) {
     width: 100%;
   }
 
@@ -826,7 +844,10 @@
   margin: 0 !important;
 }
 
-.react-app .dashboard.dashboard-view .dash-home > .chalkboard-header {
+.react-app .dashboard.dashboard-view .dash-home > .chalkboard-header,
+.react-app .dashboard.dashboard-view .dash-home > [data-tour="chalkboard"] > .chalkboard-header,
+.react-app .dashboard.dashboard-view .dash-home > [data-tour="chalkboard"].chalkboard-header,
+.react-app .dashboard.dashboard-view .dash-home > [data-tour="chalkboard"]:not(.chalkboard-header) {
   margin-left: 0 !important;
   margin-right: 0 !important;
   border-radius: 0 !important;

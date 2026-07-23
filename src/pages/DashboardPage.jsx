@@ -142,13 +142,11 @@ export default function DashboardPage({ dashboard, db, navigate }) {
 
   return (
     <div className="dash-home">
-      <div data-tour="chalkboard">
-        <ChalkboardHeader
-          teacherName={teacherName}
-          classId={classId}
-          userId={teacherId}
-        />
-      </div>
+      <ChalkboardHeader
+        teacherName={teacherName}
+        classId={classId}
+        userId={teacherId}
+      />
 
       <div className="dash-home-main">
         <div data-tour="class-status">
