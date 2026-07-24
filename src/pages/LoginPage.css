@@ -243,6 +243,17 @@
   outline-offset: 3px;
 }
 
+.mt-login-link-btn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  font-weight: 650;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .mt-access-note {
   margin: 24px 0 0;
   color: #697189;

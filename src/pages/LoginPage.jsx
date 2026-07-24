@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Heart, Lock, Mail } from "lucide-react";
+import { useAuth } from "../auth/AuthProvider";
+import { isSupabaseEnabled } from "../lib/featureFlags";
 import "./LoginPage.css";
 
 const teachersDashboardLogo = `${import.meta.env.BASE_URL}assets/teachersdashboardpng.png`;
@@ -7,6 +9,13 @@ const moneyTykesLogo = `${import.meta.env.BASE_URL}Logo.png`;
 
 function validateEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function loginHomeUrl() {
+  const base = import.meta.env.BASE_URL.endsWith("/")
+    ? import.meta.env.BASE_URL
+    : `${import.meta.env.BASE_URL}/`;
+  return base;
 }
 
 export default function LoginPage() {
@@ -41,12 +50,17 @@ function AuthLayout({ children }) {
 }
 
 function LoginForm() {
-  const [form, setForm] = useState({ email: "", password: "", rememberMe: false });
+  const { signIn, resetPassword, authError } = useAuth();
+  const [form, setForm] = useState({ email: "", password: "", rememberMe: true });
   const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [info, setInfo] = useState("");
+  const supabaseMode = isSupabaseEnabled();
 
   function updateField(field, value) {
     setForm(current => ({ ...current, [field]: value }));
-    setErrors(current => ({ ...current, [field]: "" }));
+    setErrors(current => ({ ...current, [field]: "", form: "" }));
+    setInfo("");
   }
 
   function validateForm() {
@@ -61,21 +75,50 @@ function LoginForm() {
 
     if (!form.password) {
       nextErrors.password = "Please enter your password.";
+    } else if (form.password.length < 8) {
+      nextErrors.password = "Password must be at least 8 characters.";
     }
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   }
 
-  function handleLogin() {
-    // TODO: Connect this placeholder to the teacher dashboard authentication flow.
-    window.location.href = import.meta.env.BASE_URL;
-  }
-
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     if (!validateForm()) return;
-    handleLogin();
+    setSubmitting(true);
+    setInfo("");
+    const result = await signIn({
+      email: form.email,
+      password: form.password,
+      rememberMe: form.rememberMe
+    });
+    setSubmitting(false);
+    if (!result.ok) {
+      setErrors(current => ({
+        ...current,
+        form: result.error || authError || "Sign in failed."
+      }));
+      return;
+    }
+    window.location.href = loginHomeUrl();
+  }
+
+  async function handleForgotPassword(event) {
+    event.preventDefault();
+    const email = form.email.trim();
+    if (!email || !validateEmail(email)) {
+      setErrors(current => ({ ...current, email: "Enter a valid email to reset your password." }));
+      return;
+    }
+    setSubmitting(true);
+    const result = await resetPassword(email);
+    setSubmitting(false);
+    if (!result.ok) {
+      setErrors(current => ({ ...current, form: result.error || "Could not send reset email." }));
+      return;
+    }
+    setInfo("Check your email for a password reset link.");
   }
 
   return (
@@ -86,6 +129,12 @@ function LoginForm() {
         <h1>Welcome back</h1>
         <p className="mt-login-eyebrow">Sign in to your dashboard</p>
       </div>
+
+      {!supabaseMode ? (
+        <p className="mt-access-note" role="status">
+          Demo mode: Supabase auth is off. Any valid email/password (8+ chars) continues locally.
+        </p>
+      ) : null}
 
       <form className="mt-login-form" onSubmit={handleSubmit} noValidate>
         <div className="mt-field-group">
@@ -123,7 +172,11 @@ function LoginForm() {
               placeholder="Enter your password"
             />
           </div>
-          {errors.password && <p className="mt-error-message" id="mt-login-password-error">{errors.password}</p>}
+          {errors.password && (
+            <p className="mt-error-message" id="mt-login-password-error">
+              {errors.password}
+            </p>
+          )}
         </div>
 
         <div className="mt-login-options">
@@ -135,10 +188,17 @@ function LoginForm() {
             />
             <span>Remember me</span>
           </label>
-          <a href="#forgot-password">Forgot password?</a>
+          <button type="button" className="mt-login-link-btn" onClick={handleForgotPassword} disabled={submitting}>
+            Forgot password?
+          </button>
         </div>
 
-        <button className="mt-login-submit" type="submit">Log In</button>
+        {errors.form ? <p className="mt-error-message">{errors.form}</p> : null}
+        {info ? <p className="mt-access-note" role="status">{info}</p> : null}
+
+        <button className="mt-login-submit" type="submit" disabled={submitting}>
+          {submitting ? "Signing in…" : "Log In"}
+        </button>
       </form>
 
       <p className="mt-access-note">Need access? Contact your school administrator.</p>

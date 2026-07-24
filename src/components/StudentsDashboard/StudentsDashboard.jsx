@@ -53,7 +53,8 @@ export default function StudentsDashboard({
   studentFocus,
   setStudentFocus,
   onViewStudent,
-  onEditStudent
+  onEditStudent,
+  canCreateStudents = true
 }) {
   const [classFilter, setClassFilter] = useState(() => {
     try {
@@ -179,15 +180,17 @@ export default function StudentsDashboard({
               <ClipboardCheck size={16} />
               <span>Take Attendance</span>
             </button>
-            <button
-              type="button"
-              className="btn primary"
-              data-tour="students-add"
-              onClick={() => navigate("add-student")}
-            >
-              <UserPlus size={16} />
-              <span>Add Student</span>
-            </button>
+            {canCreateStudents ? (
+              <button
+                type="button"
+                className="btn primary"
+                data-tour="students-add"
+                onClick={() => navigate("add-student")}
+              >
+                <UserPlus size={16} />
+                <span>Add Student</span>
+              </button>
+            ) : null}
           </>
         }
       />
@@ -250,8 +253,8 @@ export default function StudentsDashboard({
             </div>
           ) : (
             <RosterEmptyState
-              onAdd={() => navigate("add-student")}
-              onImport={() => importRef.current?.click()}
+              onAdd={canCreateStudents ? () => navigate("add-student") : undefined}
+              onImport={canCreateStudents ? () => importRef.current?.click() : undefined}
             />
           )}
         </section>

@@ -44,11 +44,18 @@ npm run preview
 Copy `.env.example` to a local `.env` when Supabase is connected:
 
 ```env
+VITE_USE_SUPABASE=false
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-Do not commit `.env`, `.env.local`, or `.env.production`. The current frontend remains localStorage-based and does not yet initialize a Supabase client.
+- Set `VITE_USE_SUPABASE=true` only after migrations + Auth are configured.
+- Do not commit `.env`, `.env.local`, or `.env.production`.
+- Never put the **service role** key in Vite env (Edge Functions only).
+- See [`docs/security.md`](docs/security.md) for RLS, invite flow, and hardening.
+- SQL migrations live in [`supabase/migrations/`](supabase/migrations/); deploy `invite-user` from [`supabase/functions/invite-user/`](supabase/functions/invite-user/).
+
+For GitHub Pages builds, add repository secrets `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, and optional variable `VITE_USE_SUPABASE=true`.
 
 ## Deployment
 

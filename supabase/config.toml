@@ -1,0 +1,8 @@
+# A string identifier for your Supabase project (used by the CLI).
+project_id = "rjqpojykfankjmlpdnca"
+
+[api]
+enabled = true
+
+[db]
+major_version = 15

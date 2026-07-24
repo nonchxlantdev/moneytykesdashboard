@@ -43,6 +43,9 @@ import {
 } from "lucide-react";
 import { moneyMoveQuestions } from "./moneyMoveQuestions";
 import LoginPage from "./pages/LoginPage";
+import { AuthProvider, useAuth } from "./auth/AuthProvider";
+import PageChalkLoader from "./components/shared/PageChalkLoader";
+import { useSupabaseCoreSync } from "./data/useSupabaseCoreSync";
 import RewardsPage from "./pages/RewardsPage";
 import ReportCardsPage from "./pages/ReportCardsPage";
 import AttendancePage from "./pages/Attendance";
@@ -77,7 +80,6 @@ import HowToTour from "./components/Help/HowToTour";
 import { hasSeenHowTo } from "./data/helpTips";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import StudentsDashboard from "./components/StudentsDashboard/StudentsDashboard";
-import PageChalkLoader from "./components/shared/PageChalkLoader";
 import AddStudentWizard from "./components/AddStudent/AddStudentWizard";
 import { ThemeProvider } from "./themes/ThemeContext";
 import { getReportCardsForStudent, getTemplateForSchool, statusLabel } from "./utils/reportCardsStorage";
@@ -218,6 +220,7 @@ function normalizeDatabase(saved) {
 
 function App() {
   const isLoginRoute = window.location.pathname.replace(/\/$/, "").endsWith("/login");
+  const { bootstrapping, isAuthenticated, supabaseMode, isAdmin, profile, signOut } = useAuth();
   const [db, setDb] = useState(loadDatabase);
   const [view, setView] = useState("dashboard");
   const [currentTip, setCurrentTip] = useState(() => randomFinancialTip());
@@ -242,6 +245,49 @@ function App() {
   const [pageLoading, setPageLoading] = useState(false);
   const mainContentRef = useRef(null);
   const pageLoadTimerRef = useRef(null);
+  const { refresh: refreshCoreData } = useSupabaseCoreSync({
+    enabled: supabaseMode && isAuthenticated,
+    setDb,
+    setToast
+  });
+
+  // Sync signed-in profile into the local db.teacher singleton used by headers/pages.
+  useEffect(() => {
+    if (!profile) return;
+    setDb(current => ({
+      ...current,
+      teacher: {
+        ...current.teacher,
+        id: profile.id,
+        first: profile.first_name || current.teacher?.first || "",
+        last: profile.last_name || current.teacher?.last || "",
+        email: profile.email || current.teacher?.email || ""
+      }
+    }));
+  }, [profile]);
+
+  // Session gate: Supabase mode requires auth for the dashboard; send authed users away from /login.
+  useEffect(() => {
+    if (bootstrapping) return;
+    const base = import.meta.env.BASE_URL.endsWith("/")
+      ? import.meta.env.BASE_URL
+      : `${import.meta.env.BASE_URL}/`;
+    if (supabaseMode && !isAuthenticated && !isLoginRoute) {
+      window.location.replace(`${base}login`);
+      return;
+    }
+    if (isAuthenticated && isLoginRoute) {
+      window.location.replace(base);
+    }
+  }, [bootstrapping, isAuthenticated, isLoginRoute, supabaseMode]);
+
+  // Teachers must not land on Admin even via deep link / tour.
+  useEffect(() => {
+    if (view !== "admin") return;
+    if (isAdmin) return;
+    setView("dashboard");
+    setToast("Admin is only available to school administrators.");
+  }, [isAdmin, view]);
 
   useEffect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(db)), [db]);
   useEffect(() => {
@@ -335,6 +381,10 @@ function App() {
 
   function navigate(nextView, options = {}) {
     if (nextView === "quiz-test") nextView = "quizzes";
+    if (nextView === "add-student" && !isAdmin && !options.editStudentId) {
+      setToast("Only school administrators can create students.");
+      return;
+    }
     if (pageLoadTimerRef.current) {
       window.clearTimeout(pageLoadTimerRef.current);
       pageLoadTimerRef.current = null;
@@ -400,8 +450,18 @@ function App() {
     update,
     navigate,
     setToast,
-    calendarEvents
+    calendarEvents,
+    isAdmin,
+    refreshCoreData
   };
+
+  if (bootstrapping) {
+    return (
+      <div className="app-shell react-app theme-light" style={{ minHeight: "100vh" }}>
+        <PageChalkLoader active />
+      </div>
+    );
+  }
 
   if (isLoginRoute) return <LoginPage />;
 
@@ -422,6 +482,8 @@ function App() {
         toggleCollapsed={() => setSidebarHidden(!sidebarHidden)}
         closeMenu={closeSidebarMenu}
         onOpenHowTo={openHowToWalkthrough}
+        isAdmin={isAdmin}
+        onSignOut={signOut}
       />
       {menuOpen && <button className="sidebar-backdrop" type="button" aria-label="Close navigation menu" onClick={closeSidebarMenu} />}
       <main
@@ -437,7 +499,9 @@ function App() {
 
         <div className="view active page-swap">
           <PageChalkLoader active={pageLoading} />
-          {!pageLoading && view === "admin" && <AdminDashboard db={db} update={update} />}
+          {!pageLoading && view === "admin" && isAdmin && (
+            <AdminDashboard db={db} update={update} onCoreRefresh={refreshCoreData} />
+          )}
           {!pageLoading && view === "dashboard" && <DashboardPage {...pageProps} />}
           {!pageLoading && view === "my-day" && (
             <MyDayPage db={db} setToast={setToast} navigate={navigate} currentTip={currentTip} />
@@ -492,11 +556,30 @@ function App() {
   );
 }
 
-function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, closeMenu, onOpenHowTo }) {
+function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, closeMenu, onOpenHowTo, isAdmin = false, onSignOut }) {
   const logoSrc = `${import.meta.env.BASE_URL}Logo.png`;
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
-  function goToLogin() {
+  const visibleSections = useMemo(
+    () =>
+      navSections
+        .map(section => ({
+          ...section,
+          items: section.items.filter(item => {
+            if (item.view === "admin") return Boolean(isAdmin);
+            return true;
+          })
+        }))
+        .filter(section => section.items.length > 0 || section.label === "System"),
+    [isAdmin]
+  );
+
+  async function goToLogin() {
+    try {
+      await onSignOut?.();
+    } catch {
+      /* still leave the app */
+    }
     const base = import.meta.env.BASE_URL.endsWith("/")
       ? import.meta.env.BASE_URL
       : `${import.meta.env.BASE_URL}/`;
@@ -530,7 +613,7 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
       </button>
 
       <div className="sidebar-scroll mt-sidebar-scroll">
-        {navSections.map(section => (
+        {visibleSections.map(section => (
           <nav className="nav-section" key={section.label} aria-label={section.label}>
             <p className="nav-section-label">{section.label}</p>
             <div className="nav-list">
@@ -570,6 +653,7 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
                     className="nav-item sidebar-logout"
                     title="Log out"
                     aria-label="Log out"
+                    data-tour="nav-logout"
                     onClick={() => setLogoutConfirmOpen(true)}
                   >
                     <LogOut size={ICON_SIZE} strokeWidth={ICON_STROKE} aria-hidden="true" />
@@ -582,18 +666,18 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
         ))}
       </div>
 
-      <div className="sidebar-brand-footer" aria-hidden={collapsed}>
-        <img className="sidebar-brand-logo" src={logoSrc} alt="MoneyTykes" />
+      <div className="sidebar-brand">
+        <img src={logoSrc} alt="MoneyTykes" />
       </div>
 
       {logoutConfirmOpen
         ? createPortal(
             <div
               className="modal-backdrop show logout-confirm-backdrop"
+              role="presentation"
               onClick={event => {
                 if (event.target === event.currentTarget) setLogoutConfirmOpen(false);
               }}
-              role="presentation"
             >
               <div
                 className="modal-card logout-confirm-card"
@@ -602,16 +686,15 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
                 aria-labelledby="logout-confirm-title"
               >
                 <div className="modal-icon logout-confirm-icon" aria-hidden="true">
-                  <LogOut size={22} strokeWidth={2.25} />
+                  <LogOut size={22} />
                 </div>
                 <h3 id="logout-confirm-title">Log out?</h3>
                 <p>You&apos;ll be returned to the login screen. You can sign back in anytime.</p>
                 <div className="modal-actions">
                   <button type="button" className="btn" onClick={() => setLogoutConfirmOpen(false)}>
-                    Cancel
+                    Stay signed in
                   </button>
-                  <button type="button" className="btn danger-btn" onClick={goToLogin}>
-                    <LogOut size={15} strokeWidth={2.25} />
+                  <button type="button" className="btn primary" onClick={goToLogin}>
                     Log out
                   </button>
                 </div>
@@ -685,10 +768,14 @@ function NavButton({ item, active, navigate, compact = false, showLabel = true, 
   );
 }
 
-function Students({ db, update, studentFocus, setStudentFocus, navigate, setToast }) {
+function Students({ db, update, studentFocus, setStudentFocus, navigate, setToast, isAdmin }) {
   const [viewingStudent, setViewingStudent] = useState(null);
 
   function deleteStudent(student) {
+    if (!isAdmin) {
+      setToast?.("Only school administrators can delete students.");
+      return;
+    }
     if (!window.confirm(`Delete ${student.first} ${student.last}? This cannot be undone.`)) return;
     update(dbState => {
       dbState.students = dbState.students.filter(item => item.id !== student.id);
@@ -722,6 +809,7 @@ function Students({ db, update, studentFocus, setStudentFocus, navigate, setToas
         onViewStudent={setViewingStudent}
         onEditStudent={openEditStudent}
         onDeleteStudent={deleteStudent}
+        canCreateStudents={Boolean(isAdmin)}
       />
     </>
   );
@@ -738,7 +826,7 @@ function calculateAgeFromDob(dateOfBirth) {
   return age >= 0 ? String(age) : "";
 }
 
-function AddStudentPage({ db, update, navigate, editingStudentId, setEditingStudentId }) {
+function AddStudentPage({ db, update, navigate, editingStudentId, setEditingStudentId, refreshCoreData }) {
   const editingStudent = editingStudentId
     ? db.students.find(student => student.id === editingStudentId)
     : null;
@@ -756,6 +844,7 @@ function AddStudentPage({ db, update, navigate, editingStudentId, setEditingStud
       editingStudent={editingStudent}
       onCancel={returnToStudents}
       onSuccess={returnToStudents}
+      onCoreRefresh={refreshCoreData}
     />
   );
 }
@@ -1808,4 +1897,8 @@ seedMockData();
 const rootEl = document.getElementById("root");
 const appRoot = rootEl._mtReactRoot ?? createRoot(rootEl);
 rootEl._mtReactRoot = appRoot;
-appRoot.render(<App />);
+appRoot.render(
+  <AuthProvider>
+    <App />
+  </AuthProvider>
+);

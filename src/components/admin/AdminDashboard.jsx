@@ -13,6 +13,11 @@ import Select from "../ui/Select";
 import RowOverflowMenu from "../Rewards/RowOverflowMenu";
 import PersonalizationSettings from "./PersonalizationSettings";
 import ReportCardTemplateSettings from "./ReportCardTemplateSettings";
+import { isSupabaseEnabled } from "../../lib/featureFlags";
+import { inviteUser } from "../../data/inviteUser";
+import { deleteClass, upsertClass } from "../../data/classesRepo";
+import { updateTeacherProfile } from "../../data/profilesRepo";
+import { deleteSchool, upsertSchool } from "../../data/schoolsRepo";
 import "./admin-dashboard.css";
 import "../ReportCards/report-cards.css";
 
@@ -113,10 +118,11 @@ function CompactRow({ icon, title, subtitle, status, menuItems }) {
   );
 }
 
-export default function AdminDashboard({ db, update }) {
+export default function AdminDashboard({ db, update, onCoreRefresh }) {
   const schools = db.schools || [];
   const teachers = db.teachers || [];
   const classes = db.classes || [];
+  const supabaseMode = isSupabaseEnabled();
 
   const [tab, setTab] = useState("schools"); // schools | teachers | classes | report-template
   const [schoolFormOpen, setSchoolFormOpen] = useState(false);
@@ -170,7 +176,7 @@ export default function AdminDashboard({ db, update }) {
     setSchoolError("");
   }
 
-  function saveSchool(event) {
+  async function saveSchool(event) {
     event.preventDefault();
     if (
       !schoolForm.name.trim() ||
@@ -186,6 +192,23 @@ export default function AdminDashboard({ db, update }) {
       setSchoolError("Please enter a valid school email.");
       return;
     }
+
+    if (supabaseMode) {
+      try {
+        await upsertSchool({
+          id: editingSchoolId || undefined,
+          ...schoolForm,
+          name: schoolForm.name.trim()
+        });
+        await onCoreRefresh?.();
+        update(() => {}, editingSchoolId ? "School updated" : "School added");
+        closeSchoolForm();
+      } catch (error) {
+        setSchoolError(error.message || "Could not save school.");
+      }
+      return;
+    }
+
     update(next => {
       if (editingSchoolId) {
         next.schools = next.schools.map(school =>
@@ -246,10 +269,33 @@ export default function AdminDashboard({ db, update }) {
     setTeacherError("");
   }
 
-  function createTeacherAccount(nextTeacher) {
-    // TODO: create teacher auth user in Supabase.
-    // TODO: save teacher profile to Supabase.
-    // TODO: link teacher auth user to assigned school.
+  async function createTeacherAccount(nextTeacher) {
+    if (supabaseMode) {
+      try {
+        if (editingTeacherId) {
+          await updateTeacherProfile(editingTeacherId, nextTeacher);
+        } else {
+          await inviteUser({
+            email: nextTeacher.email,
+            firstName: nextTeacher.firstName,
+            lastName: nextTeacher.lastName,
+            role: nextTeacher.role,
+            schoolId: nextTeacher.schoolId,
+            temporaryPassword: teacherForm.temporaryPassword !== "********"
+              ? teacherForm.temporaryPassword
+              : undefined
+          });
+        }
+        await onCoreRefresh?.();
+        update(() => {}, editingTeacherId ? "Teacher updated" : "Teacher invited");
+      } catch (error) {
+        setTeacherError(error.message || "Could not save teacher.");
+        throw error;
+      }
+      return;
+    }
+
+    // Local demo path (pre-Supabase).
     update(next => {
       if (editingTeacherId) {
         next.teachers = next.teachers.map(teacher =>
@@ -267,7 +313,7 @@ export default function AdminDashboard({ db, update }) {
     }, editingTeacherId ? "Teacher updated" : "Teacher added");
   }
 
-  function saveTeacher(event) {
+  async function saveTeacher(event) {
     event.preventDefault();
     if (!teacherForm.firstName.trim() || !teacherForm.lastName.trim()) {
       setTeacherError("First and last name are required.");
@@ -277,25 +323,29 @@ export default function AdminDashboard({ db, update }) {
       setTeacherError("Please enter a valid teacher email.");
       return;
     }
-    if (!teacherForm.temporaryPassword.trim()) {
+    if (!editingTeacherId && !teacherForm.temporaryPassword.trim()) {
       setTeacherError("Temporary password is required for new teachers.");
       return;
     }
-    const school = schools.find(item => item.id === Number(teacherForm.schoolId));
+    const school = schools.find(item => String(item.id) === String(teacherForm.schoolId));
     if (!school) {
       setTeacherError("Please assign a school.");
       return;
     }
-    createTeacherAccount({
-      firstName: teacherForm.firstName.trim(),
-      lastName: teacherForm.lastName.trim(),
-      email: teacherForm.email.trim(),
-      schoolId: school.id,
-      schoolName: school.name,
-      role: teacherForm.role,
-      status: teacherForm.status
-    });
-    closeTeacherForm();
+    try {
+      await createTeacherAccount({
+        firstName: teacherForm.firstName.trim(),
+        lastName: teacherForm.lastName.trim(),
+        email: teacherForm.email.trim(),
+        schoolId: school.id,
+        schoolName: school.name,
+        role: teacherForm.role,
+        status: teacherForm.status
+      });
+      closeTeacherForm();
+    } catch {
+      /* error already surfaced */
+    }
   }
 
   function openClassForm(classroom) {
@@ -326,19 +376,19 @@ export default function AdminDashboard({ db, update }) {
     setClassError("");
   }
 
-  function saveClass(event) {
+  async function saveClass(event) {
     event.preventDefault();
     const name = classForm.name.trim();
     if (!name) {
       setClassError("Class name is required (e.g. Standard 4A).");
       return;
     }
-    const school = schools.find(item => item.id === Number(classForm.schoolId));
+    const school = schools.find(item => String(item.id) === String(classForm.schoolId));
     if (!school) {
       setClassError("Please assign a school.");
       return;
     }
-    const teacher = teachers.find(item => item.id === Number(classForm.teacherId));
+    const teacher = teachers.find(item => String(item.id) === String(classForm.teacherId));
     const duplicate = classes.find(
       item =>
         item.id !== editingClassId &&
@@ -358,6 +408,18 @@ export default function AdminDashboard({ db, update }) {
       teacherName: teacher ? `${teacher.firstName} ${teacher.lastName}` : "",
       status: classForm.status || "active"
     };
+
+    if (supabaseMode) {
+      try {
+        await upsertClass({ id: editingClassId || undefined, ...payload });
+        await onCoreRefresh?.();
+        update(() => {}, editingClassId ? "Class updated" : "Class added");
+        closeClassForm();
+      } catch (error) {
+        setClassError(error.message || "Could not save class.");
+      }
+      return;
+    }
 
     update(next => {
       if (!next.classes) next.classes = [];
@@ -404,8 +466,44 @@ export default function AdminDashboard({ db, update }) {
     });
   }
 
-  function performDelete() {
+  async function performDelete() {
     if (!deleteTarget) return;
+
+    if (supabaseMode) {
+      try {
+        if (deleteTarget.type === "school") {
+          await deleteSchool(deleteTarget.id);
+          if (editingSchoolId === deleteTarget.id) closeSchoolForm();
+        } else if (deleteTarget.type === "class") {
+          await deleteClass(deleteTarget.id);
+          if (editingClassId === deleteTarget.id) closeClassForm();
+        } else if (deleteTarget.type === "teacher") {
+          await updateTeacherProfile(deleteTarget.id, {
+            firstName: deleteTarget.label.split(" ")[0] || "",
+            lastName: deleteTarget.label.split(" ").slice(1).join(" ") || "",
+            email: "",
+            schoolId: null,
+            role: "Teacher",
+            status: "inactive"
+          });
+          if (editingTeacherId === deleteTarget.id) closeTeacherForm();
+        }
+        await onCoreRefresh?.();
+        update(
+          () => {},
+          deleteTarget.type === "school"
+            ? "School deleted"
+            : deleteTarget.type === "class"
+              ? "Class deleted"
+              : "Teacher deactivated"
+        );
+      } catch (error) {
+        update(() => {}, error.message || "Delete failed");
+      }
+      setDeleteTarget(null);
+      return;
+    }
+
     if (deleteTarget.type === "school") {
       update(next => {
         next.schools = next.schools.filter(school => school.id !== deleteTarget.id);

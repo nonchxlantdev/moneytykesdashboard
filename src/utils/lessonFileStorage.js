@@ -56,6 +56,7 @@ function runTransaction(mode, action) {
 /**
  * Store a lesson attachment locally for development/testing.
  * IndexedDB is intentionally isolated behind this adapter for a later Supabase swap.
+ * Prefer `uploadLessonFileToSupabase` when VITE_USE_SUPABASE=true.
  */
 export async function storeLessonFile(file) {
   const record = {
@@ -85,3 +86,28 @@ export function deleteLessonFile(fileId) {
   if (!fileId) return Promise.resolve();
   return runTransaction("readwrite", store => store.delete(fileId));
 }
+
+/**
+ * Upload a lesson file to the private `lesson-files` Storage bucket.
+ * Path: `{userId}/{fileId}-{safeName}`
+ */
+export async function uploadLessonFileToSupabase(file, userId) {
+  const { requireSupabase } = await import("../lib/supabaseClient");
+  const client = requireSupabase();
+  const fileId = createFileId();
+  const safeName = String(file.name || "file").replace(/[^\w.\-]+/g, "_");
+  const path = `${userId}/${fileId}-${safeName}`;
+  const { error } = await client.storage.from("lesson-files").upload(path, file, {
+    contentType: file.type || "application/octet-stream",
+    upsert: false
+  });
+  if (error) throw error;
+  return {
+    fileId: path,
+    fileName: file.name,
+    fileMimeType: file.type || "application/octet-stream",
+    fileSize: file.size,
+    storageBucket: "lesson-files"
+  };
+}
+

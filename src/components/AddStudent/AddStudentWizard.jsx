@@ -8,6 +8,8 @@ import StepStudentInfo from "./StepStudentInfo";
 import StudentCardPreview from "./StudentCardPreview";
 import useAddStudentForm from "./useAddStudentForm";
 import WizardProgress, { STEPS } from "./WizardProgress";
+import { isSupabaseEnabled } from "../../lib/featureFlags";
+import { createStudent, updateStudent } from "../../data/studentsRepo";
 import "./add-student-wizard.css";
 
 function calculateAgeFromDob(dateOfBirth) {
@@ -27,7 +29,8 @@ export default function AddStudentWizard({
   navigate,
   editingStudent = null,
   onCancel,
-  onSuccess
+  onSuccess,
+  onCoreRefresh
 }) {
   const { step, setStep, data, update: patch, reset } = useAddStudentForm(editingStudent);
   const [error, setError] = useState("");
@@ -105,25 +108,52 @@ export default function AddStudentWizard({
       email: ""
     };
 
-    update(dbState => {
-      if (editingStudent) {
-        const student = dbState.students.find(item => item.id === editingStudent.id);
-        if (!student) return;
-        Object.assign(student, studentPayload);
+    async function persist() {
+      if (isSupabaseEnabled()) {
+        if (editingStudent) {
+          await updateStudent(editingStudent.id, { ...editingStudent, ...studentPayload });
+        } else {
+          await createStudent({
+            ...studentPayload,
+            balance: 0,
+            totalEarned: 0,
+            streak: 0,
+            status: "inactive"
+          });
+        }
+        await onCoreRefresh?.();
         return;
       }
-      dbState.students.push({
-        id: Date.now(),
-        balance: 0,
-        totalEarned: 0,
-        streak: 0,
-        status: "inactive",
-        ...studentPayload
-      });
-    }, isEditing ? "Student updated" : "Student added");
 
-    reset();
-    onSuccess?.();
+      update(dbState => {
+        if (editingStudent) {
+          const student = dbState.students.find(item => item.id === editingStudent.id);
+          if (!student) return;
+          Object.assign(student, studentPayload);
+          return;
+        }
+        dbState.students.push({
+          id: Date.now(),
+          balance: 0,
+          totalEarned: 0,
+          streak: 0,
+          status: "inactive",
+          ...studentPayload
+        });
+      }, isEditing ? "Student updated" : "Student added");
+    }
+
+    persist()
+      .then(() => {
+        if (isSupabaseEnabled()) {
+          update(() => {}, isEditing ? "Student updated" : "Student added");
+        }
+        reset();
+        onSuccess?.();
+      })
+      .catch(err => {
+        setError(err.message || "Could not save student.");
+      });
   }
 
   return (

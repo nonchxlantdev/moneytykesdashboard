@@ -19,6 +19,8 @@ import {
   upsertReflection
 } from "../../utils/myDayStorage";
 import { playStampSound } from "../../utils/stampSound";
+import { isSupabaseEnabled } from "../../lib/featureFlags";
+import { upsertMyDayReflection } from "../../data/domainRepos";
 import "./my-day.css";
 
 /** Pushpin graphic rendered as a sibling of the pinned card — never clipped by
@@ -231,14 +233,23 @@ export default function MyDayPage({ db, setToast, navigate, currentTip }) {
     setNotes(current => (current || []).filter(note => note.id !== id));
   }
 
-  function saveReflection(event) {
+  async function saveReflection(event) {
     event.preventDefault();
     if (teacherId == null) return;
     if (!mood) {
       setToast?.("Pick a mood for today.");
       return;
     }
-    upsertReflection({ teacherId, date: todayKey, mood, notes: reflectionNotes.trim() });
+    const notes = reflectionNotes.trim();
+    upsertReflection({ teacherId, date: todayKey, mood, notes });
+    if (isSupabaseEnabled()) {
+      try {
+        await upsertMyDayReflection({ teacherId, date: todayKey, mood, notes });
+      } catch (error) {
+        setToast?.(error.message || "Could not sync reflection to the cloud.");
+        return;
+      }
+    }
     setReflectionTick(n => n + 1);
     setToast?.("Reflection saved.");
   }
