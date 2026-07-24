@@ -8,8 +8,6 @@
 
 const STORAGE_KEY = "moneytykes.teacher.dashboard.v3";
 const SEED_MARKER = "moneytykes.seed.demo.v5";
-const LESSONS_SEED_MARKER = "moneytykes.seed.lessons.curriculum.v6";
-const CALENDAR_KEY = "calendar_events";
 const REWARDS_BANK_KEY = "rewards_bank";
 const CREATED_LESSONS_KEY = "created_lessons";
 
@@ -369,27 +367,20 @@ function isDemoLessonId(id) {
 }
 
 /**
- * Replace seeded demo lessons (ids 8000–8999) with the latest curriculum pack.
- * Keeps any teacher-created lessons outside that id range.
+ * Demo curriculum seeding is retired. Strip leftover demo lesson ids (8000–8999)
+ * without re-injecting the pack.
  */
 function refreshDemoCurriculumLessons() {
-  if (localStorage.getItem(LESSONS_SEED_MARKER)) return;
-
   try {
     const existing = JSON.parse(localStorage.getItem(CREATED_LESSONS_KEY) || "[]");
-    const teacherLessons = Array.isArray(existing)
-      ? existing.filter(lesson => !isDemoLessonId(lesson?.id))
-      : [];
-    const demoLessons = buildCreatedLessons(new Date());
-    localStorage.setItem(CREATED_LESSONS_KEY, JSON.stringify([...demoLessons, ...teacherLessons]));
+    if (!Array.isArray(existing) || !existing.some(lesson => isDemoLessonId(lesson?.id))) {
+      return;
+    }
+    const teacherLessons = existing.filter(lesson => !isDemoLessonId(lesson?.id));
+    localStorage.setItem(CREATED_LESSONS_KEY, JSON.stringify(teacherLessons));
   } catch {
     // Ignore parse errors — leave teacher data alone.
   }
-
-  ["v1", "v2", "v3", "v4", "v5"].forEach(version => {
-    localStorage.removeItem(`moneytykes.seed.lessons.curriculum.${version}`);
-  });
-  localStorage.setItem(LESSONS_SEED_MARKER, "1");
 }
 
 function syncDemoRoster(existing) {
@@ -427,12 +418,6 @@ function syncDemoRoster(existing) {
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   localStorage.setItem(REWARDS_BANK_KEY, JSON.stringify(REWARD_BANK));
-  if (!localStorage.getItem(CREATED_LESSONS_KEY)) {
-    localStorage.setItem(CREATED_LESSONS_KEY, JSON.stringify(buildCreatedLessons(todayDate)));
-  }
-  if (!localStorage.getItem(CALENDAR_KEY)) {
-    localStorage.setItem(CALENDAR_KEY, JSON.stringify(buildCalendarEvents(todayDate)));
-  }
 
   students.forEach(student => {
     localStorage.setItem(`student_points_${student.id}`, JSON.stringify(student.totalEarned));
@@ -494,8 +479,6 @@ export function seedMockData() {
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
     localStorage.setItem(REWARDS_BANK_KEY, JSON.stringify(REWARD_BANK));
-    localStorage.setItem(CREATED_LESSONS_KEY, JSON.stringify(buildCreatedLessons(todayDate)));
-    localStorage.setItem(CALENDAR_KEY, JSON.stringify(buildCalendarEvents(todayDate)));
 
     students.forEach(student => {
       localStorage.setItem(`student_points_${student.id}`, JSON.stringify(student.totalEarned));

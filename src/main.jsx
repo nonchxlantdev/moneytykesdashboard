@@ -55,7 +55,7 @@ import Topbar from "./components/Topbar";
 import EventsRail from "./components/EventsRail";
 import Select from "./components/ui/Select";
 import { useLocalStorage } from "./hooks/useLocalStorage";
-import { purgeLegacyMockData } from "./utils/purgeMockData";
+import { purgeDemoCalendarAndLessons, purgeLegacyMockData } from "./utils/purgeMockData";
 import { seedMockData } from "./data/seedMockData";
 import { formatPoints } from "./utils/points";
 import "../styles.css";
@@ -172,6 +172,7 @@ function resolveDefaultSchoolFilter(db) {
 
 function loadDatabase() {
   purgeLegacyMockData();
+  purgeDemoCalendarAndLessons();
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || createDatabase();
     return normalizeDatabase(saved);
@@ -1889,9 +1890,9 @@ function shuffleQuestions(questions) {
   return shuffled;
 }
 
-// Clear any legacy demo data first, then seed a fresh demo dataset (once) so
-// every feature has data to explore. Both are guarded no-ops on return visits.
+// Clear legacy demo data, strip seeded calendar/lessons, then seed remaining demo once.
 purgeLegacyMockData();
+purgeDemoCalendarAndLessons();
 seedMockData();
 
 const rootEl = document.getElementById("root");
