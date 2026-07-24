@@ -9,7 +9,9 @@ export async function inviteUser({
   lastName,
   role,
   schoolId,
-  temporaryPassword
+  temporaryPassword,
+  gender,
+  dateOfBirth
 }) {
   const client = requireSupabase();
   const { data, error } = await client.functions.invoke("invite-user", {
@@ -19,7 +21,9 @@ export async function inviteUser({
       lastName: String(lastName || "").trim(),
       role: String(role || "teacher"),
       schoolId,
-      temporaryPassword: temporaryPassword || undefined
+      temporaryPassword: temporaryPassword || undefined,
+      gender: gender || undefined,
+      dateOfBirth: dateOfBirth || undefined
     }
   });
 

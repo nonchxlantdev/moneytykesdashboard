@@ -11,31 +11,24 @@ From the repo root (with Supabase CLI linked):
 supabase db push
 ```
 
-Or paste SQL from `supabase/migrations/` in the SQL editor, in filename order.
+Or paste SQL from `supabase/migrations/` in the SQL editor, in filename order.  
+Newest roles migration: `20260724130000_profiles_roles_gender_dob.sql` (Dev / Class Admin / Teacher + gender + DOB).
 
-## 3. Deploy Edge Function
+## 3. Deploy Edge Functions
 
 ```bash
 supabase functions deploy invite-user
+supabase functions deploy admin-reset-password
 supabase secrets set SUPABASE_SERVICE_ROLE_KEY=... ALLOWED_ORIGIN=https://nonchxlantdev.github.io
 ```
 
-## 4. Bootstrap first admin
-After creating an Auth user in the dashboard:
+## 4. Bootstrap first Dev
+After creating an Auth user in the dashboard, run [`bootstrap_admin.sql`](bootstrap_admin.sql) in the SQL editor (sets `glenrickmspain@hotmail.com` to role `dev`).
 
-```sql
-insert into public.schools (id, name) values ('00000000-0000-0000-0000-000000000001', 'MoneyTykes Classroom');
-insert into public.profiles (id, email, first_name, last_name, role, school_id, status)
-values (
-  '<AUTH_USER_UUID>',
-  'shamira.young@moneytykes.school',
-  'Shamira',
-  'Young',
-  'school_admin',
-  '00000000-0000-0000-0000-000000000001',
-  'active'
-);
-```
+Roles:
+- `dev` — Admin + all schools
+- `class_admin` — Admin + own school
+- `teacher` — no Admin section
 
 ## 5. Enable in the SPA
 Set in `.env` / GitHub secrets:

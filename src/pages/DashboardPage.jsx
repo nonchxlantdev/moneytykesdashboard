@@ -55,11 +55,12 @@ function taskStatus(task) {
  * Events, quick actions, and daily tip live in EventsRail.
  */
 export default function DashboardPage({ dashboard, db, navigate }) {
-  const teacherLast = String(db.teacher?.last || "Young").trim() || "Young";
-  const teacherName = `Ms. ${teacherLast}`;
+  const teacherFirst = String(db.teacher?.first || "").trim();
+  const teacherLast = String(db.teacher?.last || "").trim();
+  const teacherName = teacherFirst || teacherLast || "Teacher";
   const className = db.className || "Class";
   const classId = slugClass(className) || "class";
-  const teacherId = db.teacher?.id || db.teacher?.email || teacherLast;
+  const teacherId = db.teacher?.id || db.teacher?.email || teacherName;
 
   const attendance = useMemo(() => {
     const classStudents = (db.students || []).filter(

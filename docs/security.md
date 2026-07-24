@@ -15,8 +15,11 @@ Never put `SUPABASE_SERVICE_ROLE_KEY` in Vite env, the SPA, or GitHub Pages buil
 
 ## Roles (v1)
 
-- `school_admin` — Admin nav, invite teachers/admins, manage schools/classes/students
+- `dev` — Admin nav, all schools, can invite Dev / Class Admin / Teacher
+- `class_admin` — Admin nav, own school only; can invite Class Admin / Teacher
 - `teacher` — Classroom tools only; no Admin nav; cannot create students/teachers
+
+Legacy `school_admin` is migrated to `class_admin`.
 
 ## Environment
 
@@ -43,8 +46,8 @@ GitHub Actions Pages build secrets (same names). Edge Function secrets:
 ## Deploy order
 
 1. Apply migrations in `supabase/migrations/`
-2. Deploy `invite-user` Edge Function
-3. Create first school + first `school_admin` profile linked to `auth.users` (SQL or dashboard)
+2. Deploy `invite-user` and `admin-reset-password` Edge Functions
+3. Run `bootstrap_admin.sql` so your account is `dev`
 4. Set `VITE_USE_SUPABASE=true` and rebuild Pages
 
 ## Checklist

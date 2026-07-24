@@ -1,5 +1,8 @@
 /** Map Postgres snake_case rows ↔ dashboard camelCase shapes. */
 
+import { calculateAgeFromDob } from "../utils/ageFromDob";
+import { roleLabel } from "../auth/roles";
+
 export function mapSchool(row) {
   if (!row) return null;
   return {
@@ -16,6 +19,7 @@ export function mapSchool(row) {
 
 export function mapProfileAsTeacher(row) {
   if (!row) return null;
+  const dateOfBirth = row.date_of_birth || "";
   return {
     id: row.id,
     firstName: row.first_name || "",
@@ -23,7 +27,11 @@ export function mapProfileAsTeacher(row) {
     email: row.email || "",
     schoolId: row.school_id,
     schoolName: row.school_name || "",
-    role: row.role === "school_admin" ? "School Admin" : "Teacher",
+    role: roleLabel(row.role),
+    roleKey: row.role,
+    gender: row.gender || "",
+    dateOfBirth,
+    age: calculateAgeFromDob(dateOfBirth),
     status: row.status || "active",
     createdAt: row.created_at
   };

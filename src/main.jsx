@@ -286,7 +286,7 @@ function App() {
     if (view !== "admin") return;
     if (isAdmin) return;
     setView("dashboard");
-    setToast("Admin is only available to school administrators.");
+    setToast("Admin is only available to Dev and Class Admin.");
   }, [isAdmin, view]);
 
   useEffect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(db)), [db]);

@@ -1,5 +1,6 @@
 import { requireSupabase } from "../lib/supabaseClient";
 import { mapProfileAsTeacher } from "./mappers";
+import { normalizeRole, ROLES } from "../auth/roles";
 
 export async function listTeachersForSchool(schoolId) {
   const client = requireSupabase();
@@ -20,15 +21,20 @@ export async function listTeachersForSchool(schoolId) {
 
 export async function updateTeacherProfile(id, patch) {
   const client = requireSupabase();
+  const role = normalizeRole(patch.role);
   const payload = {
     first_name: patch.firstName,
     last_name: patch.lastName,
     email: patch.email,
     school_id: patch.schoolId,
-    role: String(patch.role || "").toLowerCase().includes("admin") ? "school_admin" : "teacher",
-    status: patch.status || "active"
+    role,
+    status: patch.status || "active",
+    gender: patch.gender === "male" || patch.gender === "female" ? patch.gender : "",
+    date_of_birth: patch.dateOfBirth || null
   };
   const { data, error } = await client.from("profiles").update(payload).eq("id", id).select("*").single();
   if (error) throw error;
   return mapProfileAsTeacher(data);
 }
+
+export { ROLES };

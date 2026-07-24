@@ -8,7 +8,7 @@ const AuthContext = createContext(null);
 async function fetchProfile(userId) {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, email, first_name, last_name, role, school_id, status")
+    .select("id, email, first_name, last_name, role, school_id, status, gender, date_of_birth")
     .eq("id", userId)
     .maybeSingle();
   if (error) throw error;

@@ -19,10 +19,31 @@ function json(status, body) {
   });
 }
 
-function normalizeRole(role) {
+function normalizeRole(role, actorRole) {
   const value = String(role || "").toLowerCase().replace(/\s+/g, "_");
-  if (value.includes("admin")) return "school_admin";
+  if (value === "dev" || value.includes("developer")) {
+    if (actorRole !== "dev") return null; // only Dev may invite Dev
+    return "dev";
+  }
+  if (
+    value === "class_admin" ||
+    value === "school_admin" ||
+    value.includes("class_admin") ||
+    value.includes("admin")
+  ) {
+    return "class_admin";
+  }
   return "teacher";
+}
+
+function isElevated(role) {
+  return role === "dev" || role === "class_admin" || role === "school_admin";
+}
+
+function normalizeGender(gender) {
+  const value = String(gender || "").toLowerCase().trim();
+  if (value === "male" || value === "female") return value;
+  return "";
 }
 
 async function assertRateLimit(admin, key) {
@@ -82,8 +103,8 @@ Deno.serve(async req => {
       .eq("id", actorId)
       .maybeSingle();
 
-    if (actorError || !actor || actor.role !== "school_admin" || actor.status !== "active") {
-      return json(403, { error: "Only school admins can invite users." });
+    if (actorError || !actor || !isElevated(actor.role) || actor.status !== "active") {
+      return json(403, { error: "Only Dev or Class Admin can invite users." });
     }
 
     const allowed = await assertRateLimit(admin, `invite:${actorId}`);
@@ -100,26 +121,39 @@ Deno.serve(async req => {
     const email = String(body.email || "").trim().toLowerCase();
     const firstName = String(body.firstName || "").trim();
     const lastName = String(body.lastName || "").trim();
-    const role = normalizeRole(body.role);
+    const role = normalizeRole(body.role, actor.role);
     const schoolId = body.schoolId || actor.school_id;
     const temporaryPassword = String(body.temporaryPassword || "").trim();
+    const gender = normalizeGender(body.gender);
+    const dateOfBirth = body.dateOfBirth ? String(body.dateOfBirth).trim() : null;
 
+    if (role === null) {
+      return json(403, { error: "Only Dev can invite another Dev." });
+    }
     if (!email || !email.includes("@")) return json(400, { error: "Valid email is required." });
     if (!firstName || !lastName) return json(400, { error: "First and last name are required." });
     if (!schoolId) return json(400, { error: "schoolId is required." });
+    if (!gender) return json(400, { error: "Gender is required." });
     if (temporaryPassword && temporaryPassword.length < 8) {
       return json(400, { error: "Temporary password must be at least 8 characters." });
     }
 
-    // Admins may only invite into their own school.
-    if (String(schoolId) !== String(actor.school_id)) {
+    // Class Admin may only invite into their own school; Dev may invite into any school.
+    if (actor.role !== "dev" && String(schoolId) !== String(actor.school_id)) {
       return json(403, { error: "Cannot invite users to another school." });
     }
 
     const createPayload = {
       email,
       email_confirm: true,
-      user_metadata: { first_name: firstName, last_name: lastName, role, school_id: schoolId }
+      user_metadata: {
+        first_name: firstName,
+        last_name: lastName,
+        role,
+        school_id: schoolId,
+        gender,
+        date_of_birth: dateOfBirth
+      }
     };
     if (temporaryPassword) createPayload.password = temporaryPassword;
 
@@ -136,7 +170,9 @@ Deno.serve(async req => {
       last_name: lastName,
       role,
       school_id: schoolId,
-      status: "active"
+      status: "active",
+      gender,
+      date_of_birth: dateOfBirth || null
     });
     if (profileError) {
       return json(500, { error: profileError.message });
@@ -151,7 +187,6 @@ Deno.serve(async req => {
       meta: { email, role }
     });
 
-    // Prefer invite email when no temp password was provided.
     if (!temporaryPassword) {
       await admin.auth.admin.inviteUserByEmail(email);
     }

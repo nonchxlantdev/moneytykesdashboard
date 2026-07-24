@@ -1,4 +1,5 @@
--- Bootstrap first school + school_admin for the Auth user you created.
+-- Bootstrap first school + Dev profile for the Auth user you created.
+-- Run AFTER applying migrations (including 20260724130000_profiles_roles_gender_dob.sql).
 -- Run once in Supabase SQL Editor.
 
 insert into public.schools (id, name)
@@ -11,7 +12,7 @@ select
   u.email,
   'Glenrick',
   'Spain',
-  'school_admin',
+  'dev',
   '00000000-0000-0000-0000-000000000001',
   'active'
 from auth.users u
@@ -20,7 +21,7 @@ on conflict (id) do update set
   email = excluded.email,
   first_name = excluded.first_name,
   last_name = excluded.last_name,
-  role = 'school_admin',
+  role = 'dev',
   school_id = excluded.school_id,
   status = 'active';
 

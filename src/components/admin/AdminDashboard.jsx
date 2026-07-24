@@ -15,9 +15,13 @@ import PersonalizationSettings from "./PersonalizationSettings";
 import ReportCardTemplateSettings from "./ReportCardTemplateSettings";
 import { isSupabaseEnabled } from "../../lib/featureFlags";
 import { inviteUser } from "../../data/inviteUser";
+import { resetUserPassword } from "../../data/resetUserPassword";
 import { deleteClass, upsertClass } from "../../data/classesRepo";
 import { updateTeacherProfile } from "../../data/profilesRepo";
 import { deleteSchool, upsertSchool } from "../../data/schoolsRepo";
+import { useAuth } from "../../auth/AuthProvider";
+import { canAssignDevRole, normalizeRole, ROLE_LABELS, ROLES } from "../../auth/roles";
+import { calculateAgeFromDob } from "../../utils/ageFromDob";
 import "./admin-dashboard.css";
 import "../ReportCards/report-cards.css";
 
@@ -36,8 +40,12 @@ const emptyTeacherForm = {
   email: "",
   temporaryPassword: "",
   schoolId: "",
-  role: "Teacher",
-  status: "active"
+  role: ROLE_LABELS[ROLES.TEACHER],
+  gender: "",
+  dateOfBirth: "",
+  status: "active",
+  resetPassword: "",
+  resetPasswordConfirm: ""
 };
 
 const emptyClassForm = {
@@ -119,10 +127,12 @@ function CompactRow({ icon, title, subtitle, status, menuItems }) {
 }
 
 export default function AdminDashboard({ db, update, onCoreRefresh }) {
+  const { role: actorRole } = useAuth();
   const schools = db.schools || [];
   const teachers = db.teachers || [];
   const classes = db.classes || [];
   const supabaseMode = isSupabaseEnabled();
+  const [passwordResetBusy, setPasswordResetBusy] = useState(false);
 
   const [tab, setTab] = useState("schools"); // schools | teachers | classes | report-template
   const [schoolFormOpen, setSchoolFormOpen] = useState(false);
@@ -250,14 +260,21 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
         firstName: teacher.firstName,
         lastName: teacher.lastName,
         email: teacher.email,
-        temporaryPassword: "********",
+        temporaryPassword: "",
         schoolId: String(teacher.schoolId),
-        role: teacher.role,
-        status: teacher.status
+        role: teacher.role || ROLE_LABELS[ROLES.TEACHER],
+        gender: teacher.gender || "",
+        dateOfBirth: teacher.dateOfBirth || "",
+        status: teacher.status,
+        resetPassword: "",
+        resetPasswordConfirm: ""
       });
     } else {
       setEditingTeacherId(null);
-      setTeacherForm(emptyTeacherForm);
+      setTeacherForm({
+        ...emptyTeacherForm,
+        schoolId: schools[0] ? String(schools[0].id) : ""
+      });
     }
     setTeacherFormOpen(true);
   }
@@ -281,9 +298,9 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
             lastName: nextTeacher.lastName,
             role: nextTeacher.role,
             schoolId: nextTeacher.schoolId,
-            temporaryPassword: teacherForm.temporaryPassword !== "********"
-              ? teacherForm.temporaryPassword
-              : undefined
+            gender: nextTeacher.gender,
+            dateOfBirth: nextTeacher.dateOfBirth || undefined,
+            temporaryPassword: teacherForm.temporaryPassword || undefined
           });
         }
         await onCoreRefresh?.();
@@ -313,6 +330,39 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
     }, editingTeacherId ? "Teacher updated" : "Teacher added");
   }
 
+  async function handleResetPassword() {
+    if (!editingTeacherId) return;
+    const nextPassword = String(teacherForm.resetPassword || "");
+    const confirmPassword = String(teacherForm.resetPasswordConfirm || "");
+    if (nextPassword.length < 8) {
+      setTeacherError("New password must be at least 8 characters.");
+      return;
+    }
+    if (nextPassword !== confirmPassword) {
+      setTeacherError("Password confirmation does not match.");
+      return;
+    }
+    if (!supabaseMode) {
+      setTeacherError("Password reset requires Supabase.");
+      return;
+    }
+    setPasswordResetBusy(true);
+    setTeacherError("");
+    try {
+      await resetUserPassword({ userId: editingTeacherId, newPassword: nextPassword });
+      setTeacherForm(current => ({
+        ...current,
+        resetPassword: "",
+        resetPasswordConfirm: ""
+      }));
+      update(() => {}, "Password reset");
+    } catch (error) {
+      setTeacherError(error.message || "Could not reset password.");
+    } finally {
+      setPasswordResetBusy(false);
+    }
+  }
+
   async function saveTeacher(event) {
     event.preventDefault();
     if (!teacherForm.firstName.trim() || !teacherForm.lastName.trim()) {
@@ -323,8 +373,28 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
       setTeacherError("Please enter a valid teacher email.");
       return;
     }
+    if (teacherForm.gender !== "male" && teacherForm.gender !== "female") {
+      setTeacherError("Please select a gender.");
+      return;
+    }
+    if (teacherForm.dateOfBirth) {
+      const dob = new Date(`${teacherForm.dateOfBirth}T00:00:00`);
+      if (Number.isNaN(dob.getTime()) || dob > new Date()) {
+        setTeacherError("Please enter a valid date of birth.");
+        return;
+      }
+    }
+    const roleKey = normalizeRole(teacherForm.role);
+    if (roleKey === ROLES.DEV && !canAssignDevRole(actorRole)) {
+      setTeacherError("Only Dev can assign the Dev role.");
+      return;
+    }
     if (!editingTeacherId && !teacherForm.temporaryPassword.trim()) {
       setTeacherError("Temporary password is required for new teachers.");
+      return;
+    }
+    if (!editingTeacherId && teacherForm.temporaryPassword.trim().length < 8) {
+      setTeacherError("Temporary password must be at least 8 characters.");
       return;
     }
     const school = schools.find(item => String(item.id) === String(teacherForm.schoolId));
@@ -340,6 +410,8 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
         schoolId: school.id,
         schoolName: school.name,
         role: teacherForm.role,
+        gender: teacherForm.gender,
+        dateOfBirth: teacherForm.dateOfBirth || "",
         status: teacherForm.status
       });
       closeTeacherForm();
@@ -627,9 +699,12 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
                 setForm={setTeacherForm}
                 error={teacherError}
                 editingId={editingTeacherId}
+                actorRole={actorRole}
+                passwordResetBusy={passwordResetBusy}
                 onOpenForm={openTeacherForm}
                 onCloseForm={closeTeacherForm}
                 onSave={saveTeacher}
+                onResetPassword={handleResetPassword}
                 onEdit={openTeacherForm}
                 onReassign={openTeacherForm}
                 onDeleteRequest={confirmDeleteTeacher}
@@ -894,13 +969,25 @@ function TeachersPanel({
   setForm,
   error,
   editingId,
+  actorRole,
+  passwordResetBusy,
   onOpenForm,
   onCloseForm,
   onSave,
+  onResetPassword,
   onEdit,
   onReassign,
   onDeleteRequest
 }) {
+  const derivedAge = calculateAgeFromDob(form.dateOfBirth);
+  const roleOptions = [
+    { value: ROLE_LABELS[ROLES.TEACHER], label: ROLE_LABELS[ROLES.TEACHER] },
+    { value: ROLE_LABELS[ROLES.CLASS_ADMIN], label: ROLE_LABELS[ROLES.CLASS_ADMIN] },
+    ...(canAssignDevRole(actorRole)
+      ? [{ value: ROLE_LABELS[ROLES.DEV], label: ROLE_LABELS[ROLES.DEV] }]
+      : [])
+  ];
+
   return (
     <>
       {!schools.length ? (
@@ -932,13 +1019,44 @@ function TeachersPanel({
             onChange={email => setForm({ ...form, email })}
             required
           />
-          <Field
-            label="Temporary Password"
-            type="password"
-            value={form.temporaryPassword}
-            onChange={temporaryPassword => setForm({ ...form, temporaryPassword })}
-            required
-          />
+          {!editingId ? (
+            <Field
+              label="Temporary Password"
+              type="password"
+              value={form.temporaryPassword}
+              onChange={temporaryPassword => setForm({ ...form, temporaryPassword })}
+              required
+            />
+          ) : null}
+          <div className="form-grid">
+            <Select
+              label="Gender"
+              value={form.gender}
+              onChange={gender => setForm({ ...form, gender })}
+              options={[
+                { value: "male", label: "Male" },
+                { value: "female", label: "Female" }
+              ]}
+              placeholder="Select gender"
+              required
+              allowClear={false}
+              searchPlaceholder="Search gender"
+            />
+            <label className="field-label">
+              Date of Birth
+              <span className="input-without-icon">
+                <input
+                  type="date"
+                  value={form.dateOfBirth || ""}
+                  max={today()}
+                  onChange={event => setForm({ ...form, dateOfBirth: event.target.value })}
+                />
+              </span>
+            </label>
+          </div>
+          <p className="admin-note" style={{ marginTop: 0 }}>
+            Age: {derivedAge != null ? `${derivedAge} years` : "Enter date of birth to calculate"}
+          </p>
           <div className="form-grid">
             <Select
               label="Assign School"
@@ -954,10 +1072,7 @@ function TeachersPanel({
               label="Role"
               value={form.role}
               onChange={role => setForm({ ...form, role })}
-              options={[
-                { value: "Teacher", label: "Teacher" },
-                { value: "School Admin", label: "School Admin" }
-              ]}
+              options={roleOptions}
               required
               allowClear={false}
               searchPlaceholder="Search roles"
@@ -983,6 +1098,37 @@ function TeachersPanel({
               Cancel
             </button>
           </div>
+
+          {editingId ? (
+            <div className="admin-password-reset" style={{ marginTop: 18 }}>
+              <strong>Reset password</strong>
+              <p className="admin-note">Set a new password for this account. Separate from saving profile details.</p>
+              <div className="form-grid">
+                <Field
+                  label="New Password"
+                  type="password"
+                  value={form.resetPassword || ""}
+                  onChange={resetPassword => setForm({ ...form, resetPassword })}
+                />
+                <Field
+                  label="Confirm Password"
+                  type="password"
+                  value={form.resetPasswordConfirm || ""}
+                  onChange={resetPasswordConfirm => setForm({ ...form, resetPasswordConfirm })}
+                />
+              </div>
+              <div className="admin-form-actions">
+                <button
+                  className="btn"
+                  type="button"
+                  disabled={passwordResetBusy}
+                  onClick={onResetPassword}
+                >
+                  {passwordResetBusy ? "Resetting…" : "Reset Password"}
+                </button>
+              </div>
+            </div>
+          ) : null}
         </form>
       ) : null}
 
@@ -993,7 +1139,13 @@ function TeachersPanel({
               key={teacher.id}
               icon={<User size={16} strokeWidth={2.2} />}
               title={`${teacher.firstName} ${teacher.lastName}`}
-              subtitle={[teacher.schoolName, teacher.role].filter(Boolean).join(" · ")}
+              subtitle={[
+                teacher.schoolName,
+                teacher.role,
+                teacher.age != null ? `Age ${teacher.age}` : null
+              ]
+                .filter(Boolean)
+                .join(" · ")}
               status={teacher.status}
               menuItems={[
                 { label: "Edit", onClick: () => onEdit(teacher) },
