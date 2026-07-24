@@ -44,9 +44,9 @@ const SCHOOL = {
 
 const TEACHER = {
   id: 1,
-  firstName: "Amara",
+  firstName: "Shamira",
   lastName: "Young",
-  email: "amara.young@moneytykes.school",
+  email: "shamira.young@moneytykes.school",
   temporaryPassword: "",
   schoolId: SCHOOL.id,
   role: "Teacher",
@@ -54,6 +54,16 @@ const TEACHER = {
 };
 
 const CLASS_A = "Standard 4A";
+
+const CLASSROOM = {
+  id: 1,
+  name: CLASS_A,
+  schoolId: SCHOOL.id,
+  schoolName: SCHOOL.name,
+  teacherId: TEACHER.id,
+  teacherName: `${TEACHER.firstName} ${TEACHER.lastName}`,
+  status: "active"
+};
 
 /** Keep mock roster at 8 so dashboard / students counts match. */
 const STUDENT_SEEDS = [
@@ -401,6 +411,7 @@ function syncDemoRoster(existing) {
     students,
     schools: existing.schools?.length ? existing.schools : [SCHOOL],
     teachers: [TEACHER],
+    classes: existing.classes?.length ? existing.classes : [CLASSROOM],
     tasks: existing.tasks?.length ? existing.tasks : buildTasks(todayDate),
     rewards: existing.rewards?.length ? existing.rewards : REWARD_BANK,
     redemptions: existing.redemptions || [],
@@ -469,6 +480,7 @@ export function seedMockData() {
       students,
       schools: [SCHOOL],
       teachers: [TEACHER],
+      classes: [CLASSROOM],
       tasks: buildTasks(todayDate),
       rewards: REWARD_BANK,
       redemptions: [],

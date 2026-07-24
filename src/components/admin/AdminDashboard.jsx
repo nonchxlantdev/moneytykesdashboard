@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  BookOpen,
   Check,
   GraduationCap,
   School,
@@ -31,6 +32,13 @@ const emptyTeacherForm = {
   temporaryPassword: "",
   schoolId: "",
   role: "Teacher",
+  status: "active"
+};
+
+const emptyClassForm = {
+  name: "",
+  schoolId: "",
+  teacherId: "",
   status: "active"
 };
 
@@ -108,16 +116,21 @@ function CompactRow({ icon, title, subtitle, status, menuItems }) {
 export default function AdminDashboard({ db, update }) {
   const schools = db.schools || [];
   const teachers = db.teachers || [];
+  const classes = db.classes || [];
 
-  const [tab, setTab] = useState("schools"); // schools | teachers | report-template
+  const [tab, setTab] = useState("schools"); // schools | teachers | classes | report-template
   const [schoolFormOpen, setSchoolFormOpen] = useState(false);
   const [teacherFormOpen, setTeacherFormOpen] = useState(false);
+  const [classFormOpen, setClassFormOpen] = useState(false);
   const [editingSchoolId, setEditingSchoolId] = useState(null);
   const [editingTeacherId, setEditingTeacherId] = useState(null);
+  const [editingClassId, setEditingClassId] = useState(null);
   const [schoolForm, setSchoolForm] = useState(emptySchoolForm);
   const [teacherForm, setTeacherForm] = useState(emptyTeacherForm);
+  const [classForm, setClassForm] = useState(emptyClassForm);
   const [schoolError, setSchoolError] = useState("");
   const [teacherError, setTeacherError] = useState("");
+  const [classError, setClassError] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const totalStudents = db.students.length;
@@ -126,6 +139,7 @@ export default function AdminDashboard({ db, update }) {
   const stats = [
     { label: "Schools", value: schools.length, icon: School },
     { label: "Teachers", value: teachers.length, icon: Users },
+    { label: "Classes", value: classes.length, icon: BookOpen },
     { label: "Students", value: totalStudents, icon: GraduationCap },
     { label: "Active Accounts", value: activeTeachers, icon: Check }
   ];
@@ -184,6 +198,11 @@ export default function AdminDashboard({ db, update }) {
             ? { ...teacher, schoolName: schoolForm.name.trim() }
             : teacher
         );
+        next.classes = (next.classes || []).map(classroom =>
+          classroom.schoolId === editingSchoolId
+            ? { ...classroom, schoolName: schoolForm.name.trim() }
+            : classroom
+        );
         return;
       }
       next.schools.push({
@@ -236,6 +255,12 @@ export default function AdminDashboard({ db, update }) {
         next.teachers = next.teachers.map(teacher =>
           teacher.id === editingTeacherId ? { ...teacher, ...nextTeacher } : teacher
         );
+        const teacherName = `${nextTeacher.firstName} ${nextTeacher.lastName}`;
+        next.classes = (next.classes || []).map(classroom =>
+          classroom.teacherId === editingTeacherId
+            ? { ...classroom, teacherName, schoolId: nextTeacher.schoolId, schoolName: nextTeacher.schoolName }
+            : classroom
+        );
         return;
       }
       next.teachers.push({ id: Date.now(), ...nextTeacher, createdAt: today() });
@@ -273,6 +298,80 @@ export default function AdminDashboard({ db, update }) {
     closeTeacherForm();
   }
 
+  function openClassForm(classroom) {
+    setClassError("");
+    if (!schools.length) {
+      setClassError("Create a school before adding a class.");
+      return;
+    }
+    if (classroom) {
+      setEditingClassId(classroom.id);
+      setClassForm({
+        name: classroom.name,
+        schoolId: String(classroom.schoolId || ""),
+        teacherId: classroom.teacherId ? String(classroom.teacherId) : "",
+        status: classroom.status || "active"
+      });
+    } else {
+      setEditingClassId(null);
+      setClassForm(emptyClassForm);
+    }
+    setClassFormOpen(true);
+  }
+
+  function closeClassForm() {
+    setClassFormOpen(false);
+    setEditingClassId(null);
+    setClassForm(emptyClassForm);
+    setClassError("");
+  }
+
+  function saveClass(event) {
+    event.preventDefault();
+    const name = classForm.name.trim();
+    if (!name) {
+      setClassError("Class name is required (e.g. Standard 4A).");
+      return;
+    }
+    const school = schools.find(item => item.id === Number(classForm.schoolId));
+    if (!school) {
+      setClassError("Please assign a school.");
+      return;
+    }
+    const teacher = teachers.find(item => item.id === Number(classForm.teacherId));
+    const duplicate = classes.find(
+      item =>
+        item.id !== editingClassId &&
+        String(item.schoolId) === String(school.id) &&
+        String(item.name).trim().toLowerCase() === name.toLowerCase()
+    );
+    if (duplicate) {
+      setClassError("That class name already exists for this school.");
+      return;
+    }
+
+    const payload = {
+      name,
+      schoolId: school.id,
+      schoolName: school.name,
+      teacherId: teacher?.id ?? null,
+      teacherName: teacher ? `${teacher.firstName} ${teacher.lastName}` : "",
+      status: classForm.status || "active"
+    };
+
+    update(next => {
+      if (!next.classes) next.classes = [];
+      if (editingClassId) {
+        next.classes = next.classes.map(item =>
+          item.id === editingClassId ? { ...item, ...payload } : item
+        );
+        return;
+      }
+      next.classes.push({ id: Date.now(), ...payload, createdAt: today() });
+    }, editingClassId ? "Class updated" : "Class added");
+    closeClassForm();
+  }
+
   function confirmDeleteSchool(school) {
     setDeleteTarget({
       type: "school",
@@ -280,7 +379,7 @@ export default function AdminDashboard({ db, update }) {
       label: school.name,
       title: "Delete this school?",
       bodyText:
-        "This will permanently remove the school and any assigned local teacher records."
+        "This will permanently remove the school and any assigned local teacher and class records."
     });
   }
 
@@ -294,19 +393,41 @@ export default function AdminDashboard({ db, update }) {
     });
   }
 
+  function confirmDeleteClass(classroom) {
+    setDeleteTarget({
+      type: "class",
+      id: classroom.id,
+      label: classroom.name,
+      title: "Delete this class?",
+      bodyText:
+        "This removes the class from Admin. Existing students keep their class label; rename is not applied retroactively."
+    });
+  }
+
   function performDelete() {
     if (!deleteTarget) return;
     if (deleteTarget.type === "school") {
       update(next => {
         next.schools = next.schools.filter(school => school.id !== deleteTarget.id);
         next.teachers = next.teachers.filter(teacher => teacher.schoolId !== deleteTarget.id);
+        next.classes = (next.classes || []).filter(classroom => classroom.schoolId !== deleteTarget.id);
       }, "School deleted");
       if (editingSchoolId === deleteTarget.id) closeSchoolForm();
-    } else {
+    } else if (deleteTarget.type === "teacher") {
       update(next => {
         next.teachers = next.teachers.filter(teacher => teacher.id !== deleteTarget.id);
+        next.classes = (next.classes || []).map(classroom =>
+          classroom.teacherId === deleteTarget.id
+            ? { ...classroom, teacherId: null, teacherName: "" }
+            : classroom
+        );
       }, "Teacher deleted");
       if (editingTeacherId === deleteTarget.id) closeTeacherForm();
+    } else if (deleteTarget.type === "class") {
+      update(next => {
+        next.classes = (next.classes || []).filter(classroom => classroom.id !== deleteTarget.id);
+      }, "Class deleted");
+      if (editingClassId === deleteTarget.id) closeClassForm();
     }
     setDeleteTarget(null);
   }
@@ -316,14 +437,14 @@ export default function AdminDashboard({ db, update }) {
       <PageChalkBanner
         eyebrow="SYSTEM"
         title="Admin Dashboard"
-        subtitle="Manage schools, teacher accounts, report card templates, and personalization."
+        subtitle="Manage schools, classes, teacher accounts, report card templates, and personalization."
       />
 
       <div className="admin-body">
         <StatStrip stats={stats} />
 
         <div className="form-card manage-card">
-          <div className="manage-tabs" role="tablist" aria-label="Manage schools, teachers, and report cards" data-tour="admin-tabs">
+          <div className="manage-tabs" role="tablist" aria-label="Manage schools, classes, teachers, and report cards" data-tour="admin-tabs">
             <button
               type="button"
               role="tab"
@@ -333,6 +454,16 @@ export default function AdminDashboard({ db, update }) {
               onClick={() => setTab("schools")}
             >
               Schools
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === "classes"}
+              className={tab === "classes" ? "manage-tab active" : "manage-tab"}
+              data-tour="admin-tab-classes"
+              onClick={() => setTab("classes")}
+            >
+              Classes
             </button>
             <button
               type="button"
@@ -370,6 +501,23 @@ export default function AdminDashboard({ db, update }) {
                 onSave={saveSchool}
                 onEdit={openSchoolForm}
                 onDeleteRequest={confirmDeleteSchool}
+              />
+            ) : null}
+            {tab === "classes" ? (
+              <ClassesPanel
+                classes={classes}
+                schools={schools}
+                teachers={teachers}
+                formOpen={classFormOpen}
+                form={classForm}
+                setForm={setClassForm}
+                error={classError}
+                editingId={editingClassId}
+                onOpenForm={openClassForm}
+                onCloseForm={closeClassForm}
+                onSave={saveClass}
+                onEdit={openClassForm}
+                onDeleteRequest={confirmDeleteClass}
               />
             ) : null}
             {tab === "teachers" ? (
@@ -512,6 +660,128 @@ function SchoolsPanel({
       {!formOpen ? (
         <button className="btn primary-gold admin-add-btn" type="button" data-tour="admin-add" onClick={() => onOpenForm()}>
           Add School
+        </button>
+      ) : null}
+    </>
+  );
+}
+
+function ClassesPanel({
+  classes,
+  schools,
+  teachers,
+  formOpen,
+  form,
+  setForm,
+  error,
+  editingId,
+  onOpenForm,
+  onCloseForm,
+  onSave,
+  onEdit,
+  onDeleteRequest
+}) {
+  const schoolTeachers = teachers.filter(
+    teacher => !form.schoolId || String(teacher.schoolId) === String(form.schoolId)
+  );
+
+  return (
+    <>
+      {!schools.length ? (
+        <p className="admin-note">Create a school first so each class can be assigned during setup.</p>
+      ) : null}
+      {error && !formOpen ? <p className="admin-form-error">{error}</p> : null}
+
+      {formOpen ? (
+        <form className="admin-inline-form" onSubmit={onSave}>
+          {error ? <p className="admin-form-error">{error}</p> : null}
+          <Field
+            label="Class name"
+            value={form.name}
+            onChange={name => setForm({ ...form, name })}
+            required
+          />
+          <div className="form-grid">
+            <Select
+              label="School"
+              value={form.schoolId}
+              onChange={schoolId => setForm({ ...form, schoolId, teacherId: "" })}
+              options={schools.map(school => ({ value: String(school.id), label: school.name }))}
+              placeholder="Select school"
+              searchPlaceholder="Search schools"
+              required
+              allowClear={false}
+            />
+            <Select
+              label="Homeroom teacher"
+              value={form.teacherId}
+              onChange={teacherId => setForm({ ...form, teacherId })}
+              options={schoolTeachers.map(teacher => ({
+                value: String(teacher.id),
+                label: `${teacher.firstName} ${teacher.lastName}`
+              }))}
+              placeholder={form.schoolId ? "Select teacher (optional)" : "Select a school first"}
+              searchPlaceholder="Search teachers"
+              disabled={!form.schoolId}
+              allowClear
+            />
+          </div>
+          <Select
+            label="Status"
+            value={form.status}
+            onChange={status => setForm({ ...form, status })}
+            options={[
+              { value: "active", label: "Active" },
+              { value: "inactive", label: "Inactive" }
+            ]}
+            required
+            allowClear={false}
+            searchPlaceholder="Search status"
+          />
+          <div className="admin-form-actions">
+            <button className="btn primary-gold" type="submit">
+              {editingId ? "Save Class" : "Save Class"}
+            </button>
+            <button className="btn" type="button" onClick={onCloseForm}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      ) : null}
+
+      {classes.length ? (
+        <div className="compact-list">
+          {classes.map(classroom => (
+            <CompactRow
+              key={classroom.id}
+              icon={<BookOpen size={16} strokeWidth={2.2} />}
+              title={classroom.name}
+              subtitle={[classroom.schoolName, classroom.teacherName || "No teacher"].filter(Boolean).join(" · ")}
+              status={classroom.status || "active"}
+              menuItems={[
+                { label: "Edit", onClick: () => onEdit(classroom) },
+                { label: "Remove", danger: true, onClick: () => onDeleteRequest(classroom) }
+              ]}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="admin-empty">
+          <strong>No classes yet</strong>
+          <p>Add classes like Standard 4A so student forms and Report Cards share one list.</p>
+        </div>
+      )}
+
+      {!formOpen ? (
+        <button
+          className="btn primary-gold admin-add-btn"
+          data-tour="admin-add"
+          type="button"
+          onClick={() => onOpenForm()}
+          disabled={!schools.length}
+          title={!schools.length ? "Create a school before adding a class" : "Add class"}
+        >
+          Add Class
         </button>
       ) : null}
     </>

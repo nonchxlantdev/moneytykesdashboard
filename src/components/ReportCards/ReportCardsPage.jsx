@@ -1,5 +1,8 @@
 import { useMemo, useRef, useState } from "react";
+import { CheckCircle2, ClipboardList, Send, TrendingUp } from "lucide-react";
 import PageChalkBanner from "../shared/PageChalkBanner";
+import ClassSelector from "../shared/ClassSelector";
+import StatCard from "../shared/StatCard";
 import RosterTable from "./RosterTable";
 import ReportCardEditor from "./ReportCardEditor";
 import ReportCardPreview from "./ReportCardPreview";
@@ -15,18 +18,27 @@ import {
   parentEmailForStudent,
   recomputeCard,
   resolveClassSections,
+  resolveTemplateAccent,
   upsertReportCards
 } from "../../utils/reportCardsStorage";
 import { downloadReportCardExcelTemplate, parseReportCardExcel } from "../../utils/reportCardExcel";
 import { downloadReportCardPdf, downloadReportCardsZip } from "../../utils/reportCardPdf";
 import { sendReportCardEmail, sendReportCardsBulk } from "../../utils/reportCardEmail";
+import { useTheme } from "../../themes/ThemeContext";
+import { formatPercent } from "../../utils/reportCardScores";
 import "./report-cards.css";
 
-export default function ReportCardsPage({ db, setToast }) {
+export default function ReportCardsPage({ db, setToast, navigate }) {
+  const { theme } = useTheme();
   const students = db.students || [];
   const schools = db.schools || [];
   const school = schools[0] || { id: "default", name: db.school || "MoneyTykes School" };
-  const template = getTemplateForSchool(school.id, school);
+  const baseTemplate = getTemplateForSchool(school.id, school);
+  const template = {
+    ...baseTemplate,
+    themeId: theme,
+    accentColor: resolveTemplateAccent(baseTemplate, theme)
+  };
   const classSections = useMemo(() => resolveClassSections(students, db), [students, db]);
 
   const [classId, setClassId] = useState(String(classSections[0]?.id || ""));
@@ -50,10 +62,10 @@ export default function ReportCardsPage({ db, setToast }) {
       classSection,
       schoolYear,
       term,
-      template
+      template: baseTemplate
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [students, classSection, schoolYear, term, template, tick]);
+  }, [students, classSection, schoolYear, term, baseTemplate, tick]);
 
   const rows = useMemo(() => {
     return rosterCards
@@ -63,6 +75,20 @@ export default function ReportCardsPage({ db, setToast }) {
       })
       .filter(Boolean);
   }, [rosterCards, students]);
+
+  const classSize = rows.length;
+
+  const snapshot = useMemo(() => {
+    const drafts = rows.filter(({ card }) => card.status === "draft").length;
+    const ready = rows.filter(({ card }) => card.status === "ready").length;
+    const sent = rows.filter(({ card }) => card.status === "sent").length;
+    const avgs = rows.map(({ card }) => card.overallAvg).filter(value => value != null && Number.isFinite(Number(value)));
+    const classAvg =
+      avgs.length > 0
+        ? Math.round((avgs.reduce((sum, n) => sum + Number(n), 0) / avgs.length) * 10) / 10
+        : null;
+    return { drafts, ready, sent, classAvg };
+  }, [rows]);
 
   const cardsByStudent = useMemo(() => {
     const map = {};
@@ -81,6 +107,10 @@ export default function ReportCardsPage({ db, setToast }) {
     upsertReportCards(ranked);
     refresh();
     if (message) setToast?.(message);
+  }
+
+  function pdfTemplate() {
+    return template;
   }
 
   function handleSaveEditor(card) {
@@ -111,8 +141,9 @@ export default function ReportCardsPage({ db, setToast }) {
       .map(({ student, card }) => ({
         student,
         reportCard: card,
-        template,
-        className: classSection?.name
+        template: pdfTemplate(),
+        className: classSection?.name,
+        classSize
       }));
     if (!items.length) {
       setToast?.("No report cards ready to export");
@@ -127,7 +158,7 @@ export default function ReportCardsPage({ db, setToast }) {
     event.target.value = "";
     if (!file) return;
     const buffer = await file.arrayBuffer();
-    const review = parseReportCardExcel(buffer, { students: rows.map(row => row.student), template });
+    const review = parseReportCardExcel(buffer, { students: rows.map(row => row.student), template: baseTemplate });
     setImportReview(review);
   }
 
@@ -139,9 +170,9 @@ export default function ReportCardsPage({ db, setToast }) {
       const base =
         index >= 0
           ? next[index]
-          : buildBlankCard({ student: item.student, classSection, schoolYear, term, template });
+          : buildBlankCard({ student: item.student, classSection, schoolYear, term, template: baseTemplate });
 
-      const subjects = (template.subjects || []).map(subjectDef => {
+      const subjects = (baseTemplate.subjects || []).map(subjectDef => {
         const imported = item.subjects[subjectDef.name];
         if (!imported) {
           return (
@@ -149,7 +180,7 @@ export default function ReportCardsPage({ db, setToast }) {
               name: subjectDef.name,
               instructor: subjectDef.instructor || "",
               hours: subjectDef.hours || 0,
-              termScores: (template.terms || []).map(() => null),
+              termScores: (baseTemplate.terms || []).map(() => null),
               avg: null
             }
           );
@@ -239,21 +270,32 @@ export default function ReportCardsPage({ db, setToast }) {
       />
 
       <div className="rc-body">
+        <section className="stats-row" aria-label="Report card class snapshot" data-tour="rc-stats">
+          <StatCard label="DRAFTS REMAINING" value={snapshot.drafts} icon={ClipboardList} tone="inactive" />
+          <StatCard label="READY TO GENERATE" value={snapshot.ready} icon={CheckCircle2} tone="published" />
+          <StatCard
+            label="CLASS AVERAGE"
+            value={snapshot.classAvg == null ? "—" : formatPercent(snapshot.classAvg)}
+            icon={TrendingUp}
+            tone="attendance"
+          />
+          <StatCard label="SENT THIS TERM" value={snapshot.sent} icon={Send} tone="points" />
+        </section>
+
         <div className="form-card rc-toolbar" data-tour="rc-toolbar">
-          <label>
-            Class
-            <select value={String(classSection?.id || "")} onChange={event => setClassId(event.target.value)}>
-              {classSections.map(section => (
-                <option key={section.id} value={String(section.id)}>
-                  {section.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="rc-toolbar-class">
+            <ClassSelector
+              classes={classSections}
+              value={classId}
+              onChange={setClassId}
+              label="Class"
+              placeholder="Select class"
+            />
+          </div>
           <label>
             Term
             <select value={term} onChange={event => setTerm(event.target.value)}>
-              {(template.terms || []).map(item => (
+              {(baseTemplate.terms || []).map(item => (
                 <option key={item} value={item}>
                   {item}
                 </option>
@@ -275,7 +317,7 @@ export default function ReportCardsPage({ db, setToast }) {
             onClick={() =>
               downloadReportCardExcelTemplate({
                 students: rows.map(row => row.student),
-                template,
+                template: baseTemplate,
                 schoolYear,
                 term,
                 className: classSection?.name
@@ -327,7 +369,7 @@ export default function ReportCardsPage({ db, setToast }) {
           <ReportCardEditor
             card={editing.card}
             student={editing.student}
-            template={template}
+            template={baseTemplate}
             teachers={(db.teachers || []).filter(
               teacher => !school?.id || String(teacher.schoolId) === String(school.id)
             )}
@@ -350,6 +392,7 @@ export default function ReportCardsPage({ db, setToast }) {
               student={preview.student}
               template={template}
               className={classSection?.name}
+              classSize={classSize}
             />
           </div>
         ) : null}
@@ -359,6 +402,7 @@ export default function ReportCardsPage({ db, setToast }) {
             rows={rows}
             selectable
             selectedIds={selectedIds}
+            onGoStudents={navigate ? () => navigate("students") : undefined}
             onToggleSelect={id => {
               setSelectedIds(current => {
                 const next = new Set(current);
@@ -386,8 +430,9 @@ export default function ReportCardsPage({ db, setToast }) {
               downloadReportCardPdf({
                 reportCard: card,
                 student,
-                template,
-                className: classSection?.name
+                template: pdfTemplate(),
+                className: classSection?.name,
+                classSize
               });
               setToast?.("PDF downloaded");
             }}

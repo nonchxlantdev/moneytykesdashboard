@@ -66,7 +66,7 @@ export default function StudentsDashboard({
   const [sortBy, setSortBy] = useState("name");
   const importRef = useRef(null);
 
-  const { students, loading, stats, classOptions } = useStudents(db.students || [], classFilter);
+  const { students, loading, stats, classOptions } = useStudents(db, classFilter);
 
   useEffect(() => {
     try {

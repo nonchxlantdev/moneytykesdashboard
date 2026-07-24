@@ -35,16 +35,27 @@ const AVATAR_PALETTE = [
 /**
  * Maps raw db students into roster models + class-level stats.
  * Stats are always derived from the same students array as the table.
+ * Class picker options prefer Admin `db.classes`, with student labels as fallback.
  */
-export default function useStudents(dbStudents = [], classFilter = "all") {
+export default function useStudents(db = {}, classFilter = "all") {
+  const dbStudents = db.students || [];
   const [loading] = useState(false);
 
   const attendanceRows = useMemo(() => getAllAttendanceRows(), [dbStudents]);
 
   const classOptions = useMemo(() => {
-    const labels = [...new Set(dbStudents.map(student => student.classLabel).filter(Boolean))];
-    return labels.sort((a, b) => a.localeCompare(b));
-  }, [dbStudents]);
+    const names = new Set(
+      (db.classes || [])
+        .map(item => String(item.name || "").trim())
+        .filter(Boolean)
+    );
+    dbStudents.forEach(student => {
+      const label = String(student.classLabel || "").trim();
+      if (label) names.add(label);
+    });
+    if (db.className) names.add(String(db.className).trim());
+    return Array.from(names).sort((a, b) => a.localeCompare(b));
+  }, [db.classes, db.className, dbStudents]);
 
   const students = useMemo(() => {
     if (!classFilter) return [];

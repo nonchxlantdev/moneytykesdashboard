@@ -1,3 +1,8 @@
+import { getAllAttendanceRows } from "./attendanceStorage";
+import { getPointsLog } from "./rewardsStorage";
+import { THEME_TOKENS } from "../themes/themeTokens";
+import { DEFAULT_THEME } from "../themes/ThemeContext";
+
 /**
  * Report Cards localStorage layer (parallel to rewardsStorage / lessonsStorage).
  */
@@ -132,10 +137,22 @@ export function saveClassSections(sections) {
   writeJson(SECTIONS_KEY, sections);
 }
 
-/** Derive class sections from student classLabel values + saved sections. */
+/** Prefer Admin `db.classes`; fall back to legacy labels so orphaned students still appear. */
 export function resolveClassSections(students = [], db = {}) {
-  const saved = loadClassSections();
-  const byId = new Map(saved.map(section => [String(section.id), section]));
+  const byId = new Map();
+
+  (db.classes || []).forEach(entry => {
+    const name = String(entry.name || "").trim();
+    if (!name) return;
+    const id = slugClassId(name);
+    byId.set(id, {
+      id,
+      name,
+      teacherId: entry.teacherId ?? null,
+      schoolId: entry.schoolId ?? null,
+      registryId: entry.id
+    });
+  });
 
   const labels = new Set();
   students.forEach(student => {
@@ -146,25 +163,25 @@ export function resolveClassSections(students = [], db = {}) {
 
   labels.forEach(name => {
     const id = slugClassId(name);
-    if (!byId.has(id)) {
-      byId.set(id, {
-        id,
-        name,
-        teacherId: db.teacher?.id ?? null,
-        schoolId: (db.schools || [])[0]?.id ?? null
-      });
-    }
+    if (byId.has(id)) return;
+    byId.set(id, {
+      id,
+      name,
+      teacherId: db.teacher?.id ?? null,
+      schoolId: (db.schools || [])[0]?.id ?? null
+    });
   });
 
   const list = Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name));
   if (!list.length) {
-    const fallback = {
-      id: "default-class",
-      name: db.className || "Financial Literacy Class",
-      teacherId: db.teacher?.id ?? null,
-      schoolId: (db.schools || [])[0]?.id ?? null
-    };
-    return [fallback];
+    return [
+      {
+        id: "default-class",
+        name: db.className || "Financial Literacy Class",
+        teacherId: db.teacher?.id ?? null,
+        schoolId: (db.schools || [])[0]?.id ?? null
+      }
+    ];
   }
   return list;
 }
@@ -186,6 +203,86 @@ export function emptyAttendance() {
   return { absent: 0, tardy: 0, demerits: 0, merits: 0, probation: "" };
 }
 
+/** Parse "2025/2026" → inclusive ISO date bounds (Aug 1 → Jul 31). */
+export function schoolYearBounds(schoolYear) {
+  const startYear = Number(String(schoolYear || "").split("/")[0]);
+  if (!Number.isFinite(startYear)) {
+    const y = new Date().getFullYear();
+    return { start: `${y - 1}-08-01`, end: `${y}-07-31` };
+  }
+  return { start: `${startYear}-08-01`, end: `${startYear + 1}-07-31` };
+}
+
+function dateInSchoolYear(dateStr, schoolYear) {
+  if (!dateStr) return false;
+  const { start, end } = schoolYearBounds(schoolYear);
+  return String(dateStr) >= start && String(dateStr) <= end;
+}
+
+/**
+ * Count absent (absent+sick) and tardy (late) from Attendance module records
+ * for this student + class within the school year.
+ */
+export function attendanceCountsFromApp({ studentId, classId, schoolYear }) {
+  const classKey = String(classId || "");
+  let absent = 0;
+  let tardy = 0;
+
+  getAllAttendanceRows().forEach(row => {
+    if (String(row.studentId) !== String(studentId)) return;
+    if (classKey && String(row.classId) !== classKey) return;
+    if (!dateInSchoolYear(row.date, schoolYear)) return;
+    if (row.status === "absent" || row.status === "sick") absent += 1;
+    if (row.status === "late") tardy += 1;
+  });
+
+  return { absent, tardy };
+}
+
+/**
+ * Merits from reward points earned in the school year.
+ * 10 points ≈ 1 merit (rounded); falls back to student.totalEarned if log is empty.
+ */
+export function meritsFromRewards({ student, schoolYear }) {
+  const log = getPointsLog(student?.id);
+  const { start, end } = schoolYearBounds(schoolYear);
+  const startMs = new Date(`${start}T00:00:00`).getTime();
+  const endMs = new Date(`${end}T23:59:59`).getTime();
+
+  const yearPoints = log
+    .filter(entry => {
+      const stamp = entry.awardedAt || `${entry.date || ""}T12:00:00`;
+      const ms = new Date(stamp).getTime();
+      return Number.isFinite(ms) && ms >= startMs && ms <= endMs;
+    })
+    .reduce((sum, entry) => sum + (Number(entry.points) || 0), 0);
+
+  const points = yearPoints > 0 ? yearPoints : Number(student?.totalEarned) || 0;
+  return Math.max(0, Math.round(points / 10));
+}
+
+export function seedAttendanceForStudent({ student, classSection, schoolYear }) {
+  const counts = attendanceCountsFromApp({
+    studentId: student.id,
+    classId: classSection?.id,
+    schoolYear
+  });
+  return {
+    ...emptyAttendance(),
+    absent: counts.absent,
+    tardy: counts.tardy,
+    merits: meritsFromRewards({ student, schoolYear })
+  };
+}
+
+/** Template accent for PDF: custom school color, else active theme icon accent. */
+export function resolveTemplateAccent(template, themeId = DEFAULT_THEME) {
+  const custom = String(template?.accentColor || "").trim();
+  if (custom) return custom;
+  const tokens = THEME_TOKENS[themeId] || THEME_TOKENS[DEFAULT_THEME];
+  return tokens.iconAccent || tokens.accentColor || "#359392";
+}
+
 export function buildBlankCard({ student, classSection, schoolYear, term, template }) {
   const subjects = (template.subjects || []).map(subject => ({
     name: subject.name,
@@ -204,7 +301,7 @@ export function buildBlankCard({ student, classSection, schoolYear, term, templa
     subjects,
     overallAvg: null,
     rank: null,
-    attendance: emptyAttendance(),
+    attendance: seedAttendanceForStudent({ student, classSection, schoolYear }),
     comments: "",
     status: "draft",
     generatedAt: null,

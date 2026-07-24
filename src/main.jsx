@@ -69,6 +69,7 @@ import "./components/ui.css";
 import "./components/ui/shell-components.css";
 import DashboardPage from "./pages/DashboardPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
+import MyDayPage from "./components/MyDay/MyDayPage";
 import QuizzesPage from "./pages/QuizzesPage";
 import GamesLibrary from "./components/Games/GamesLibrary";
 import "./components/Games/games.css";
@@ -144,7 +145,7 @@ const studentAvatars = [
 
 function createDatabase() {
   return {
-    teacher: { id: 1, first: "Amara", last: "Young", email: "amara.young@moneytykes.school" },
+    teacher: { id: 1, first: "Shamira", last: "Young", email: "shamira.young@moneytykes.school" },
     school: "MoneyTykes Classroom",
     className: "Financial Literacy Class",
     students: [],
@@ -183,13 +184,30 @@ function normalizeDatabase(saved) {
   // Migrate the pre-existing placeholder surname so already-saved browsers
   // pick up the current default teacher identity instead of the old one.
   if (teacher.last === "Advisor") teacher.last = defaults.teacher.last;
+  if (teacher.first === "Amara") {
+    teacher.first = defaults.teacher.first;
+    if (!teacher.email || teacher.email.startsWith("amara.")) {
+      teacher.email = defaults.teacher.email;
+    }
+  }
+  const teachers = (saved.teachers || []).map(item => {
+    if (item.firstName !== "Amara") return item;
+    return {
+      ...item,
+      firstName: defaults.teacher.first,
+      email:
+        !item.email || String(item.email).startsWith("amara.")
+          ? defaults.teacher.email
+          : item.email
+    };
+  });
   return {
     ...defaults,
     ...saved,
     teacher,
     students: saved.students || [],
     schools: saved.schools || [],
-    teachers: saved.teachers || [],
+    teachers,
     tasks: saved.tasks || [],
     rewards: saved.rewards || [],
     redemptions: saved.redemptions || [],
@@ -422,12 +440,7 @@ function App() {
           {!pageLoading && view === "admin" && <AdminDashboard db={db} update={update} />}
           {!pageLoading && view === "dashboard" && <DashboardPage {...pageProps} />}
           {!pageLoading && view === "my-day" && (
-            <ComingSoonPage
-              eyebrow="Planning"
-              title="My Day"
-              lead="A focused place to organize your teaching day."
-              description="Soon you’ll be able to manage a to-do list, review organized events, and plan your next day—all in one clear view."
-            />
+            <MyDayPage db={db} setToast={setToast} navigate={navigate} currentTip={currentTip} />
           )}
           {!pageLoading && view === "students" && <Students {...pageProps} />}
           {!pageLoading && view === "add-student" && <AddStudentPage {...pageProps} />}

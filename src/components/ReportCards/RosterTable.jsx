@@ -1,5 +1,6 @@
 import { formatPercent } from "../../utils/reportCardScores";
 import { statusLabel } from "../../utils/reportCardsStorage";
+import EmptyBox from "../shared/EmptyBox";
 import RowOverflowMenu from "../Rewards/RowOverflowMenu";
 
 const STATUS_TIPS = {
@@ -18,6 +19,11 @@ function statusTooltip(card) {
   return STATUS_TIPS[card.status] || STATUS_TIPS.draft;
 }
 
+function formatRank(rank, classSize) {
+  if (rank == null) return "—";
+  return `${rank} of ${classSize}`;
+}
+
 export default function RosterTable({
   rows,
   onEdit,
@@ -27,14 +33,24 @@ export default function RosterTable({
   selectedIds,
   onToggleSelect,
   onToggleSelectAll,
-  selectable
+  selectable,
+  onGoStudents
 }) {
+  const classSize = rows.length;
+
   if (!rows.length) {
     return (
-      <div className="rc-empty">
-        <strong>No students in this class</strong>
-        <p>Add students with this class label, or pick another class.</p>
-      </div>
+      <EmptyBox
+        title="No students in this class"
+        description="Add students with this class label, or pick another class."
+        actions={
+          onGoStudents ? (
+            <button type="button" className="btn primary" onClick={onGoStudents}>
+              Go to Students
+            </button>
+          ) : null
+        }
+      />
     );
   }
 
@@ -91,7 +107,7 @@ export default function RosterTable({
                   <strong>{name}</strong>
                 </td>
                 <td>{formatPercent(card.overallAvg)}</td>
-                <td>{card.rank == null ? "—" : card.rank}</td>
+                <td>{formatRank(card.rank, classSize)}</td>
                 <td>
                   <span className={`rc-status rc-status-${card.status}`} title={statusTooltip(card)}>
                     {statusLabel(card.status)}

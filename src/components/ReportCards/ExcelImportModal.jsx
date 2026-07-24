@@ -40,10 +40,21 @@ export default function ExcelImportModal({ open, review, onCancel, onCommit }) {
         ) : null}
 
         <div className="rc-modal-actions">
-          <button type="button" className="btn" onClick={onCancel}>
+          <button
+            type="button"
+            className="btn"
+            title="Discard this import — no changes will be applied"
+            onClick={onCancel}
+          >
             Cancel
           </button>
-          <button type="button" className="btn primary-gold" onClick={onCommit} disabled={!review?.matched?.length}>
+          <button
+            type="button"
+            className="btn primary-gold"
+            title="Apply the matched rows to this class's report cards"
+            onClick={onCommit}
+            disabled={!review?.matched?.length}
+          >
             Commit import
           </button>
         </div>

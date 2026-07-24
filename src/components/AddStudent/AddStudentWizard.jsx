@@ -56,7 +56,7 @@ export default function AddStudentWizard({
       return "";
     }
     if (currentStep === 2) {
-      if (!data.standard && !data.form) return "Choose a Standard or Form.";
+      if (!data.standard && !data.form) return "Select a class from Admin → Classes.";
       if (!data.schoolId) return "Select a school.";
       if (!data.teacherId) return "Select a teacher.";
       return "";
@@ -167,6 +167,7 @@ export default function AddStudentWizard({
                 update={patch}
                 schools={db.schools || []}
                 teachers={db.teachers || []}
+                classes={db.classes || []}
                 navigate={navigate}
                 error={error}
               />

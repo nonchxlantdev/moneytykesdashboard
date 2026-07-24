@@ -1,7 +1,7 @@
 import { formatPercent } from "../../utils/reportCardScores";
 import "./report-cards.css";
 
-export default function ReportCardPreview({ reportCard, student, template, className }) {
+export default function ReportCardPreview({ reportCard, student, template, className, classSize }) {
   const terms = template?.terms || [];
   const columns = template?.columns || {};
   const att = reportCard?.attendance || {};
@@ -36,7 +36,8 @@ export default function ReportCardPreview({ reportCard, student, template, class
         </span>
         {columns.showRank !== false ? (
           <span>
-            <strong>Rank</strong> {reportCard?.rank == null ? "—" : reportCard.rank}
+            <strong>Rank</strong>{" "}
+            {reportCard?.rank == null ? "—" : `${reportCard.rank} of ${classSize || "—"}`}
           </span>
         ) : null}
       </div>
@@ -76,7 +77,7 @@ export default function ReportCardPreview({ reportCard, student, template, class
         </span>
         {columns.showRank !== false ? (
           <span>
-            Rank: <strong>{reportCard?.rank == null ? "—" : reportCard.rank}</strong>
+            Rank: <strong>{reportCard?.rank == null ? "—" : `${reportCard.rank} of ${classSize || "—"}`}</strong>
           </span>
         ) : null}
       </div>

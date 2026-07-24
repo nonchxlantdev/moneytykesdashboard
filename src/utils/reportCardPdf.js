@@ -1,6 +1,8 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import JSZip from "jszip";
+import { resolveTemplateAccent } from "./reportCardsStorage";
+import { DEFAULT_THEME } from "../themes/ThemeContext";
 
 function plainCell(value) {
   return value == null || value === "" ? "—" : String(value);
@@ -13,19 +15,36 @@ function percentCell(value) {
   return `${num}%`;
 }
 
+function resolveReportCardAccent(template) {
+  return resolveTemplateAccent(template, template?.themeId || DEFAULT_THEME);
+}
+
+function hexToRgb(hex) {
+  const raw = String(hex || "").replace("#", "").trim();
+  if (raw.length !== 6) return [53, 147, 146];
+  return [parseInt(raw.slice(0, 2), 16), parseInt(raw.slice(2, 4), 16), parseInt(raw.slice(4, 6), 16)];
+}
+
+function formatRank(rank, classSize) {
+  if (rank == null) return "—";
+  if (classSize) return `${rank} of ${classSize}`;
+  return String(rank);
+}
+
 /**
  * Build one PDF for a report card. Returns Blob.
  */
-export function buildReportCardPdf({ reportCard, student, template, className }) {
+export function buildReportCardPdf({ reportCard, student, template, className, classSize }) {
   const doc = new jsPDF({ unit: "pt", format: "letter" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 40;
   let y = 48;
 
   const schoolName = template.schoolName || "School";
-  const accent = template.accentColor || "#006d77";
+  const accent = resolveReportCardAccent(template);
+  const accentRgb = hexToRgb(accent);
 
-  doc.setFillColor(accent);
+  doc.setFillColor(...accentRgb);
   doc.rect(0, 0, pageWidth, 8, "F");
 
   doc.setFont("helvetica", "bold");
@@ -56,7 +75,7 @@ export function buildReportCardPdf({ reportCard, student, template, className })
   y += 14;
   doc.text(`Class: ${className || "—"}`, margin, y);
   if (template.columns?.showRank !== false) {
-    doc.text(`Rank: ${reportCard.rank == null ? "—" : reportCard.rank}`, pageWidth / 2, y);
+    doc.text(`Rank: ${formatRank(reportCard.rank, classSize)}`, pageWidth / 2, y);
   }
   y += 14;
   doc.text(`School Year: ${reportCard.schoolYear}`, margin, y);
@@ -82,7 +101,7 @@ export function buildReportCardPdf({ reportCard, student, template, className })
     head,
     body,
     styles: { fontSize: 9, cellPadding: 4 },
-    headStyles: { fillColor: accent, textColor: 255 },
+    headStyles: { fillColor: accentRgb, textColor: 255 },
     margin: { left: margin, right: margin }
   });
 
@@ -92,7 +111,7 @@ export function buildReportCardPdf({ reportCard, student, template, className })
   doc.setFontSize(10);
   doc.text(`Overall Average: ${percentCell(reportCard.overallAvg)}`, margin, y);
   if (template.columns?.showRank !== false) {
-    doc.text(`Rank: ${plainCell(reportCard.rank)}`, pageWidth / 2, y);
+    doc.text(`Rank: ${formatRank(reportCard.rank, classSize)}`, pageWidth / 2, y);
   }
   y += 18;
 

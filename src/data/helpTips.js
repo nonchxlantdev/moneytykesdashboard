@@ -168,7 +168,7 @@ export const HOW_TO_TOPICS = [
     label: "My Day",
     section: "Main",
     view: "my-day",
-    summary: "Personal planning for your teaching day (coming soon).",
+    summary: "Your personal daily hub — tasks, notes, focus, alerts, and reflection.",
     steps: [
       {
         id: "nav",
@@ -176,31 +176,47 @@ export const HOW_TO_TOPICS = [
         placement: "right",
         view: "my-day",
         title: "My Day in the sidebar",
-        body: "My Day will be your personal teaching plan — priorities, reminders, and what to tackle before class."
+        body: "Your personal teaching plan for today — priorities, reminders, and what needs attention before class."
       },
       {
         id: "banner",
-        selector: '[data-tour="page-banner"]',
+        selector: '[data-tour="my-day-banner"]',
         placement: "bottom",
         view: "my-day",
-        title: "Still coming soon",
-        body: "This page is a placeholder while we build the day planner. The rest of the dashboard is ready to use today."
+        title: "Today's tip",
+        body: "A fresh daily tip greets you here each time you check in."
       },
       {
-        id: "body",
-        selector: '[data-tour="coming-soon-body"]',
+        id: "tasks",
+        selector: '[data-tour="my-day-tasks"]',
         placement: "top",
         view: "my-day",
-        title: "What to use instead",
-        body: "Until My Day launches, start on Dashboard for class health, and use Calendar to schedule lessons, quizzes, and reminders."
+        title: "My Tasks & My Notes",
+        body: "Keep a running to-do list and quick scratch notes — both are yours alone and stick around day to day."
       },
       {
-        id: "calendar-alt",
-        selector: '[data-tour="nav-calendar"]',
-        placement: "right",
+        id: "focus",
+        selector: '[data-tour="my-day-focus"]',
+        placement: "top",
         view: "my-day",
-        title: "Plan on Calendar",
-        body: "Open Calendar from Main to block time for lessons and events. Those items also appear on the Dashboard Events rail."
+        title: "Today's Focus",
+        body: "An automatic summary of what's on your Calendar today — add events there and they'll show up here."
+      },
+      {
+        id: "alerts",
+        selector: '[data-tour="my-day-alerts"]',
+        placement: "top",
+        view: "my-day",
+        title: "Student Alerts",
+        body: "Real signals pulled from Attendance, Rewards, Lessons, and student birthdays — nothing here is made up."
+      },
+      {
+        id: "reflection",
+        selector: '[data-tour="my-day-reflection"]',
+        placement: "top",
+        view: "my-day",
+        title: "Daily Reflection",
+        body: "Stamp how the day went and jot a note. Use History to look back on past days."
       }
     ]
   },
@@ -700,15 +716,15 @@ export const HOW_TO_TOPICS = [
         placement: "bottom",
         view: "admin",
         title: "School counts",
-        body: "Quick totals for schools, teachers, and students so you know the size of your setup."
+        body: "Quick totals for schools, classes, teachers, and students so you know the size of your setup."
       },
       {
         id: "tabs",
         selector: '[data-tour="admin-tabs"]',
         placement: "bottom",
         view: "admin",
-        title: "Schools · Teachers · Template",
-        body: "Three tabs: Schools for campus records, Teachers for accounts, Report Card Template for branding and grade structure."
+        title: "Schools · Classes · Teachers · Template",
+        body: "Four tabs: Schools for campus records, Classes for grade/section names, Teachers for accounts, Report Card Template for branding and grade structure."
       },
       {
         id: "schools",
@@ -717,16 +733,25 @@ export const HOW_TO_TOPICS = [
         view: "admin",
         clickSelector: '[data-tour="admin-tab-schools"]',
         title: "Schools tab",
-        body: "Add or edit schools first. Students and teachers need a school before you assign them."
+        body: "Add or edit schools first. Classes, students, and teachers need a school before you assign them."
+      },
+      {
+        id: "classes",
+        selector: '[data-tour="admin-tab-classes"]',
+        placement: "bottom",
+        view: "admin",
+        clickSelector: '[data-tour="admin-tab-classes"]',
+        title: "Classes tab",
+        body: "Create class names like Standard 4A. Student forms and Report Cards both use this list as the source of truth."
       },
       {
         id: "add",
         selector: '[data-tour="admin-add"]',
         placement: "left",
         view: "admin",
-        clickSelector: '[data-tour="admin-tab-schools"]',
-        title: "Add school or teacher",
-        body: "Use the gold Add button on each tab to create a new school or teacher. Create the school before adding teachers."
+        clickSelector: '[data-tour="admin-tab-classes"]',
+        title: "Add school, class, or teacher",
+        body: "Use the gold Add button on each tab. Create the school first, then classes and teachers."
       },
       {
         id: "teachers",

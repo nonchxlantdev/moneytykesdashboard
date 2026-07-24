@@ -24,6 +24,7 @@ export const THEME_OPTIONS = [
  *   headerBg: string,
  *   headerIsLight: boolean,
  *   accentColor: string,
+ *   iconAccent: string,
  *   darkTextColor: string
  * }>} */
 export const THEME_TOKENS = {
@@ -33,6 +34,7 @@ export const THEME_TOKENS = {
     headerBg: "#123e35",
     headerIsLight: false,
     accentColor: "#f6cc69",
+    iconAccent: "#359392",
     darkTextColor: "#10162f"
   },
   "chalkboard-green": {
@@ -41,6 +43,7 @@ export const THEME_TOKENS = {
     headerBg: "#29422f",
     headerIsLight: false,
     accentColor: "#f6cc69",
+    iconAccent: "#4d724f",
     darkTextColor: "#10162f"
   },
   "navy-gold": {
@@ -49,6 +52,7 @@ export const THEME_TOKENS = {
     headerBg: "#0a2443",
     headerIsLight: false,
     accentColor: "#f6cc69",
+    iconAccent: "#f6cc69",
     darkTextColor: "#0c2d4f"
   },
   "soft-teal-mint": {
@@ -57,6 +61,7 @@ export const THEME_TOKENS = {
     headerBg: "#b8dedc",
     headerIsLight: true,
     accentColor: "#73b1ac",
+    iconAccent: "#73b1ac",
     darkTextColor: "#1a4a49"
   }
 };

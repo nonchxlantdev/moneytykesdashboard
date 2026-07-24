@@ -4,6 +4,7 @@ import { ICON_STROKE } from "../config/navigation";
 const PAGE_TITLES = {
   admin: "Admin",
   dashboard: null,
+  "my-day": "My Day",
   students: "Students",
   "add-student": "Add student",
   lessons: "Lessons library",
