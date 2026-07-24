@@ -27,8 +27,10 @@ export default function LoginPage() {
 }
 
 function AuthLayout({ children }) {
+  const loginBg = `url("${import.meta.env.BASE_URL}assets/loginbkground.png")`;
+
   return (
-    <main className="mt-login-page">
+    <main className="mt-login-page" style={{ "--mt-login-bg": loginBg }}>
       <div className="mt-login-stage">
         <section className="mt-login-form-panel" aria-label="Teacher login">
           {children}

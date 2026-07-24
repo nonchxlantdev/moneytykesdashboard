@@ -666,8 +666,8 @@ function Sidebar({ currentView, open, navigate, collapsed, toggleCollapsed, clos
         ))}
       </div>
 
-      <div className="sidebar-brand">
-        <img src={logoSrc} alt="MoneyTykes" />
+      <div className="sidebar-brand-footer" aria-hidden={collapsed}>
+        <img className="sidebar-brand-logo" src={logoSrc} alt="MoneyTykes" />
       </div>
 
       {logoutConfirmOpen
