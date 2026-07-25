@@ -4,8 +4,10 @@ import DataTable from "../components/ui/DataTable";
 import ProgressBar from "../components/ui/ProgressBar";
 import SegmentedProgress from "../components/ui/SegmentedProgress";
 import ChalkboardHeader from "../components/ChalkboardHeader/ChalkboardHeader";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 import { loadAttendanceRecord } from "../utils/attendanceStorage";
 import { loadCreatedLessons } from "../utils/lessonsStorage";
+import { MY_DAY_TASKS_KEY } from "../utils/myDayStorage";
 import { formatPoints } from "../utils/points";
 import { getPointsLog } from "../utils/rewardsStorage";
 import "../dashboard-v2.css";
@@ -30,13 +32,16 @@ function formatShortDate(value) {
 
 function statusTone(status) {
   const normalized = String(status || "").toLowerCase();
-  if (normalized === "published" || normalized === "completed" || normalized === "active") return "success";
+  if (normalized === "published" || normalized === "completed" || normalized === "done" || normalized === "active") {
+    return "success";
+  }
   if (normalized === "draft" || normalized === "inactive") return "inactive";
-  if (normalized === "pending" || normalized === "in progress") return "pending";
+  if (normalized === "pending" || normalized === "in progress" || normalized === "to do") return "pending";
   return "info";
 }
 
 function taskProgress(task) {
+  if (task.done) return 100;
   const completed = Number(task.completed || 0);
   if (completed >= 100) return 100;
   if (completed > 0) return completed;
@@ -44,14 +49,13 @@ function taskProgress(task) {
 }
 
 function taskStatus(task) {
-  const progress = taskProgress(task);
-  if (progress >= 100) return "Completed";
-  if (progress > 0) return "In progress";
-  return "Not started";
+  if (task.done || taskProgress(task) >= 100) return "Completed";
+  if (taskProgress(task) > 0) return "In progress";
+  return "To do";
 }
 
 /**
- * Dashboard home — welcome, status, tasks, top students list.
+ * Dashboard home — welcome, status, My Day tasks, top students list.
  * Events, quick actions, and daily tip live in EventsRail.
  */
 export default function DashboardPage({ dashboard, db, navigate }) {
@@ -61,6 +65,8 @@ export default function DashboardPage({ dashboard, db, navigate }) {
   const className = db.className || "Class";
   const classId = slugClass(className) || "class";
   const teacherId = db.teacher?.id || db.teacher?.email || teacherName;
+
+  const [myDayTasks] = useLocalStorage(MY_DAY_TASKS_KEY, []);
 
   const attendance = useMemo(() => {
     const classStudents = (db.students || []).filter(
@@ -88,19 +94,38 @@ export default function DashboardPage({ dashboard, db, navigate }) {
       total,
       published,
       completed,
-      rate: total ? Math.round((done / total) * 100) : dashboard.completionRate || 0
+      rate: total ? Math.round((done / total) * 100) : 0
     };
-  }, [dashboard.completionRate]);
+  }, []);
 
   const rewardsIssued = useMemo(() => {
     return (db.students || []).reduce((sum, student) => sum + getPointsLog(student.id).length, 0);
   }, [db.students]);
 
   const recentTasks = useMemo(() => {
-    return [...(db.tasks || [])]
-      .sort((a, b) => String(b.createdAt || b.due || "").localeCompare(String(a.createdAt || a.due || "")))
-      .slice(0, 5);
-  }, [db.tasks]);
+    return [...(myDayTasks || [])]
+      .filter(task => String(task.teacherId) === String(teacherId))
+      .sort((a, b) => {
+        if (Boolean(a.done) !== Boolean(b.done)) return a.done ? 1 : -1;
+        return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
+      })
+      .slice(0, 5)
+      .map(task => ({
+        ...task,
+        title: task.text || task.title || "Task",
+        category: "My Day"
+      }));
+  }, [myDayTasks, teacherId]);
+
+  const myDayStats = useMemo(() => {
+    const mine = (myDayTasks || []).filter(task => String(task.teacherId) === String(teacherId));
+    const doneCount = mine.filter(task => task.done).length;
+    return {
+      total: mine.length,
+      doneCount,
+      rate: mine.length ? Math.round((doneCount / mine.length) * 100) : 0
+    };
+  }, [myDayTasks, teacherId]);
 
   const topStudents = (dashboard.leaderboard || []).slice(0, 5);
 
@@ -128,10 +153,10 @@ export default function DashboardPage({ dashboard, db, navigate }) {
     },
     {
       label: "Task progress",
-      value: `${dashboard.completionRate || 0}%`,
-      meta: `${dashboard.taskCount || 0} tasks`,
+      value: `${myDayStats.rate}%`,
+      meta: `${myDayStats.doneCount} of ${myDayStats.total} My Day tasks`,
       tone: "rose",
-      percent: dashboard.completionRate || 0
+      percent: myDayStats.rate
     }
   ];
 
@@ -158,7 +183,7 @@ export default function DashboardPage({ dashboard, db, navigate }) {
           <article className="mt-card-panel dash-home-card">
             <div className="mt-card-panel-header">
               <h3>Recent tasks</h3>
-              <button type="button" className="mt-card-panel-link" onClick={() => navigate("create-lessons")}>
+              <button type="button" className="mt-card-panel-link" onClick={() => navigate("my-day")}>
                 View all
               </button>
             </div>
@@ -168,7 +193,7 @@ export default function DashboardPage({ dashboard, db, navigate }) {
               empty={
                 <div className="mt-empty-state">
                   <strong>No tasks yet</strong>
-                  <p>Create a lesson or task to start tracking class progress.</p>
+                  <p>Add tasks in My Day to track your classroom to-dos here.</p>
                 </div>
               }
               renderCell={(row, column) => {
@@ -176,7 +201,7 @@ export default function DashboardPage({ dashboard, db, navigate }) {
                   return (
                     <div>
                       <strong>{row.title}</strong>
-                      <div className="dash-v2-subtle">{row.category || "General"} · {formatShortDate(row.due || row.createdAt)}</div>
+                      <div className="dash-v2-subtle">{row.category || "My Day"} · {formatShortDate(row.createdAt)}</div>
                     </div>
                   );
                 }

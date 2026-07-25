@@ -211,7 +211,7 @@ function normalizeDatabase(saved) {
     students: saved.students || [],
     schools: saved.schools || [],
     teachers,
-    tasks: saved.tasks || [],
+    tasks: [],
     rewards: saved.rewards || [],
     redemptions: saved.redemptions || [],
     transactions: saved.transactions || [],
@@ -1824,17 +1824,25 @@ function EmptyState({ title, text }) {
 function buildDashboard(db) {
   const totalEarned = db.students.reduce((sum, student) => sum + (student.totalEarned || 0), 0);
   const totalBalance = db.students.reduce((sum, student) => sum + (student.balance || 0), 0);
-  const categories = db.tasks.reduce((acc, task) => ({ ...acc, [task.category]: (acc[task.category] || 0) + 1 }), {});
+  let myDayTasks = [];
+  try {
+    myDayTasks = JSON.parse(localStorage.getItem("mt.my_day.tasks.v1") || "[]") || [];
+  } catch {
+    myDayTasks = [];
+  }
+  const teacherId = db.teacher?.id || db.teacher?.email;
+  const mine = myDayTasks.filter(task => String(task.teacherId) === String(teacherId));
+  const doneCount = mine.filter(task => task.done).length;
   return {
     students: db.students,
     studentCount: db.students.length,
-    taskCount: db.tasks.length,
+    taskCount: mine.length,
     totalEarned,
     averageBalance: db.students.length ? totalBalance / db.students.length : 0,
-    completionRate: db.tasks.length ? Math.round(db.tasks.reduce((sum, task) => sum + (task.completed || 0), 0) / db.tasks.length) : 0,
+    completionRate: mine.length ? Math.round((doneCount / mine.length) * 100) : 0,
     activeStreaks: db.students.filter(student => student.streak > 0).length,
     leaderboard: [...db.students].sort((a, b) => (b.totalEarned || 0) - (a.totalEarned || 0)),
-    topCategory: Object.entries(categories).sort((a, b) => b[1] - a[1])[0]?.[0] || "Not started"
+    topCategory: "My Day"
   };
 }
 
