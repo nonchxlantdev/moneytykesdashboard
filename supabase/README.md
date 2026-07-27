@@ -19,8 +19,12 @@ Newest roles migration: `20260724130000_profiles_roles_gender_dob.sql` (Dev / Cl
 ```bash
 supabase functions deploy invite-user
 supabase functions deploy admin-reset-password
-supabase secrets set SUPABASE_SERVICE_ROLE_KEY=... ALLOWED_ORIGIN=https://nonchxlantdev.github.io
+supabase functions deploy admin-force-logout
+supabase secrets set ALLOWED_ORIGIN=https://nonchxlantdev.github.io
 ```
+
+Session presence migration: `20260725153000_user_sessions_presence.sql`  
+(Admin → Online tab, single-device login, force logout.)
 
 ## 4. Bootstrap first Dev
 After creating an Auth user in the dashboard, run [`bootstrap_admin.sql`](bootstrap_admin.sql) in the SQL editor (sets `glenrickmspain@hotmail.com` to role `dev`).

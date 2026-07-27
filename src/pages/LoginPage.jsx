@@ -52,7 +52,7 @@ function AuthLayout({ children }) {
 }
 
 function LoginForm() {
-  const { signIn, resetPassword, authError } = useAuth();
+  const { signIn, resetPassword, authError, sessionNotice, clearSessionNotice } = useAuth();
   const [form, setForm] = useState({ email: "", password: "", rememberMe: true });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -135,6 +135,15 @@ function LoginForm() {
       {!supabaseMode ? (
         <p className="mt-access-note" role="status">
           Demo mode: Supabase auth is off. Any valid email/password (8+ chars) continues locally.
+        </p>
+      ) : null}
+
+      {sessionNotice ? (
+        <p className="mt-access-note" role="status">
+          {sessionNotice}{" "}
+          <button type="button" className="mt-text-link" onClick={clearSessionNotice}>
+            Dismiss
+          </button>
         </p>
       ) : null}
 

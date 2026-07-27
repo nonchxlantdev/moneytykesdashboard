@@ -73,6 +73,8 @@ function ParticleCard({
   const memoizedParticles = useRef([]);
   const particlesInitialized = useRef(false);
   const magnetismAnimationRef = useRef(null);
+  const mouseRef = useRef({ x: 0, y: 0, moved: false });
+  const rafRef = useRef(null);
 
   const initializeParticles = useCallback(() => {
     if (particlesInitialized.current || !cardRef.current) return;
@@ -146,15 +148,23 @@ function ParticleCard({
     const handleMouseLeave = () => {
       isHoveredRef.current = false;
       clearAllParticles();
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      mouseRef.current.moved = false;
       if (enableTilt) gsap.to(element, { rotateX: 0, rotateY: 0, duration: 0.3, ease: "power2.out" });
       if (enableMagnetism) gsap.to(element, { x: 0, y: 0, duration: 0.3, ease: "power2.out" });
     };
 
-    const handleMouseMove = e => {
-      if (!enableTilt && !enableMagnetism) return;
+    // rAF-throttle: store latest mouse position; layout reads run at most once per frame.
+    const runFrame = () => {
+      rafRef.current = null;
+      if (!mouseRef.current.moved || (!enableTilt && !enableMagnetism)) return;
+      mouseRef.current.moved = false;
       const rect = element.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const x = mouseRef.current.x - rect.left;
+      const y = mouseRef.current.y - rect.top;
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
       if (enableTilt) {
@@ -174,6 +184,12 @@ function ParticleCard({
           ease: "power2.out"
         });
       }
+    };
+
+    const handleMouseMove = e => {
+      if (!enableTilt && !enableMagnetism) return;
+      mouseRef.current = { x: e.clientX, y: e.clientY, moved: true };
+      if (rafRef.current == null) rafRef.current = requestAnimationFrame(runFrame);
     };
 
     const handleClick = e => {
@@ -215,6 +231,7 @@ function ParticleCard({
     element.addEventListener("click", handleClick);
     return () => {
       isHoveredRef.current = false;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       element.removeEventListener("mouseenter", handleMouseEnter);
       element.removeEventListener("mouseleave", handleMouseLeave);
       element.removeEventListener("mousemove", handleMouseMove);
@@ -260,17 +277,28 @@ function GlobalSpotlight({ gridRef, disableAnimations = false, enabled = true, s
     document.body.appendChild(spotlight);
     spotlightRef.current = spotlight;
 
-    const handleMouseMove = e => {
-      if (!spotlightRef.current || !gridRef.current) return;
+    let cards = gridRef.current.querySelectorAll(".magic-bento-card");
+    const refreshCards = () => {
+      if (gridRef.current) cards = gridRef.current.querySelectorAll(".magic-bento-card");
+    };
+    window.addEventListener("resize", refreshCards);
+
+    const mouse = { x: 0, y: 0, moved: false };
+    let rafId = null;
+
+    const runFrame = () => {
+      rafId = null;
+      if (!mouse.moved || !spotlightRef.current || !gridRef.current) return;
+      mouse.moved = false;
+
       const section = gridRef.current.closest(".magic-bento-section");
       const rect = section?.getBoundingClientRect();
       const mouseInside =
         rect &&
-        e.clientX >= rect.left &&
-        e.clientX <= rect.right &&
-        e.clientY >= rect.top &&
-        e.clientY <= rect.bottom;
-      const cards = gridRef.current.querySelectorAll(".magic-bento-card");
+        mouse.x >= rect.left &&
+        mouse.x <= rect.right &&
+        mouse.y >= rect.top &&
+        mouse.y <= rect.bottom;
 
       if (!mouseInside) {
         gsap.to(spotlightRef.current, { opacity: 0, duration: 0.3, ease: "power2.out" });
@@ -286,7 +314,7 @@ function GlobalSpotlight({ gridRef, disableAnimations = false, enabled = true, s
         const centerX = cardRect.left + cardRect.width / 2;
         const centerY = cardRect.top + cardRect.height / 2;
         const distance =
-          Math.hypot(e.clientX - centerX, e.clientY - centerY) - Math.max(cardRect.width, cardRect.height) / 2;
+          Math.hypot(mouse.x - centerX, mouse.y - centerY) - Math.max(cardRect.width, cardRect.height) / 2;
         const effectiveDistance = Math.max(0, distance);
         minDistance = Math.min(minDistance, effectiveDistance);
         let glowIntensity = 0;
@@ -294,10 +322,10 @@ function GlobalSpotlight({ gridRef, disableAnimations = false, enabled = true, s
         else if (effectiveDistance <= fadeDistance) {
           glowIntensity = (fadeDistance - effectiveDistance) / (fadeDistance - proximity);
         }
-        updateCardGlowProperties(card, e.clientX, e.clientY, glowIntensity, spotlightRadius);
+        updateCardGlowProperties(card, mouse.x, mouse.y, glowIntensity, spotlightRadius);
       });
 
-      gsap.to(spotlightRef.current, { left: e.clientX, top: e.clientY, duration: 0.1, ease: "power2.out" });
+      gsap.to(spotlightRef.current, { left: mouse.x, top: mouse.y, duration: 0.1, ease: "power2.out" });
       const targetOpacity =
         minDistance <= proximity
           ? 0.55
@@ -311,8 +339,15 @@ function GlobalSpotlight({ gridRef, disableAnimations = false, enabled = true, s
       });
     };
 
+    const handleMouseMove = e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      mouse.moved = true;
+      if (rafId == null) rafId = requestAnimationFrame(runFrame);
+    };
+
     const handleMouseLeave = () => {
-      gridRef.current?.querySelectorAll(".magic-bento-card").forEach(card => {
+      cards.forEach(card => {
         card.style.setProperty("--glow-intensity", "0");
       });
       if (spotlightRef.current) gsap.to(spotlightRef.current, { opacity: 0, duration: 0.3, ease: "power2.out" });
@@ -321,6 +356,8 @@ function GlobalSpotlight({ gridRef, disableAnimations = false, enabled = true, s
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseleave", handleMouseLeave);
     return () => {
+      if (rafId != null) cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", refreshCards);
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseleave", handleMouseLeave);
       spotlightRef.current?.parentNode?.removeChild(spotlightRef.current);

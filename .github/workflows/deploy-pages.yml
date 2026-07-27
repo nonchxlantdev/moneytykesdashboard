@@ -36,6 +36,8 @@ jobs:
       - name: Build
         env:
           VITE_USE_SUPABASE: ${{ vars.VITE_USE_SUPABASE || 'false' }}
+          # Do not set VITE_ALLOW_DEMO_MODE here — production must fail closed
+          # when Supabase is misconfigured, not silently grant demo access.
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: npm run build

@@ -5,6 +5,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
+  // Production: set ALLOWED_ORIGIN as a Supabase Edge Function secret
+  // (e.g. https://nonchxlantdev.github.io) — do not leave "*" in live deploys.
   "Access-Control-Allow-Origin": Deno.env.get("ALLOWED_ORIGIN") || "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
@@ -122,7 +124,8 @@ Deno.serve(async req => {
     const firstName = String(body.firstName || "").trim();
     const lastName = String(body.lastName || "").trim();
     const role = normalizeRole(body.role, actor.role);
-    const schoolId = body.schoolId || actor.school_id;
+    const rawSchoolId = body.schoolId == null || body.schoolId === "" ? null : String(body.schoolId).trim();
+    const schoolId = rawSchoolId || null;
     const temporaryPassword = String(body.temporaryPassword || "").trim();
     const gender = normalizeGender(body.gender);
     const dateOfBirth = body.dateOfBirth ? String(body.dateOfBirth).trim() : null;
@@ -132,14 +135,14 @@ Deno.serve(async req => {
     }
     if (!email || !email.includes("@")) return json(400, { error: "Valid email is required." });
     if (!firstName || !lastName) return json(400, { error: "First and last name are required." });
-    if (!schoolId) return json(400, { error: "schoolId is required." });
     if (!gender) return json(400, { error: "Gender is required." });
     if (temporaryPassword && temporaryPassword.length < 8) {
       return json(400, { error: "Temporary password must be at least 8 characters." });
     }
 
-    // Class Admin may only invite into their own school; Dev may invite into any school.
-    if (actor.role !== "dev" && String(schoolId) !== String(actor.school_id)) {
+    // Class Admin may only invite into their own school (or leave school unassigned).
+    // Dev may invite with any school or none.
+    if (actor.role !== "dev" && schoolId && String(schoolId) !== String(actor.school_id)) {
       return json(403, { error: "Cannot invite users to another school." });
     }
 

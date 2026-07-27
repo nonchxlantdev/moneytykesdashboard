@@ -102,7 +102,7 @@
 /* —— Manage card (Schools / Teachers tabs) —— */
 .manage-card {
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .manage-tabs {
@@ -326,13 +326,19 @@
   position: absolute;
   right: 0;
   top: calc(100% + 4px);
-  z-index: 20;
+  z-index: 40;
   min-width: 148px;
   padding: 6px;
   border-radius: 10px;
   background: #fff;
   border: 1px solid color-mix(in srgb, var(--icon-accent) 14%, transparent);
   box-shadow: 0 12px 28px rgba(28, 43, 42, 0.12);
+}
+
+.rw-overflow-menu-portal {
+  position: fixed !important;
+  right: auto !important;
+  z-index: 4000 !important;
 }
 
 .admin-dash .rw-overflow-item {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BookOpen,
   Check,
@@ -16,11 +16,12 @@ import ReportCardTemplateSettings from "./ReportCardTemplateSettings";
 import { isSupabaseEnabled } from "../../lib/featureFlags";
 import { inviteUser } from "../../data/inviteUser";
 import { resetUserPassword } from "../../data/resetUserPassword";
+import { forceLogoutUser, listOnlineSessions, claimSession } from "../../data/sessionsRepo";
 import { deleteClass, upsertClass } from "../../data/classesRepo";
 import { updateTeacherProfile } from "../../data/profilesRepo";
 import { deleteSchool, upsertSchool } from "../../data/schoolsRepo";
 import { useAuth } from "../../auth/AuthProvider";
-import { canAssignDevRole, normalizeRole, ROLE_LABELS, ROLES } from "../../auth/roles";
+import { canAssignDevRole, normalizeRole, ROLE_LABELS, ROLES, roleLabel } from "../../auth/roles";
 import { calculateAgeFromDob } from "../../utils/ageFromDob";
 import "./admin-dashboard.css";
 import "../ReportCards/report-cards.css";
@@ -134,7 +135,7 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
   const supabaseMode = isSupabaseEnabled();
   const [passwordResetBusy, setPasswordResetBusy] = useState(false);
 
-  const [tab, setTab] = useState("schools"); // schools | teachers | classes | report-template
+  const [tab, setTab] = useState("schools"); // schools | teachers | classes | report-template | sessions
   const [schoolFormOpen, setSchoolFormOpen] = useState(false);
   const [teacherFormOpen, setTeacherFormOpen] = useState(false);
   const [classFormOpen, setClassFormOpen] = useState(false);
@@ -250,10 +251,6 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
 
   function openTeacherForm(teacher) {
     setTeacherError("");
-    if (!schools.length) {
-      setTeacherError("Create a school before adding a teacher.");
-      return;
-    }
     if (teacher) {
       setEditingTeacherId(teacher.id);
       setTeacherForm({
@@ -261,7 +258,7 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
         lastName: teacher.lastName,
         email: teacher.email,
         temporaryPassword: "",
-        schoolId: String(teacher.schoolId),
+        schoolId: teacher.schoolId != null && teacher.schoolId !== "" ? String(teacher.schoolId) : "",
         role: teacher.role || ROLE_LABELS[ROLES.TEACHER],
         gender: teacher.gender || "",
         dateOfBirth: teacher.dateOfBirth || "",
@@ -273,7 +270,7 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
       setEditingTeacherId(null);
       setTeacherForm({
         ...emptyTeacherForm,
-        schoolId: schools[0] ? String(schools[0].id) : ""
+        schoolId: ""
       });
     }
     setTeacherFormOpen(true);
@@ -398,17 +395,15 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
       return;
     }
     const school = schools.find(item => String(item.id) === String(teacherForm.schoolId));
-    if (!school) {
-      setTeacherError("Please assign a school.");
-      return;
-    }
+    const schoolId = school?.id ?? null;
+    const schoolName = school?.name || "";
     try {
       await createTeacherAccount({
         firstName: teacherForm.firstName.trim(),
         lastName: teacherForm.lastName.trim(),
         email: teacherForm.email.trim(),
-        schoolId: school.id,
-        schoolName: school.name,
+        schoolId,
+        schoolName,
         role: teacherForm.role,
         gender: teacherForm.gender,
         dateOfBirth: teacherForm.dateOfBirth || "",
@@ -648,6 +643,16 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
             <button
               type="button"
               role="tab"
+              aria-selected={tab === "sessions"}
+              className={tab === "sessions" ? "manage-tab active" : "manage-tab"}
+              data-tour="admin-tab-sessions"
+              onClick={() => setTab("sessions")}
+            >
+              Online
+            </button>
+            <button
+              type="button"
+              role="tab"
               aria-selected={tab === "report-template"}
               className={tab === "report-template" ? "manage-tab active" : "manage-tab"}
               data-tour="admin-tab-template"
@@ -709,6 +714,9 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
                 onReassign={openTeacherForm}
                 onDeleteRequest={confirmDeleteTeacher}
               />
+            ) : null}
+            {tab === "sessions" ? (
+              <SessionsPanel onToast={message => update(() => {}, message)} />
             ) : null}
             {tab === "report-template" ? <ReportCardTemplateSettings schools={schools} teachers={teachers} /> : null}
           </div>
@@ -990,9 +998,6 @@ function TeachersPanel({
 
   return (
     <>
-      {!schools.length ? (
-        <p className="admin-note">Create a school first so each teacher can be assigned during setup.</p>
-      ) : null}
       {error && !formOpen ? <p className="admin-form-error">{error}</p> : null}
 
       {formOpen ? (
@@ -1059,14 +1064,14 @@ function TeachersPanel({
           </p>
           <div className="form-grid">
             <Select
-              label="Assign School"
+              label="Assign School (optional)"
               value={form.schoolId}
               onChange={schoolId => setForm({ ...form, schoolId })}
               options={schools.map(school => ({ value: String(school.id), label: school.name }))}
-              placeholder="Select school"
+              placeholder={schools.length ? "Select school" : "No schools yet — optional"}
               searchPlaceholder="Search schools"
-              required
-              allowClear={false}
+              required={false}
+              allowClear
             />
             <Select
               label="Role"
@@ -1158,7 +1163,7 @@ function TeachersPanel({
       ) : (
         <div className="admin-empty">
           <strong>No teachers yet</strong>
-          <p>Create teacher accounts after schools are added.</p>
+          <p>Add teacher accounts anytime — school assignment is optional.</p>
         </div>
       )}
 
@@ -1168,8 +1173,7 @@ function TeachersPanel({
           data-tour="admin-add"
           type="button"
           onClick={() => onOpenForm()}
-          disabled={!schools.length}
-          title={!schools.length ? "Create a school before adding a teacher" : "Add teacher"}
+          title="Add teacher"
         >
           Add Teacher
         </button>
@@ -1177,3 +1181,140 @@ function TeachersPanel({
     </>
   );
 }
+
+function formatSeen(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+
+function deviceLabel(userAgent) {
+  const ua = String(userAgent || "");
+  if (!ua) return "Unknown device";
+  if (/Mobile|Android|iPhone/i.test(ua)) return "Mobile browser";
+  if (/Edg\//i.test(ua)) return "Edge";
+  if (/Chrome\//i.test(ua)) return "Chrome";
+  if (/Firefox\//i.test(ua)) return "Firefox";
+  if (/Safari\//i.test(ua)) return "Safari";
+  return "Browser";
+}
+
+function SessionsPanel({ onToast }) {
+  const { user } = useAuth();
+  const supabaseMode = isSupabaseEnabled();
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [busyId, setBusyId] = useState("");
+
+  async function refresh() {
+    if (!supabaseMode) {
+      setRows([]);
+      setError("Online sessions require Supabase.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      // Ensure this browser is registered before listing (fixes missed boot claim).
+      try {
+        await claimSession();
+      } catch (claimErr) {
+        console.warn("claimSession during Online refresh:", claimErr?.message || claimErr);
+      }
+      const next = await listOnlineSessions(120);
+      setRows(next);
+    } catch (err) {
+      setError(err.message || "Could not load online sessions.");
+      setRows([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    refresh();
+    const timer = window.setInterval(refresh, 20000);
+    return () => window.clearInterval(timer);
+  }, [supabaseMode]);
+
+  async function handleForceLogout(row) {
+    if (!row?.userId) return;
+    const name = `${row.firstName} ${row.lastName}`.trim() || row.email;
+    const confirmed = window.confirm(
+      `Force sign out ${name}? They will need to sign in again on any browser.`
+    );
+    if (!confirmed) return;
+    setBusyId(row.userId);
+    setError("");
+    try {
+      await forceLogoutUser(row.userId);
+      onToast?.(`Signed out ${name}`);
+      await refresh();
+    } catch (err) {
+      setError(err.message || "Force logout failed.");
+    } finally {
+      setBusyId("");
+    }
+  }
+
+  return (
+    <>
+      <p className="admin-note">
+        People with activity in the last 2 minutes. Signing in on a new device closes their previous
+        session. Use Force logout if someone is stuck signed in at home and needs school access.
+      </p>
+      {error ? <p className="admin-form-error">{error}</p> : null}
+      <div className="admin-form-actions" style={{ marginBottom: 12 }}>
+        <button className="btn" type="button" onClick={refresh} disabled={loading}>
+          {loading ? "Refreshing…" : "Refresh"}
+        </button>
+      </div>
+      {rows.length ? (
+        <div className="compact-list">
+          {rows.map(row => {
+            const name = `${row.firstName || ""} ${row.lastName || ""}`.trim() || row.email;
+            const isSelf = String(row.userId) === String(user?.id);
+            return (
+              <CompactRow
+                key={row.sessionId || `${row.userId}-${row.clientId}`}
+                icon={<User size={16} strokeWidth={2.2} />}
+                title={name}
+                subtitle={[
+                  roleLabel(row.role),
+                  row.schoolName || "No school",
+                  deviceLabel(row.userAgent),
+                  `Seen ${formatSeen(row.lastSeenAt)}`
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                status="active"
+                menuItems={[
+                  {
+                    label: isSelf ? "This is you" : busyId === row.userId ? "Signing out…" : "Force logout",
+                    danger: !isSelf,
+                    onClick: () => {
+                      if (!isSelf && busyId !== row.userId) handleForceLogout(row);
+                    }
+                  }
+                ]}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        <div className="admin-empty">
+          <strong>{loading ? "Checking sessions…" : "Nobody online right now"}</strong>
+          <p>Active sign-ins appear here while teachers are using the dashboard.</p>
+        </div>
+      )}
+    </>
+  );
+}
+

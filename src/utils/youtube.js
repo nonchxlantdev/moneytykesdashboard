@@ -60,31 +60,35 @@ export async function fetchYoutubeOEmbed(url) {
   }
 }
 
+import { sanitizeLessonHtml } from "./sanitizeLessonHtml";
+
 /**
  * Format lesson text for display. Rich Notes may already be HTML.
+ * Always run through DOMPurify — regex stripping is not a XSS boundary
+ * (unquoted onerror / javascript: URLs bypassed the old cleanup).
  * @param {string} text
  */
 export function formatLessonText(text) {
   if (!text) return "";
   if (/<[a-z][\s\S]*>/i.test(text)) {
-    return String(text)
-      .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
-      .replace(/\son\w+=(["']).*?\1/gi, "");
+    return sanitizeLessonHtml(text);
   }
-  return text
-    .split("\n")
-    .map(line => {
-      const trimmed = line.trim();
-      if (trimmed.startsWith("- ")) {
-        return `<li>${escapeHtml(trimmed.slice(2))}</li>`;
-      }
-      let html = escapeHtml(trimmed);
-      html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-      html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
-      return html ? `<p>${html}</p>` : "";
-    })
-    .join("")
-    .replace(/(<li>.*<\/li>)+/g, match => `<ul>${match}</ul>`);
+  return sanitizeLessonHtml(
+    text
+      .split("\n")
+      .map(line => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith("- ")) {
+          return `<li>${escapeHtml(trimmed.slice(2))}</li>`;
+        }
+        let html = escapeHtml(trimmed);
+        html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
+        return html ? `<p>${html}</p>` : "";
+      })
+      .join("")
+      .replace(/(<li>.*<\/li>)+/g, match => `<ul>${match}</ul>`)
+  );
 }
 
 function escapeHtml(value) {

@@ -44,6 +44,9 @@ import {
 import { moneyMoveQuestions } from "./moneyMoveQuestions";
 import LoginPage from "./pages/LoginPage";
 import { AuthProvider, useAuth } from "./auth/AuthProvider";
+import MisconfiguredDeployScreen from "./components/MisconfiguredDeployScreen";
+import DemoModeBanner from "./components/DemoModeBanner";
+import TabLock from "./auth/TabLock";
 import PageChalkLoader from "./components/shared/PageChalkLoader";
 import { useSupabaseCoreSync } from "./data/useSupabaseCoreSync";
 import RewardsPage from "./pages/RewardsPage";
@@ -87,10 +90,10 @@ import { downloadReportCardPdf } from "./utils/reportCardPdf";
 import "./components/ReportCards/report-cards.css";
 
 import { navSections, ICON_SIZE, ICON_STROKE } from "./config/navigation";
+import { useTeacherDatabase, loadDatabase } from "./hooks/useTeacherDatabase";
 import { buttonTap, fadeUp } from "./lib/motion";
 
 const CalendarPage = React.lazy(() => import("./pages/Calendar"));
-const STORAGE_KEY = "moneytykes.teacher.dashboard.v3";
 const assetPath = path => `${import.meta.env.BASE_URL}${path}`;
 
 const mobileTabItems = [
@@ -145,84 +148,15 @@ const studentAvatars = [
   "voltorb.png"
 ];
 
-function createDatabase() {
-  return {
-    teacher: { id: 1, first: "Shamira", last: "Young", email: "shamira.young@moneytykes.school" },
-    school: "MoneyTykes Classroom",
-    className: "Financial Literacy Class",
-    students: [],
-    schools: [],
-    teachers: [],
-    tasks: [],
-    rewards: [],
-    redemptions: [],
-    transactions: [],
-    tips: [
-      "Encourage students to set savings goals. Small steps today build financial confidence.",
-      "Ask students to separate needs from wants before spending reward points.",
-      "A clear point goal gives every reward a purpose before it gets spent."
-    ]
-  };
-}
-
 function resolveDefaultSchoolFilter(db) {
   const match = (db.schools || []).find(school => school.name === db.school);
   return match ? String(match.id) : "all";
 }
 
-function loadDatabase() {
-  purgeLegacyMockData();
-  purgeDemoCalendarAndLessons();
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || createDatabase();
-    return normalizeDatabase(saved);
-  } catch {
-    return createDatabase();
-  }
-}
-
-function normalizeDatabase(saved) {
-  const defaults = createDatabase();
-  const teacher = { ...defaults.teacher, ...(saved.teacher || {}) };
-  // Migrate the pre-existing placeholder surname so already-saved browsers
-  // pick up the current default teacher identity instead of the old one.
-  if (teacher.last === "Advisor") teacher.last = defaults.teacher.last;
-  if (teacher.first === "Amara") {
-    teacher.first = defaults.teacher.first;
-    if (!teacher.email || teacher.email.startsWith("amara.")) {
-      teacher.email = defaults.teacher.email;
-    }
-  }
-  const teachers = (saved.teachers || []).map(item => {
-    if (item.firstName !== "Amara") return item;
-    return {
-      ...item,
-      firstName: defaults.teacher.first,
-      email:
-        !item.email || String(item.email).startsWith("amara.")
-          ? defaults.teacher.email
-          : item.email
-    };
-  });
-  return {
-    ...defaults,
-    ...saved,
-    teacher,
-    students: saved.students || [],
-    schools: saved.schools || [],
-    teachers,
-    tasks: [],
-    rewards: saved.rewards || [],
-    redemptions: saved.redemptions || [],
-    transactions: saved.transactions || [],
-    tips: saved.tips || defaults.tips
-  };
-}
-
 function App() {
   const isLoginRoute = window.location.pathname.replace(/\/$/, "").endsWith("/login");
   const { bootstrapping, isAuthenticated, supabaseMode, isAdmin, profile, signOut } = useAuth();
-  const [db, setDb] = useState(loadDatabase);
+  const { db, setDb } = useTeacherDatabase();
   const [view, setView] = useState("dashboard");
   const [currentTip, setCurrentTip] = useState(() => randomFinancialTip());
   const [howToOpen, setHowToOpen] = useState(false);
@@ -262,10 +196,11 @@ function App() {
         id: profile.id,
         first: profile.first_name || current.teacher?.first || "",
         last: profile.last_name || current.teacher?.last || "",
-        email: profile.email || current.teacher?.email || ""
+        email: profile.email || current.teacher?.email || "",
+        gender: profile.gender || current.teacher?.gender || ""
       }
     }));
-  }, [profile]);
+  }, [profile, setDb]);
 
   // Session gate: Supabase mode requires auth for the dashboard; send authed users away from /login.
   useEffect(() => {
@@ -290,7 +225,6 @@ function App() {
     setToast("Admin is only available to Dev and Class Admin.");
   }, [isAdmin, view]);
 
-  useEffect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(db)), [db]);
   useEffect(() => {
     try {
       localStorage.setItem("sidebarCollapsed", String(sidebarHidden));
@@ -1903,11 +1837,38 @@ purgeLegacyMockData();
 purgeDemoCalendarAndLessons();
 seedMockData();
 
+function AppWithSessionGuards() {
+  const { isAuthenticated, supabaseMode, demoMode, configured, bootstrapping } = useAuth();
+  const isLoginRoute = window.location.pathname.replace(/\/$/, "").endsWith("/login");
+
+  if (!configured) {
+    return <MisconfiguredDeployScreen />;
+  }
+
+  // Render login without mounting the full dashboard tree (avoids heavy deps / crashes on /login).
+  if (isLoginRoute && !isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  // Avoid locking the login route; only lock authenticated dashboard tabs.
+  const lockTabs = Boolean(supabaseMode && isAuthenticated && !bootstrapping);
+  const app = (
+    <>
+      {demoMode ? <DemoModeBanner /> : null}
+      <App />
+    </>
+  );
+  if (!lockTabs) {
+    return app;
+  }
+  return <TabLock enabled>{app}</TabLock>;
+}
+
 const rootEl = document.getElementById("root");
 const appRoot = rootEl._mtReactRoot ?? createRoot(rootEl);
 rootEl._mtReactRoot = appRoot;
 appRoot.render(
   <AuthProvider>
-    <App />
+    <AppWithSessionGuards />
   </AuthProvider>
 );

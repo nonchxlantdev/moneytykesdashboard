@@ -26,7 +26,7 @@ export async function updateTeacherProfile(id, patch) {
     first_name: patch.firstName,
     last_name: patch.lastName,
     email: patch.email,
-    school_id: patch.schoolId,
+    school_id: patch.schoolId || null,
     role,
     status: patch.status || "active",
     gender: patch.gender === "male" || patch.gender === "female" ? patch.gender : "",

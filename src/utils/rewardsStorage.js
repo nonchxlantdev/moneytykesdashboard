@@ -1,5 +1,8 @@
 const REWARDS_BANK_KEY = "rewards_bank";
 
+/** In-memory cache so render-path memos don't re-parse localStorage per student. */
+const pointsLogCache = new Map();
+
 export function studentPointsKey(studentId) {
   return `student_points_${studentId}`;
 }
@@ -34,22 +37,35 @@ export function setStudentPoints(studentId, points) {
 }
 
 export function getPointsLog(studentId) {
+  const key = String(studentId);
+  if (pointsLogCache.has(key)) return pointsLogCache.get(key);
   try {
-    return JSON.parse(localStorage.getItem(pointsLogKey(studentId))) || [];
+    const log = JSON.parse(localStorage.getItem(pointsLogKey(studentId))) || [];
+    pointsLogCache.set(key, log);
+    return log;
   } catch {
-    return [];
+    const empty = [];
+    pointsLogCache.set(key, empty);
+    return empty;
   }
 }
 
+/** Cheap count for dashboard aggregates — uses the same cache as getPointsLog. */
+export function getPointsLogCount(studentId) {
+  return getPointsLog(studentId).length;
+}
+
 export function addPointsLogEntry(studentId, entry) {
-  const log = getPointsLog(studentId);
+  const log = getPointsLog(studentId).slice();
   log.unshift(entry);
+  pointsLogCache.set(String(studentId), log);
   localStorage.setItem(pointsLogKey(studentId), JSON.stringify(log));
 }
 
 /** Award logs store reward name/icon/points snapshots — safe if the bank reward is deleted. */
 export function removePointsLogEntry(studentId, entryId) {
   const next = getPointsLog(studentId).filter(entry => String(entry.id) !== String(entryId));
+  pointsLogCache.set(String(studentId), next);
   localStorage.setItem(pointsLogKey(studentId), JSON.stringify(next));
   return next;
 }

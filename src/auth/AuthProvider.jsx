@@ -1,12 +1,16 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
-import { isSupabaseEnabled } from "../lib/featureFlags";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { EPHEMERAL_AUTH_KEY, getSupabase, recreateSupabaseClient } from "../lib/supabaseClient";
+import { isDemoMode, isDeploymentConfigured, isSupabaseEnabled } from "../lib/featureFlags";
+import { claimSession, heartbeatSession } from "../data/sessionsRepo";
 import { canAccessAdmin, demoProfile, normalizeRole, ROLES } from "./roles";
 
 const AuthContext = createContext(null);
+const HEARTBEAT_MS = 30_000;
 
 async function fetchProfile(userId) {
-  const { data, error } = await supabase
+  const client = getSupabase();
+  if (!client) throw new Error("Supabase client unavailable");
+  const { data, error } = await client
     .from("profiles")
     .select("id, email, first_name, last_name, role, school_id, status, gender, date_of_birth")
     .eq("id", userId)
@@ -17,10 +21,25 @@ async function fetchProfile(userId) {
 
 export function AuthProvider({ children }) {
   const supabaseMode = isSupabaseEnabled();
+  const demoMode = isDemoMode();
+  const configured = isDeploymentConfigured();
   const [bootstrapping, setBootstrapping] = useState(supabaseMode);
   const [session, setSession] = useState(null);
-  const [profile, setProfile] = useState(() => (supabaseMode ? null : demoProfile()));
+  // Fail closed: only auto-authenticate when demo mode is explicitly allowed.
+  const [profile, setProfile] = useState(() => (demoMode ? demoProfile() : null));
   const [authError, setAuthError] = useState("");
+  const [sessionNotice, setSessionNotice] = useState("");
+  const heartbeatRef = useRef(null);
+  // Bumped when the Supabase client is rebuilt (Remember-me storage switch)
+  // so onAuthStateChange rebinds to the live client.
+  const [clientEpoch, setClientEpoch] = useState(0);
+
+  const clearHeartbeat = useCallback(() => {
+    if (heartbeatRef.current) {
+      window.clearInterval(heartbeatRef.current);
+      heartbeatRef.current = null;
+    }
+  }, []);
 
   const loadProfile = useCallback(async user => {
     if (!user) {
@@ -37,7 +56,6 @@ export function AuthProvider({ children }) {
         setProfile(next);
         return next;
       }
-      // Auth user exists but profile row missing — treat as teacher with no school until admin links them.
       const fallback = {
         id: user.id,
         email: user.email || "",
@@ -56,8 +74,59 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  const endLocalSession = useCallback(
+    async notice => {
+      clearHeartbeat();
+      const client = getSupabase();
+      if (supabaseMode && client) {
+        try {
+          await client.auth.signOut();
+        } catch {
+          /* ignore */
+        }
+      }
+      setSession(null);
+      setProfile(demoMode ? demoProfile() : null);
+      if (notice) setSessionNotice(notice);
+    },
+    [clearHeartbeat, demoMode, supabaseMode]
+  );
+
+  const startPresence = useCallback(async () => {
+    if (!supabaseMode || !getSupabase()) return;
+    try {
+      await claimSession();
+      clearHeartbeat();
+      heartbeatRef.current = window.setInterval(async () => {
+        try {
+          const result = await heartbeatSession();
+          if (!result?.ok) {
+            const reason = result?.reason;
+            const message =
+              reason === "revoked"
+                ? "An administrator signed you out. Please sign in again."
+                : reason === "replaced"
+                  ? "You signed in on another device or browser. This session was closed."
+                  : "Your session is no longer active. Please sign in again.";
+            await endLocalSession(message);
+          }
+        } catch {
+          /* transient network — keep session, retry next beat */
+        }
+      }, HEARTBEAT_MS);
+    } catch (error) {
+      console.warn("Session presence claim failed:", error?.message || error);
+    }
+  }, [clearHeartbeat, endLocalSession, supabaseMode]);
+
   useEffect(() => {
-    if (!supabaseMode || !supabase) {
+    if (!configured || !supabaseMode) {
+      setBootstrapping(false);
+      return undefined;
+    }
+
+    const client = getSupabase();
+    if (!client) {
       setBootstrapping(false);
       return undefined;
     }
@@ -66,97 +135,142 @@ export function AuthProvider({ children }) {
 
     async function boot() {
       setBootstrapping(true);
-      const { data } = await supabase.auth.getSession();
+      const { data } = await client.auth.getSession();
       if (cancelled) return;
       const nextSession = data.session || null;
       setSession(nextSession);
-      if (nextSession?.user) await loadProfile(nextSession.user);
-      else setProfile(null);
+      if (nextSession?.user) {
+        await loadProfile(nextSession.user);
+        await startPresence();
+      } else {
+        setProfile(null);
+      }
       if (!cancelled) setBootstrapping(false);
     }
 
     boot();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
+    const { data: authListener } = client.auth.onAuthStateChange(async (event, nextSession) => {
       setSession(nextSession);
-      if (nextSession?.user) await loadProfile(nextSession.user);
-      else setProfile(null);
+      if (nextSession?.user) {
+        await loadProfile(nextSession.user);
+        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") {
+          await startPresence();
+        }
+      } else {
+        clearHeartbeat();
+        setProfile(null);
+      }
     });
 
     return () => {
       cancelled = true;
+      clearHeartbeat();
       authListener?.subscription?.unsubscribe?.();
     };
-  }, [loadProfile, supabaseMode]);
+  }, [clearHeartbeat, configured, loadProfile, startPresence, supabaseMode, clientEpoch]);
 
-  const signIn = useCallback(async ({ email, password, rememberMe = true }) => {
-    if (!supabaseMode || !supabase) {
-      // Demo mode: accept any non-empty credentials and continue.
-      setProfile(demoProfile());
-      setSession({ user: { id: "demo-admin", email } });
-      return { ok: true };
-    }
-
-    setAuthError("");
-    // Persist session in localStorage by default; "remember me" off uses sessionStorage via temporary sign-in.
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password
-    });
-    if (error) {
-      setAuthError(error.message || "Sign in failed.");
-      return { ok: false, error: error.message };
-    }
-    if (!rememberMe && typeof window !== "undefined") {
-      // Best-effort: mark session as non-persistent for this browser tab.
-      try {
-        sessionStorage.setItem("mt.auth.ephemeral", "1");
-      } catch {
-        /* ignore */
+  const signIn = useCallback(
+    async ({ email, password, rememberMe = true }) => {
+      if (!configured) {
+        return { ok: false, error: "This deployment is not configured." };
       }
-    }
-    setSession(data.session);
-    await loadProfile(data.user);
-    return { ok: true };
-  }, [loadProfile, supabaseMode]);
+
+      if (demoMode) {
+        setProfile(demoProfile());
+        setSession({ user: { id: "demo-admin", email } });
+        return { ok: true };
+      }
+
+      if (!supabaseMode) {
+        return { ok: false, error: "Sign in requires Supabase to be enabled." };
+      }
+
+      setAuthError("");
+      setSessionNotice("");
+
+      // Rebuild client with sessionStorage vs localStorage before auth write.
+      // Unchecked "Remember me" → ephemeral session (tab-scoped).
+      const client = recreateSupabaseClient({ ephemeral: !rememberMe });
+      if (!client) {
+        setAuthError("Supabase is not configured.");
+        return { ok: false, error: "Supabase is not configured." };
+      }
+      setClientEpoch(value => value + 1);
+
+      const { data, error } = await client.auth.signInWithPassword({
+        email: email.trim(),
+        password
+      });
+      if (error) {
+        setAuthError(error.message || "Sign in failed.");
+        return { ok: false, error: error.message };
+      }
+      setSession(data.session);
+      await loadProfile(data.user);
+      await startPresence();
+      return { ok: true };
+    },
+    [configured, demoMode, loadProfile, startPresence, supabaseMode]
+  );
 
   const signOut = useCallback(async () => {
     setAuthError("");
-    if (supabaseMode && supabase) {
-      await supabase.auth.signOut();
+    setSessionNotice("");
+    clearHeartbeat();
+    const client = getSupabase();
+    if (supabaseMode && client) {
+      await client.auth.signOut();
     }
     setSession(null);
-    setProfile(supabaseMode ? null : demoProfile());
+    setProfile(demoMode ? demoProfile() : null);
     try {
-      sessionStorage.removeItem("mt.auth.ephemeral");
+      sessionStorage.removeItem(EPHEMERAL_AUTH_KEY);
     } catch {
       /* ignore */
     }
-  }, [supabaseMode]);
-
-  const resetPassword = useCallback(async email => {
-    if (!supabaseMode || !supabase) {
-      return { ok: false, error: "Password reset requires Supabase to be enabled." };
+    // Restore persistent-storage client as the default after sign-out.
+    if (supabaseMode) {
+      recreateSupabaseClient({ ephemeral: false });
+      setClientEpoch(value => value + 1);
     }
-    const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}login`;
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo });
-    if (error) return { ok: false, error: error.message };
-    return { ok: true };
-  }, [supabaseMode]);
+  }, [clearHeartbeat, demoMode, supabaseMode]);
+
+  const resetPassword = useCallback(
+    async email => {
+      if (!supabaseMode) {
+        return { ok: false, error: "Password reset requires Supabase to be enabled." };
+      }
+      const client = getSupabase();
+      if (!client) {
+        return { ok: false, error: "Supabase is not configured." };
+      }
+      const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}login`;
+      const { error } = await client.auth.resetPasswordForEmail(email.trim(), { redirectTo });
+      if (error) return { ok: false, error: error.message };
+      return { ok: true };
+    },
+    [supabaseMode]
+  );
 
   const value = useMemo(() => {
     const role = normalizeRole(profile?.role);
     return {
       supabaseMode,
+      demoMode,
+      configured,
       bootstrapping,
       session,
       user: session?.user || null,
       profile,
       role,
       schoolId: profile?.school_id ?? null,
-      isAuthenticated: supabaseMode ? Boolean(session?.user) : true,
+      // Fail closed: unconfigured deploys are never authenticated.
+      isAuthenticated: !configured ? false : supabaseMode ? Boolean(session?.user) : demoMode,
       isAdmin: canAccessAdmin(role),
       authError,
+      sessionNotice,
+      clearSessionNotice: () => setSessionNotice(""),
       signIn,
       signOut,
       resetPassword,
@@ -165,10 +279,13 @@ export function AuthProvider({ children }) {
   }, [
     authError,
     bootstrapping,
+    configured,
+    demoMode,
     loadProfile,
     profile,
     resetPassword,
     session,
+    sessionNotice,
     signIn,
     signOut,
     supabaseMode

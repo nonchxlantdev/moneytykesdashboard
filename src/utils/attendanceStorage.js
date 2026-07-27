@@ -2,17 +2,26 @@ export function attendanceKey(classId, date) {
   return `attendance_${classId}_${date}`;
 }
 
+const attendanceCache = new Map();
+
 export function loadAttendanceRecord(classId, date) {
+  const key = attendanceKey(classId, date);
+  if (attendanceCache.has(key)) return attendanceCache.get(key);
   try {
-    const raw = localStorage.getItem(attendanceKey(classId, date));
-    return raw ? JSON.parse(raw) : null;
+    const raw = localStorage.getItem(key);
+    const parsed = raw ? JSON.parse(raw) : null;
+    attendanceCache.set(key, parsed);
+    return parsed;
   } catch {
+    attendanceCache.set(key, null);
     return null;
   }
 }
 
 export function saveAttendanceRecord(classId, date, records) {
-  localStorage.setItem(attendanceKey(classId, date), JSON.stringify(records));
+  const key = attendanceKey(classId, date);
+  attendanceCache.set(key, records);
+  localStorage.setItem(key, JSON.stringify(records));
 }
 
 export function getAllAttendanceKeys() {

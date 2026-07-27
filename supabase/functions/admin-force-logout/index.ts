@@ -1,6 +1,5 @@
-// Deno Edge Function: admin-reset-password
-// Deploy: supabase functions deploy admin-reset-password
-// Secrets: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+// Deno Edge Function: admin-force-logout
+// Revokes app presence sessions and globally signs the user out of Auth.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
@@ -12,7 +11,7 @@ const corsHeaders = {
 };
 
 const WINDOW_MS = 60_000;
-const MAX_PER_WINDOW = 10;
+const MAX_PER_WINDOW = 20;
 
 function json(status, body) {
   return new Response(JSON.stringify(body), {
@@ -35,9 +34,7 @@ async function assertRateLimit(admin, key) {
     .maybeSingle();
 
   const count = existing?.count || 0;
-  if (count >= MAX_PER_WINDOW) {
-    return false;
-  }
+  if (count >= MAX_PER_WINDOW) return false;
 
   if (existing) {
     await admin
@@ -83,26 +80,21 @@ Deno.serve(async req => {
       .maybeSingle();
 
     if (actorError || !actor || !isElevated(actor.role) || actor.status !== "active") {
-      return json(403, { error: "Only Dev or Class Admin can reset passwords." });
+      return json(403, { error: "Only Dev or Class Admin can force logout." });
     }
 
-    const allowed = await assertRateLimit(admin, `reset-pwd:${actorId}`);
+    const allowed = await assertRateLimit(admin, `force-logout:${actorId}`);
     if (!allowed) {
       return json(429, { error: "Rate limit exceeded.", code: "rate_limited" });
     }
 
     const body = await req.json();
     const targetUserId = String(body.userId || "").trim();
-    const newPassword = String(body.newPassword || "");
-
     if (!targetUserId) return json(400, { error: "userId is required." });
-    if (newPassword.length < 8) {
-      return json(400, { error: "Password must be at least 8 characters." });
-    }
 
     const { data: target, error: targetError } = await admin
       .from("profiles")
-      .select("id, school_id, email, role")
+      .select("id, email, school_id, role")
       .eq("id", targetUserId)
       .maybeSingle();
 
@@ -110,21 +102,31 @@ Deno.serve(async req => {
       return json(404, { error: "User not found." });
     }
 
-    if (actor.role !== "dev" && String(target.school_id) !== String(actor.school_id)) {
-      return json(403, { error: "Cannot reset password for a user in another school." });
+    if (actor.role !== "dev" && String(target.school_id || "") !== String(actor.school_id || "")) {
+      return json(403, { error: "Cannot force logout a user outside your school." });
     }
 
-    const { error: updateError } = await admin.auth.admin.updateUserById(targetUserId, {
-      password: newPassword
-    });
-    if (updateError) {
-      return json(400, { error: updateError.message });
+    await admin
+      .from("user_sessions")
+      .update({ revoked_at: new Date().toISOString() })
+      .eq("user_id", targetUserId)
+      .is("revoked_at", null);
+
+    // Invalidate all refresh tokens for this user.
+    const { error: signOutError } = await admin.auth.admin.signOut(targetUserId, "global");
+    if (signOutError) {
+      // Older API shape fallback
+      try {
+        await admin.auth.admin.signOut(targetUserId);
+      } catch {
+        return json(400, { error: signOutError.message || "Could not sign out user." });
+      }
     }
 
     await admin.from("audit_log").insert({
       actor_id: actorId,
       school_id: target.school_id || actor.school_id,
-      action: "reset_password",
+      action: "force_logout",
       target_type: "profile",
       target_id: targetUserId,
       meta: { email: target.email }

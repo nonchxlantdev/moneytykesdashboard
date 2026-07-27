@@ -9,7 +9,7 @@ import { loadAttendanceRecord } from "../utils/attendanceStorage";
 import { loadCreatedLessons } from "../utils/lessonsStorage";
 import { MY_DAY_TASKS_KEY } from "../utils/myDayStorage";
 import { formatPoints } from "../utils/points";
-import { getPointsLog } from "../utils/rewardsStorage";
+import { getPointsLogCount } from "../utils/rewardsStorage";
 import "../dashboard-v2.css";
 
 function slugClass(value) {
@@ -61,10 +61,13 @@ function taskStatus(task) {
 export default function DashboardPage({ dashboard, db, navigate }) {
   const teacherFirst = String(db.teacher?.first || "").trim();
   const teacherLast = String(db.teacher?.last || "").trim();
-  const teacherName = teacherFirst || teacherLast || "Teacher";
+  const displayName = teacherFirst || teacherLast || "Teacher";
+  const gender = String(db.teacher?.gender || "").toLowerCase();
+  const honorific = gender === "male" ? "Mr." : gender === "female" ? "Ms." : "";
+  const teacherName = honorific ? `${honorific} ${displayName}` : displayName;
   const className = db.className || "Class";
   const classId = slugClass(className) || "class";
-  const teacherId = db.teacher?.id || db.teacher?.email || teacherName;
+  const teacherId = db.teacher?.id || db.teacher?.email || displayName;
 
   const [myDayTasks] = useLocalStorage(MY_DAY_TASKS_KEY, []);
 
@@ -99,7 +102,7 @@ export default function DashboardPage({ dashboard, db, navigate }) {
   }, []);
 
   const rewardsIssued = useMemo(() => {
-    return (db.students || []).reduce((sum, student) => sum + getPointsLog(student.id).length, 0);
+    return (db.students || []).reduce((sum, student) => sum + getPointsLogCount(student.id), 0);
   }, [db.students]);
 
   const recentTasks = useMemo(() => {

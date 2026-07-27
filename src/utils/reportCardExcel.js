@@ -1,10 +1,24 @@
-import * as XLSX from "xlsx";
 import { clampPercent } from "./reportCardScores";
+
+function triggerXlsxDownload(buffer, filename) {
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
 
 /**
  * Long/normalized Excel template: one row per student × subject.
+ * Column layout matches the previous xlsx export for teacher compatibility.
+ * exceljs is loaded on demand so the login shell does not pull Node-ish deps at boot.
  */
-export function downloadReportCardExcelTemplate({ students, template, schoolYear, term, className }) {
+export async function downloadReportCardExcelTemplate({ students, template, schoolYear, term, className }) {
+  const ExcelJS = (await import("exceljs")).default;
   const terms = template.terms || [];
   const header = [
     "Student ID",
@@ -21,11 +35,14 @@ export function downloadReportCardExcelTemplate({ students, template, schoolYear
     "Probation"
   ];
 
-  const rows = [];
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet("Report Cards");
+  sheet.addRow(header);
+
   students.forEach(student => {
     const name = `${student.first || ""} ${student.last || ""}`.trim();
     (template.subjects || []).forEach(subject => {
-      rows.push([
+      sheet.addRow([
         student.id,
         name,
         subject.name,
@@ -42,17 +59,39 @@ export function downloadReportCardExcelTemplate({ students, template, schoolYear
     });
   });
 
-  const sheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
-  const book = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(book, sheet, "Report Cards");
+  const buffer = await workbook.xlsx.writeBuffer();
   const filename = `report-card-template-${String(className || "class").replace(/\s+/g, "-")}-${schoolYear}-${term}.xlsx`;
-  XLSX.writeFile(book, filename);
+  triggerXlsxDownload(buffer, filename);
 }
 
-export function parseReportCardExcel(fileBuffer, { students, template }) {
-  const book = XLSX.read(fileBuffer, { type: "array" });
-  const sheet = book.Sheets[book.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+function sheetRowsToObjects(sheet) {
+  const values = sheet.getSheetValues();
+  // exceljs getSheetValues is 1-indexed; index 0 is empty
+  const dataRows = values.slice(1).filter(row => row && row.length);
+  if (!dataRows.length) return [];
+  const headerCells = dataRows[0];
+  const headers = [];
+  for (let i = 1; i < headerCells.length; i += 1) {
+    headers[i] = String(headerCells[i] ?? "").trim();
+  }
+  return dataRows.slice(1).map(row => {
+    const obj = {};
+    for (let i = 1; i < headers.length; i += 1) {
+      const key = headers[i];
+      if (!key) continue;
+      const cell = row[i];
+      obj[key] = cell == null ? "" : cell;
+    }
+    return obj;
+  });
+}
+
+export async function parseReportCardExcel(fileBuffer, { students, template }) {
+  const ExcelJS = (await import("exceljs")).default;
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(fileBuffer);
+  const sheet = workbook.worksheets[0];
+  const rows = sheet ? sheetRowsToObjects(sheet) : [];
   const terms = template.terms || [];
 
   const byId = new Map(students.map(student => [String(student.id), student]));

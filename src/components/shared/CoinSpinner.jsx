@@ -1,6 +1,6 @@
 import "./coin-spinner.css";
 
-const coinSrc = `${import.meta.env.BASE_URL}coinicon.png`;
+const coinSrc = `${import.meta.env.BASE_URL}coinicon.webp`;
 
 /**
  * Spinning MoneyTykes coin — shared loading indicator.

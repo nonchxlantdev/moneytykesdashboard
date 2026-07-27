@@ -491,6 +491,12 @@
   box-shadow: 0 12px 28px rgba(28, 43, 42, 0.12);
 }
 
+.rw-overflow-menu-portal {
+  position: fixed !important;
+  right: auto !important;
+  z-index: 4000 !important;
+}
+
 .rw-overflow-item {
   display: block;
   width: 100%;

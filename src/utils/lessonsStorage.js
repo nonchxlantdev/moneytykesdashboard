@@ -74,14 +74,20 @@ export function mapCreatedLessonForLibrary(lesson) {
   };
 }
 
+let createdLessonsCache = null;
+
 export function loadCreatedLessons() {
+  if (createdLessonsCache) return createdLessonsCache;
   try {
-    return JSON.parse(localStorage.getItem(CREATED_LESSONS_KEY)) || [];
+    createdLessonsCache = JSON.parse(localStorage.getItem(CREATED_LESSONS_KEY)) || [];
+    return createdLessonsCache;
   } catch {
-    return [];
+    createdLessonsCache = [];
+    return createdLessonsCache;
   }
 }
 
 export function saveCreatedLessons(lessons) {
+  createdLessonsCache = lessons;
   localStorage.setItem(CREATED_LESSONS_KEY, JSON.stringify(lessons));
 }

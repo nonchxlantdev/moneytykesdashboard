@@ -158,7 +158,7 @@ export default function ReportCardsPage({ db, setToast, navigate }) {
     event.target.value = "";
     if (!file) return;
     const buffer = await file.arrayBuffer();
-    const review = parseReportCardExcel(buffer, { students: rows.map(row => row.student), template: baseTemplate });
+    const review = await parseReportCardExcel(buffer, { students: rows.map(row => row.student), template: baseTemplate });
     setImportReview(review);
   }
 
@@ -314,15 +314,15 @@ export default function ReportCardsPage({ db, setToast, navigate }) {
             className="btn"
             title="Download a spreadsheet pre-filled with your class roster and subjects — fill in Term scores, then re-import it."
             data-tour="rc-excel-download"
-            onClick={() =>
-              downloadReportCardExcelTemplate({
+            onClick={() => {
+              void downloadReportCardExcelTemplate({
                 students: rows.map(row => row.student),
                 template: baseTemplate,
                 schoolYear,
                 term,
                 className: classSection?.name
-              })
-            }
+              });
+            }}
           >
             Download Excel Template
           </button>

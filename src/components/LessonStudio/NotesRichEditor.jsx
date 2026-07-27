@@ -1,13 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Bold, Italic, List, ListOrdered, Underline } from "lucide-react";
-import Select from "../ui/Select";
+import { sanitizeLessonHtml } from "../../utils/sanitizeLessonHtml";
 
-const FONT_SIZES = [
-  { value: "3", label: "Normal" },
-  { value: "2", label: "Small" },
-  { value: "4", label: "Large" },
-  { value: "5", label: "Extra large" }
-];
+// Font-size toolbar removed: execCommand("fontSize") with styleWithCSS emits
+// style= attributes; allowing style safely is fiddly, so we omit it from the
+// DOMPurify allow-list entirely (see sanitizeLessonHtml.js).
 
 function looksLikeHtml(value) {
   return /<[a-z][\s\S]*>/i.test(String(value || ""));
@@ -78,7 +75,10 @@ export default function NotesRichEditor({
   function emitChange() {
     const editor = editorRef.current;
     if (!editor) return;
-    const html = isBlankRichText(editor.innerHTML) ? "" : editor.innerHTML;
+    // Sanitize at write-time so stored lessons never hold XSS payloads
+    // (defense in depth alongside formatLessonText at render).
+    const raw = isBlankRichText(editor.innerHTML) ? "" : editor.innerHTML;
+    const html = raw ? sanitizeLessonHtml(raw) : "";
     lastHtmlRef.current = html;
     onChange?.(html);
   }
@@ -102,22 +102,6 @@ export default function NotesRichEditor({
         <button type="button" className="notes-tool" title="Underline" aria-label="Underline" onMouseDown={event => event.preventDefault()} onClick={() => apply("underline")}>
           <Underline size={15} />
         </button>
-        <span className="notes-tool-divider" aria-hidden="true" />
-        <div className="notes-font-size">
-          <Select
-            aria-label="Font size"
-            className="notes-font-size-dd"
-            value=""
-            placeholder="Font size"
-            searchPlaceholder="Search sizes"
-            options={FONT_SIZES}
-            onChange={size => {
-              if (!size) return;
-              apply("fontSize", size);
-            }}
-            allowClear={false}
-          />
-        </div>
         <span className="notes-tool-divider" aria-hidden="true" />
         <button type="button" className="notes-tool" title="Bullet list" aria-label="Bullet list" onMouseDown={event => event.preventDefault()} onClick={() => apply("insertUnorderedList")}>
           <List size={15} />
