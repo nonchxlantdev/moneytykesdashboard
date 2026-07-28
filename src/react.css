@@ -110,34 +110,26 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 0 10px 4px 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 .mt-sidebar-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(15, 118, 110, 0.45) rgba(255, 255, 255, 0.18);
+  /* Keep scroll, hide the visible scrollbar (matches right events rail) */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .mt-sidebar-scroll::-webkit-scrollbar {
-  width: 7px;
-}
-
-.mt-sidebar-scroll::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 999px;
-}
-
-.mt-sidebar-scroll::-webkit-scrollbar-thumb {
-  background: rgba(15, 118, 110, 0.45);
-  border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, 0.18);
-}
-
-.mt-sidebar-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(15, 118, 110, 0.7);
-}
-
-.mt-sidebar-scroll::-webkit-scrollbar-corner {
-  background: transparent;
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 .sidebar-scroll .challenge-card {
