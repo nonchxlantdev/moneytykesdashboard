@@ -61,10 +61,11 @@ function taskStatus(task) {
 export default function DashboardPage({ dashboard, db, navigate }) {
   const teacherFirst = String(db.teacher?.first || "").trim();
   const teacherLast = String(db.teacher?.last || "").trim();
-  const displayName = teacherFirst || teacherLast || "Teacher";
   const gender = String(db.teacher?.gender || "").toLowerCase();
   const honorific = gender === "male" ? "Mr." : gender === "female" ? "Ms." : "";
-  const teacherName = honorific ? `${honorific} ${displayName}` : displayName;
+  // Chalkboard greeting: Mr./Ms. + last name only (fall back if surname missing).
+  const surname = teacherLast || teacherFirst || "Teacher";
+  const teacherName = honorific ? `${honorific} ${surname}` : surname;
   const className = db.className || "Class";
   const classId = slugClass(className) || "class";
   const teacherId = db.teacher?.id || db.teacher?.email || displayName;

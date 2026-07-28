@@ -35,6 +35,9 @@ jobs:
 
       - name: Build
         env:
+          # GitHub Pages project site: https://nonchxlantdev.github.io/moneytykesdashboard/
+          # Vercel subdomain builds leave VITE_BASE_PATH unset (base "/").
+          VITE_BASE_PATH: /moneytykesdashboard/
           VITE_USE_SUPABASE: ${{ vars.VITE_USE_SUPABASE || 'false' }}
           # Do not set VITE_ALLOW_DEMO_MODE here — production must fail closed
           # when Supabase is misconfigured, not silently grant demo access.
