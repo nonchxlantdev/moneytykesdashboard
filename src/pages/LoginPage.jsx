@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Heart, Lock, Mail } from "lucide-react";
 import { useAuth } from "../auth/AuthProvider";
-import { isSupabaseEnabled } from "../lib/featureFlags";
 import "./LoginPage.css";
 
 const teachersDashboardLogo = `${import.meta.env.BASE_URL}assets/teachersdashboardpng.png`;
@@ -52,12 +51,20 @@ function AuthLayout({ children }) {
 }
 
 function LoginForm() {
-  const { signIn, resetPassword, authError, sessionNotice, clearSessionNotice } = useAuth();
+  const {
+    signIn,
+    enterDemo,
+    resetPassword,
+    authError,
+    sessionNotice,
+    clearSessionNotice,
+    demoMode,
+    supabaseMode
+  } = useAuth();
   const [form, setForm] = useState({ email: "", password: "", rememberMe: true });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [info, setInfo] = useState("");
-  const supabaseMode = isSupabaseEnabled();
 
   function updateField(field, value) {
     setForm(current => ({ ...current, [field]: value }));
@@ -87,6 +94,10 @@ function LoginForm() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (demoMode) {
+      await handleAccessDemo();
+      return;
+    }
     if (!validateForm()) return;
     setSubmitting(true);
     setInfo("");
@@ -101,6 +112,18 @@ function LoginForm() {
         ...current,
         form: result.error || authError || "Sign in failed."
       }));
+      return;
+    }
+    window.location.href = loginHomeUrl();
+  }
+
+  async function handleAccessDemo() {
+    setSubmitting(true);
+    setErrors({});
+    const result = await enterDemo();
+    setSubmitting(false);
+    if (!result.ok) {
+      setErrors({ form: result.error || "Could not open demo." });
       return;
     }
     window.location.href = loginHomeUrl();
@@ -131,12 +154,6 @@ function LoginForm() {
         <h1>Welcome back</h1>
         <p className="mt-login-eyebrow">Sign in to your dashboard</p>
       </div>
-
-      {!supabaseMode ? (
-        <p className="mt-access-note" role="status">
-          Demo mode: Supabase auth is off. Any valid email/password (8+ chars) continues locally.
-        </p>
-      ) : null}
 
       {sessionNotice ? (
         <p className="mt-access-note" role="status">
@@ -199,7 +216,12 @@ function LoginForm() {
             />
             <span>Remember me</span>
           </label>
-          <button type="button" className="mt-login-link-btn" onClick={handleForgotPassword} disabled={submitting}>
+          <button
+            type="button"
+            className="mt-login-link-btn"
+            onClick={handleForgotPassword}
+            disabled={submitting || !supabaseMode}
+          >
             Forgot password?
           </button>
         </div>
@@ -207,12 +229,19 @@ function LoginForm() {
         {errors.form ? <p className="mt-error-message">{errors.form}</p> : null}
         {info ? <p className="mt-access-note" role="status">{info}</p> : null}
 
-        <button className="mt-login-submit" type="submit" disabled={submitting}>
-          {submitting ? "Signing in…" : "Log In"}
-        </button>
+        {demoMode ? (
+          <button className="mt-login-submit" type="button" disabled={submitting} onClick={handleAccessDemo}>
+            {submitting ? "Opening…" : "Access demo"}
+          </button>
+        ) : (
+          <button className="mt-login-submit" type="submit" disabled={submitting}>
+            {submitting ? "Signing in…" : "Log In"}
+          </button>
+        )}
       </form>
 
-      <p className="mt-access-note">Need access? Contact your school administrator.</p>
+      {!demoMode ? <p className="mt-access-note">Need access? Contact your school administrator.</p> : null}
     </article>
   );
 }
+

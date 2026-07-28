@@ -4,12 +4,23 @@
  *
  * Guarded by SEED_MARKER and only runs when the dashboard has no students yet,
  * so it never clobbers a teacher's real data. Runs AFTER purgeLegacyMockData().
+ * In explicit demo mode (VITE_ALLOW_DEMO_MODE), a new marker version re-applies
+ * the mock roster so switching off Supabase brings sample data back.
  */
 
+import { isDemoMode } from "../lib/featureFlags";
+
 const STORAGE_KEY = "moneytykes.teacher.dashboard.v3";
-const SEED_MARKER = "moneytykes.seed.demo.v5";
+const SEED_MARKER = "moneytykes.seed.demo.v8";
 const REWARDS_BANK_KEY = "rewards_bank";
 const CREATED_LESSONS_KEY = "created_lessons";
+const CALENDAR_EVENTS_KEY = "calendar_events";
+const MY_DAY_TASKS_KEY = "mt.my_day.tasks.v1";
+const MY_DAY_NOTES_KEY = "mt.my_day.notes.v1";
+const MY_DAY_REFLECTIONS_KEY = "mt.my_day.reflections.v1";
+const REPORT_TEMPLATE_KEY = "mt.report_card.templates.v1";
+const REPORT_CARDS_KEY = "mt.report_card.cards.v1";
+const REPORT_SECTIONS_KEY = "mt.report_card.class_sections.v1";
 
 const asset = path => `${import.meta.env.BASE_URL}${path}`;
 
@@ -41,13 +52,13 @@ const SCHOOL = {
 };
 
 const TEACHER = {
-  id: 1,
+  id: "demo-admin",
   firstName: "Shamira",
   lastName: "Young",
   email: "shamira.young@moneytykes.school",
   temporaryPassword: "",
   schoolId: SCHOOL.id,
-  role: "Teacher",
+  role: "Class Admin",
   status: "active"
 };
 
@@ -367,10 +378,10 @@ function isDemoLessonId(id) {
 }
 
 /**
- * Demo curriculum seeding is retired. Strip leftover demo lesson ids (8000–8999)
- * without re-injecting the pack.
+ * In demo mode, keep (or restore) the curriculum pack. Outside demo, strip leftover demo ids.
  */
 function refreshDemoCurriculumLessons() {
+  if (isDemoMode()) return;
   try {
     const existing = JSON.parse(localStorage.getItem(CREATED_LESSONS_KEY) || "[]");
     if (!Array.isArray(existing) || !existing.some(lesson => isDemoLessonId(lesson?.id))) {
@@ -381,6 +392,234 @@ function refreshDemoCurriculumLessons() {
   } catch {
     // Ignore parse errors — leave teacher data alone.
   }
+}
+
+function schoolYearLabel(date = new Date()) {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  // Match reportCardsStorage.currentSchoolYear (Aug–Jul academic year).
+  return month >= 7 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+}
+
+function seedMyDay(todayDate) {
+  const teacherId = TEACHER.id;
+  const tasks = [
+    {
+      id: 6101,
+      teacherId,
+      text: "Take attendance for Standard 4A",
+      done: true,
+      createdAt: iso(addDays(todayDate, -1)) + "T08:05:00.000Z"
+    },
+    {
+      id: 6102,
+      teacherId,
+      text: "Review savings worksheets before lunch",
+      done: false,
+      createdAt: iso(todayDate) + "T07:40:00.000Z"
+    },
+    {
+      id: 6103,
+      teacherId,
+      text: "Call Zara's guardian about attendance",
+      done: false,
+      createdAt: iso(todayDate) + "T07:45:00.000Z"
+    },
+    {
+      id: 6104,
+      teacherId,
+      text: "Prep Needs vs Wants slides for tomorrow",
+      done: false,
+      createdAt: iso(todayDate) + "T08:00:00.000Z"
+    },
+    {
+      id: 6105,
+      teacherId,
+      text: "Enter report card scores for Term 1",
+      done: false,
+      createdAt: iso(todayDate) + "T08:20:00.000Z"
+    },
+    {
+      id: 6106,
+      teacherId,
+      text: "Award Super Saver badges after assembly",
+      done: true,
+      createdAt: iso(addDays(todayDate, -2)) + "T14:00:00.000Z"
+    },
+    {
+      id: 6107,
+      teacherId,
+      text: "Confirm bank field-trip chaperones",
+      done: false,
+      createdAt: iso(todayDate) + "T09:05:00.000Z"
+    }
+  ];
+  const notes = [
+    {
+      id: 6201,
+      teacherId,
+      text: "Class loved the piggy-bank goal trackers — print more for next week.",
+      createdAt: iso(addDays(todayDate, -1)) + "T15:10:00.000Z"
+    },
+    {
+      id: 6202,
+      teacherId,
+      text: "Ask office about the bank field-trip permission slips.",
+      createdAt: iso(todayDate) + "T09:20:00.000Z"
+    },
+    {
+      id: 6203,
+      teacherId,
+      text: "Nia asked great questions about needs vs wants — use her example tomorrow.",
+      createdAt: iso(todayDate) + "T11:05:00.000Z"
+    },
+    {
+      id: 6204,
+      teacherId,
+      text: "Reminder: parent-teacher evening next week — bring progress notes.",
+      createdAt: iso(addDays(todayDate, -2)) + "T16:30:00.000Z"
+    },
+    {
+      id: 6205,
+      teacherId,
+      text: "Kofi finished early on the budgeting worksheet — give him an extension challenge.",
+      createdAt: iso(todayDate) + "T12:15:00.000Z"
+    }
+  ];
+  const reflections = [
+    {
+      teacherId,
+      date: iso(addDays(todayDate, -2)),
+      mood: "okay",
+      notes: "A bit rushed before assembly, but the quiz still went fine."
+    },
+    {
+      teacherId,
+      date: iso(addDays(todayDate, -1)),
+      mood: "good",
+      notes: "Solid lesson day. Quiz scores were stronger than last week."
+    },
+    {
+      teacherId,
+      date: iso(todayDate),
+      mood: "great",
+      notes: "Students stayed engaged during the savings discussion."
+    }
+  ];
+  localStorage.setItem(MY_DAY_TASKS_KEY, JSON.stringify(tasks));
+  localStorage.setItem(MY_DAY_NOTES_KEY, JSON.stringify(notes));
+  localStorage.setItem(MY_DAY_REFLECTIONS_KEY, JSON.stringify(reflections));
+}
+
+function buildSubjectScores(student, subjectIndex, termLabelIndex) {
+  // Distinct, realistic percents so the editor shows filled Term 1/2/3 cells + avg.
+  const base = 68 + ((Number(student.id) + subjectIndex * 11 + termLabelIndex * 5) % 28);
+  const t1 = Math.min(100, base);
+  const t2 = Math.min(100, base + 3 + (subjectIndex % 4));
+  const t3 = Math.min(100, base + 6 + ((student.id + subjectIndex) % 5));
+  const termScores = [t1, t2, t3];
+  const avg = Math.round((termScores.reduce((sum, n) => sum + n, 0) / termScores.length) * 10) / 10;
+  return { termScores, avg };
+}
+
+function seedReportCards(students) {
+  const schoolYear = schoolYearLabel();
+  const termLabels = ["1st Term", "2nd Term", "3rd Term"];
+  const classSection = {
+    id: slugClass(CLASS_A),
+    name: CLASS_A,
+    schoolId: SCHOOL.id
+  };
+  const template = {
+    schoolId: SCHOOL.id,
+    schoolName: SCHOOL.name,
+    logoUrl: "",
+    motto: "Learning money skills for life",
+    accentColor: "",
+    terms: termLabels,
+    subjects: [
+      { name: "Financial Literacy", instructor: `${TEACHER.firstName} ${TEACHER.lastName}`, hours: 40 },
+      { name: "Mathematics", instructor: `${TEACHER.firstName} ${TEACHER.lastName}`, hours: 40 },
+      { name: "Language Arts", instructor: "Grace Mwansa", hours: 40 }
+    ],
+    columns: {
+      showHours: true,
+      showRank: true,
+      showAbsent: true,
+      showTardy: true,
+      showDemerits: true,
+      showMerits: true,
+      showProbation: true
+    },
+    signatureLabels: ["Homeroom Teacher", "Principal"]
+  };
+
+  const cards = [];
+  termLabels.forEach((term, termLabelIndex) => {
+    const termCards = students.map((student, index) => {
+      const subjects = template.subjects.map((subject, subjectIndex) => {
+        const { termScores, avg } = buildSubjectScores(student, subjectIndex, termLabelIndex);
+        return {
+          name: subject.name,
+          instructor: subject.instructor,
+          hours: subject.hours,
+          termScores,
+          avg
+        };
+      });
+      const overallAvg =
+        Math.round((subjects.reduce((sum, subject) => sum + subject.avg, 0) / subjects.length) * 10) / 10;
+      return {
+        id: `rc-${student.id}-${classSection.id}-${schoolYear}-${term}`.replace(/\s+/g, "-"),
+        studentId: student.id,
+        classId: classSection.id,
+        schoolYear,
+        term_or_terms: term,
+        subjects,
+        overallAvg,
+        rank: null,
+        attendance: {
+          absent: (index + termLabelIndex) % 3,
+          tardy: (index + 1) % 2,
+          demerits: index === students.length - 1 ? 1 : 0,
+          merits: 4 + ((index + termLabelIndex) % 6),
+          probation: ""
+        },
+        comments:
+          index === students.length - 1
+            ? "Needs consistent attendance and extra practice with savings goals."
+            : "Shows strong money habits and participates well in class discussions.",
+        status: index < 3 ? "generated" : index < 6 ? "ready" : "draft",
+        generatedAt: index < 3 ? new Date().toISOString() : null,
+        sentAt: null
+      };
+    });
+
+    // Rank within this term roster by overallAvg (desc).
+    const ranked = [...termCards].sort((a, b) => (b.overallAvg ?? -1) - (a.overallAvg ?? -1));
+    let place = 1;
+    ranked.forEach((card, index) => {
+      if (index > 0 && ranked[index - 1].overallAvg === card.overallAvg) {
+        card.rank = ranked[index - 1].rank;
+      } else {
+        card.rank = place;
+      }
+      place += 1;
+    });
+    cards.push(...termCards);
+  });
+
+  localStorage.setItem(REPORT_TEMPLATE_KEY, JSON.stringify({ [String(SCHOOL.id)]: template, default: template }));
+  localStorage.setItem(REPORT_CARDS_KEY, JSON.stringify(cards));
+  localStorage.setItem(REPORT_SECTIONS_KEY, JSON.stringify([classSection]));
+}
+
+/** Calendar, lessons, My Day, and report cards — used by local demo mode. */
+function seedFeatureMocks(students, todayDate) {
+  localStorage.setItem(CALENDAR_EVENTS_KEY, JSON.stringify(buildCalendarEvents(todayDate)));
+  localStorage.setItem(CREATED_LESSONS_KEY, JSON.stringify(buildCreatedLessons(todayDate)));
+  seedMyDay(todayDate);
+  seedReportCards(students);
 }
 
 function syncDemoRoster(existing) {
@@ -396,14 +635,20 @@ function syncDemoRoster(existing) {
 
   const next = {
     ...existing,
-    teacher: { id: TEACHER.id, first: TEACHER.firstName, last: TEACHER.lastName, email: TEACHER.email },
+    teacher: {
+      id: TEACHER.id,
+      first: TEACHER.firstName,
+      last: TEACHER.lastName,
+      email: TEACHER.email,
+      gender: "female"
+    },
     school: SCHOOL.name,
     className: CLASS_A,
     students,
     schools: existing.schools?.length ? existing.schools : [SCHOOL],
     teachers: [TEACHER],
     classes: existing.classes?.length ? existing.classes : [CLASSROOM],
-    tasks: [],
+    tasks: buildTasks(todayDate),
     rewards: existing.rewards?.length ? existing.rewards : REWARD_BANK,
     redemptions: existing.redemptions || [],
     transactions: buildTransactions(students, todayDate),
@@ -424,12 +669,14 @@ function syncDemoRoster(existing) {
     localStorage.setItem(`points_log_${student.id}`, JSON.stringify(buildPointsLog(student, todayDate)));
   });
   seedAttendance(students, todayDate);
+  if (isDemoMode()) seedFeatureMocks(students, todayDate);
 }
 
 /**
  * Seed demo data once. Safe no-op for real teacher data.
  * v4 resets the demo roster to exactly 8 students so counts match.
  * Curriculum lessons refresh once for demo libraries (ids 8000–8999).
+ * Demo mode (VITE_ALLOW_DEMO_MODE): v8 marker re-seeds mock data across all features.
  */
 export function seedMockData() {
   try {
@@ -445,12 +692,55 @@ export function seedMockData() {
     }
 
     const hasStudents = existing && Array.isArray(existing.students) && existing.students.length > 0;
+    const demo = isDemoMode();
+
+    // Demo mode: replace leftover Supabase/local state with the full mock classroom once.
+    if (demo) {
+      const todayDate = new Date();
+      const students = buildStudents();
+      const db = {
+        teacher: {
+          id: TEACHER.id,
+          first: TEACHER.firstName,
+          last: TEACHER.lastName,
+          email: TEACHER.email,
+          gender: "female"
+        },
+        school: SCHOOL.name,
+        className: CLASS_A,
+        students,
+        schools: [SCHOOL],
+        teachers: [{ ...TEACHER, role: "Class Admin" }],
+        classes: [CLASSROOM],
+        tasks: buildTasks(todayDate),
+        rewards: REWARD_BANK,
+        redemptions: [],
+        transactions: buildTransactions(students, todayDate),
+        tips: [
+          "Encourage students to set savings goals. Small steps today build financial confidence.",
+          "Ask students to separate needs from wants before spending reward points.",
+          "A clear point goal gives every reward a purpose before it gets spent."
+        ]
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+      localStorage.setItem(REWARDS_BANK_KEY, JSON.stringify(REWARD_BANK));
+      students.forEach(student => {
+        localStorage.setItem(`student_points_${student.id}`, JSON.stringify(student.totalEarned));
+        localStorage.setItem(`points_log_${student.id}`, JSON.stringify(buildPointsLog(student, todayDate)));
+      });
+      seedAttendance(students, todayDate);
+      seedFeatureMocks(students, todayDate);
+      ["v1", "v2", "v3", "v4", "v5", "v6", "v7"].forEach(v => localStorage.removeItem(`moneytykes.seed.demo.${v}`));
+      localStorage.setItem(SEED_MARKER, "1");
+      return;
+    }
 
     if (hasStudents) {
       if (looksLikeDemoRoster(existing)) {
         syncDemoRoster(existing);
       }
-      ["v1", "v2", "v3", "v4"].forEach(v => localStorage.removeItem(`moneytykes.seed.demo.${v}`));
+      ["v1", "v2", "v3", "v4", "v5", "v6", "v7"].forEach(v => localStorage.removeItem(`moneytykes.seed.demo.${v}`));
       localStorage.setItem(SEED_MARKER, "1");
       return;
     }
@@ -459,14 +749,20 @@ export function seedMockData() {
     const students = buildStudents();
 
     const db = {
-      teacher: { id: TEACHER.id, first: TEACHER.firstName, last: TEACHER.lastName, email: TEACHER.email },
+      teacher: {
+        id: TEACHER.id,
+        first: TEACHER.firstName,
+        last: TEACHER.lastName,
+        email: TEACHER.email,
+        gender: "female"
+      },
       school: SCHOOL.name,
       className: CLASS_A,
       students,
       schools: [SCHOOL],
       teachers: [TEACHER],
       classes: [CLASSROOM],
-      tasks: [],
+      tasks: buildTasks(todayDate),
       rewards: REWARD_BANK,
       redemptions: [],
       transactions: buildTransactions(students, todayDate),
@@ -487,7 +783,7 @@ export function seedMockData() {
 
     seedAttendance(students, todayDate);
 
-    ["v1", "v2", "v3", "v4"].forEach(v => localStorage.removeItem(`moneytykes.seed.demo.${v}`));
+    ["v1", "v2", "v3", "v4", "v5", "v6", "v7"].forEach(v => localStorage.removeItem(`moneytykes.seed.demo.${v}`));
     localStorage.setItem(SEED_MARKER, "1");
   } catch {
     /* best-effort: never block app startup on seeding */

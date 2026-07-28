@@ -67,7 +67,7 @@ export function demoProfile() {
     role: ROLES.CLASS_ADMIN,
     school_id: null,
     status: "active",
-    gender: "",
+    gender: "female",
     date_of_birth: null
   };
 }

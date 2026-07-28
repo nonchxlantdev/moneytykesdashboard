@@ -45,7 +45,6 @@ import { moneyMoveQuestions } from "./moneyMoveQuestions";
 import LoginPage from "./pages/LoginPage";
 import { AuthProvider, useAuth } from "./auth/AuthProvider";
 import MisconfiguredDeployScreen from "./components/MisconfiguredDeployScreen";
-import DemoModeBanner from "./components/DemoModeBanner";
 import TabLock from "./auth/TabLock";
 import PageChalkLoader from "./components/shared/PageChalkLoader";
 import { useSupabaseCoreSync } from "./data/useSupabaseCoreSync";
@@ -58,6 +57,7 @@ import Topbar from "./components/Topbar";
 import EventsRail from "./components/EventsRail";
 import Select from "./components/ui/Select";
 import { useLocalStorage } from "./hooks/useLocalStorage";
+import { isDemoMode } from "./lib/featureFlags";
 import { purgeDemoCalendarAndLessons, purgeLegacyMockData } from "./utils/purgeMockData";
 import { seedMockData } from "./data/seedMockData";
 import { formatPoints } from "./utils/points";
@@ -202,20 +202,20 @@ function App() {
     }));
   }, [profile, setDb]);
 
-  // Session gate: Supabase mode requires auth for the dashboard; send authed users away from /login.
+  // Session gate: require auth for the dashboard; send authed users away from /login.
   useEffect(() => {
     if (bootstrapping) return;
     const base = import.meta.env.BASE_URL.endsWith("/")
       ? import.meta.env.BASE_URL
       : `${import.meta.env.BASE_URL}/`;
-    if (supabaseMode && !isAuthenticated && !isLoginRoute) {
+    if (!isAuthenticated && !isLoginRoute) {
       window.location.replace(`${base}login`);
       return;
     }
     if (isAuthenticated && isLoginRoute) {
       window.location.replace(base);
     }
-  }, [bootstrapping, isAuthenticated, isLoginRoute, supabaseMode]);
+  }, [bootstrapping, isAuthenticated, isLoginRoute]);
 
   // Teachers must not land on Admin even via deep link / tour.
   useEffect(() => {
@@ -1832,21 +1832,30 @@ function shuffleQuestions(questions) {
   return shuffled;
 }
 
-// Clear legacy demo data, strip seeded calendar/lessons, then seed remaining demo once.
+// Clear legacy demo data, then seed. Keep calendar/lessons when running local demo mode.
 purgeLegacyMockData();
-purgeDemoCalendarAndLessons();
+if (!isDemoMode()) {
+  purgeDemoCalendarAndLessons();
+}
 seedMockData();
 
 function AppWithSessionGuards() {
-  const { isAuthenticated, supabaseMode, demoMode, configured, bootstrapping } = useAuth();
+  const { isAuthenticated, supabaseMode, configured, bootstrapping } = useAuth();
   const isLoginRoute = window.location.pathname.replace(/\/$/, "").endsWith("/login");
 
   if (!configured) {
     return <MisconfiguredDeployScreen />;
   }
 
-  // Render login without mounting the full dashboard tree (avoids heavy deps / crashes on /login).
-  if (isLoginRoute && !isAuthenticated) {
+  // Unauthenticated: always show login (demo + Supabase).
+  if (!isAuthenticated) {
+    if (!isLoginRoute && !bootstrapping) {
+      const base = import.meta.env.BASE_URL.endsWith("/")
+        ? import.meta.env.BASE_URL
+        : `${import.meta.env.BASE_URL}/`;
+      window.location.replace(`${base}login`);
+      return null;
+    }
     return <LoginPage />;
   }
 
@@ -1854,7 +1863,6 @@ function AppWithSessionGuards() {
   const lockTabs = Boolean(supabaseMode && isAuthenticated && !bootstrapping);
   const app = (
     <>
-      {demoMode ? <DemoModeBanner /> : null}
       <App />
     </>
   );

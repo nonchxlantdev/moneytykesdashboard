@@ -6,6 +6,26 @@ import { canAccessAdmin, demoProfile, normalizeRole, ROLES } from "./roles";
 
 const AuthContext = createContext(null);
 const HEARTBEAT_MS = 30_000;
+const DEMO_SIGNED_IN_KEY = "mt.demo.signedIn";
+
+function readDemoSignedIn() {
+  if (typeof window === "undefined") return false;
+  try {
+    return sessionStorage.getItem(DEMO_SIGNED_IN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writeDemoSignedIn(value) {
+  if (typeof window === "undefined") return;
+  try {
+    if (value) sessionStorage.setItem(DEMO_SIGNED_IN_KEY, "1");
+    else sessionStorage.removeItem(DEMO_SIGNED_IN_KEY);
+  } catch {
+    /* ignore */
+  }
+}
 
 async function fetchProfile(userId) {
   const client = getSupabase();
@@ -24,9 +44,14 @@ export function AuthProvider({ children }) {
   const demoMode = isDemoMode();
   const configured = isDeploymentConfigured();
   const [bootstrapping, setBootstrapping] = useState(supabaseMode);
-  const [session, setSession] = useState(null);
-  // Fail closed: only auto-authenticate when demo mode is explicitly allowed.
-  const [profile, setProfile] = useState(() => (demoMode ? demoProfile() : null));
+  const [session, setSession] = useState(() => {
+    if (demoMode && readDemoSignedIn()) {
+      return { user: { id: "demo-admin", email: demoProfile().email } };
+    }
+    return null;
+  });
+  // Demo starts logged out unless this tab already entered demo (sessionStorage).
+  const [profile, setProfile] = useState(() => (demoMode && readDemoSignedIn() ? demoProfile() : null));
   const [authError, setAuthError] = useState("");
   const [sessionNotice, setSessionNotice] = useState("");
   const heartbeatRef = useRef(null);
@@ -85,11 +110,12 @@ export function AuthProvider({ children }) {
           /* ignore */
         }
       }
+      writeDemoSignedIn(false);
       setSession(null);
-      setProfile(demoMode ? demoProfile() : null);
+      setProfile(null);
       if (notice) setSessionNotice(notice);
     },
-    [clearHeartbeat, demoMode, supabaseMode]
+    [clearHeartbeat, supabaseMode]
   );
 
   const startPresence = useCallback(async () => {
@@ -170,16 +196,25 @@ export function AuthProvider({ children }) {
     };
   }, [clearHeartbeat, configured, loadProfile, startPresence, supabaseMode, clientEpoch]);
 
+  const enterDemo = useCallback(async () => {
+    if (!demoMode) return { ok: false, error: "Demo mode is not enabled." };
+    setAuthError("");
+    setSessionNotice("");
+    const profileRow = demoProfile();
+    writeDemoSignedIn(true);
+    setProfile(profileRow);
+    setSession({ user: { id: profileRow.id, email: profileRow.email } });
+    return { ok: true };
+  }, [demoMode]);
+
   const signIn = useCallback(
-    async ({ email, password, rememberMe = true }) => {
+    async ({ email, password, rememberMe = true } = {}) => {
       if (!configured) {
         return { ok: false, error: "This deployment is not configured." };
       }
 
       if (demoMode) {
-        setProfile(demoProfile());
-        setSession({ user: { id: "demo-admin", email } });
-        return { ok: true };
+        return enterDemo();
       }
 
       if (!supabaseMode) {
@@ -211,7 +246,7 @@ export function AuthProvider({ children }) {
       await startPresence();
       return { ok: true };
     },
-    [configured, demoMode, loadProfile, startPresence, supabaseMode]
+    [configured, demoMode, enterDemo, loadProfile, startPresence, supabaseMode]
   );
 
   const signOut = useCallback(async () => {
@@ -222,8 +257,9 @@ export function AuthProvider({ children }) {
     if (supabaseMode && client) {
       await client.auth.signOut();
     }
+    writeDemoSignedIn(false);
     setSession(null);
-    setProfile(demoMode ? demoProfile() : null);
+    setProfile(null);
     try {
       sessionStorage.removeItem(EPHEMERAL_AUTH_KEY);
     } catch {
@@ -234,7 +270,7 @@ export function AuthProvider({ children }) {
       recreateSupabaseClient({ ephemeral: false });
       setClientEpoch(value => value + 1);
     }
-  }, [clearHeartbeat, demoMode, supabaseMode]);
+  }, [clearHeartbeat, supabaseMode]);
 
   const resetPassword = useCallback(
     async email => {
@@ -255,6 +291,13 @@ export function AuthProvider({ children }) {
 
   const value = useMemo(() => {
     const role = normalizeRole(profile?.role);
+    const isAuthenticated = !configured
+      ? false
+      : supabaseMode
+        ? Boolean(session?.user)
+        : demoMode
+          ? Boolean(session?.user)
+          : false;
     return {
       supabaseMode,
       demoMode,
@@ -265,13 +308,13 @@ export function AuthProvider({ children }) {
       profile,
       role,
       schoolId: profile?.school_id ?? null,
-      // Fail closed: unconfigured deploys are never authenticated.
-      isAuthenticated: !configured ? false : supabaseMode ? Boolean(session?.user) : demoMode,
+      isAuthenticated,
       isAdmin: canAccessAdmin(role),
       authError,
       sessionNotice,
       clearSessionNotice: () => setSessionNotice(""),
       signIn,
+      enterDemo,
       signOut,
       resetPassword,
       refreshProfile: () => (session?.user ? loadProfile(session.user) : Promise.resolve(null))
@@ -281,6 +324,7 @@ export function AuthProvider({ children }) {
     bootstrapping,
     configured,
     demoMode,
+    enterDemo,
     loadProfile,
     profile,
     resetPassword,
