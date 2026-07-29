@@ -978,6 +978,8 @@
   }
 }
 
+/* Tablet + phone: compact chalk header, stats strip, and stacked lesson rows */
+@media (max-width: 1023px) {
   .lessons-lib {
     gap: 10px;
   }

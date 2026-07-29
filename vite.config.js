@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { copyFileSync } from "node:fs";
+import { copyFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 /**
@@ -24,7 +24,11 @@ export default defineConfig({
       name: "github-pages-spa-fallback",
       closeBundle() {
         const distRoot = resolve("dist");
-        copyFileSync(resolve(distRoot, "index.html"), resolve(distRoot, "404.html"));
+        const indexHtml = resolve(distRoot, "index.html");
+        if (!existsSync(indexHtml)) {
+          throw new Error("github-pages-spa-fallback: dist/index.html was not generated.");
+        }
+        copyFileSync(indexHtml, resolve(distRoot, "404.html"));
       }
     }
   ]
