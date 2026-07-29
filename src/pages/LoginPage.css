@@ -1,7 +1,7 @@
 @font-face {
   font-family: "MT Classroom Teacher";
   src:
-    url("/moneytykesdashboard/fonts/classroom-teacher/Classroom%20Teacher.ttf") format("truetype"),
+    url("/fonts/classroom-teacher/Classroom%20Teacher.ttf") format("truetype"),
     local("Classroom Teacher"),
     local("ClassroomTeacher");
   font-display: swap;
@@ -10,7 +10,7 @@
 @font-face {
   font-family: "MT Perfect Lemonde";
   src:
-    url("/moneytykesdashboard/fonts/perfect-lemonade/Perfect%20Lemonade.otf") format("opentype"),
+    url("/fonts/perfect-lemonade/Perfect%20Lemonade.otf") format("opentype"),
     local("Perfect Lemonde Regular"),
     local("Perfect Lemonde"),
     local("Perfect Lemonade Regular"),

@@ -35,11 +35,14 @@ jobs:
 
       - name: Build
         env:
-          # GitHub Pages project site: https://nonchxlantdev.github.io/moneytykesdashboard/
-          VITE_BASE_PATH: /moneytykesdashboard/
-          # Match local demo prototype: Access demo + mock data (not live Supabase).
-          VITE_USE_SUPABASE: "false"
-          VITE_ALLOW_DEMO_MODE: "true"
+          # moneytykes/teacher-dashboard → /teacher-dashboard/
+          # nonchxlantdev/moneytykesdashboard → /moneytykesdashboard/
+          VITE_BASE_PATH: ${{ github.repository == 'moneytykes/teacher-dashboard' && '/teacher-dashboard/' || '/moneytykesdashboard/' }}
+          VITE_USE_SUPABASE: ${{ vars.VITE_USE_SUPABASE || 'false' }}
+          # Demo login only on the public prototype fork — production stays fail-closed.
+          VITE_ALLOW_DEMO_MODE: ${{ github.repository == 'moneytykes/teacher-dashboard' && 'false' || 'true' }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: npm run build
 
       - name: Add GitHub Pages SPA support
