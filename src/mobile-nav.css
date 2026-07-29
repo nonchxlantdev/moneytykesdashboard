@@ -1,0 +1,233 @@
+/**
+ * Mobile + tablet navigation — loads last so it beats shell-v2 sticky sidebar.
+ * Phone (≤767): bottom tab bar Menu opens an overlay drawer above the dimmer.
+ * Tablet (768–1023): same overlay drawer; hamburger lives in the topbar / chalk header.
+ */
+
+/* ——— Shared overlay drawer (phone + tablet) ——— */
+@media (max-width: 1023px) {
+  .react-app.app-shell,
+  .react-app.app-shell.sidebar-collapsed,
+  .react-app.app-shell.theme-light,
+  .react-app.app-shell.theme-light.sidebar-collapsed {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .react-app .sidebar,
+  .react-app.theme-light .sidebar,
+  .react-app.sidebar-collapsed .sidebar,
+  .react-app .sidebar.collapsed,
+  .react-app.theme-light.sidebar-collapsed .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: auto !important;
+    bottom: 0 !important;
+    align-self: auto !important;
+    z-index: 110 !important;
+    width: min(300px, 86vw) !important;
+    max-width: 300px !important;
+    min-width: 0 !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    padding:
+      max(12px, var(--safe-top, 0px))
+      14px
+      max(12px, var(--safe-bottom, 0px))
+      max(14px, var(--safe-left, 0px)) !important;
+    transform: translate3d(-105%, 0, 0);
+    visibility: hidden;
+    pointer-events: none;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    box-shadow: 20px 0 48px rgba(15, 23, 42, 0.28) !important;
+    transition:
+      transform 0.2s ease,
+      visibility 0.2s ease;
+  }
+
+  .react-app .sidebar.open,
+  .react-app .sidebar.collapsed.open,
+  .react-app.theme-light .sidebar.open,
+  .react-app.theme-light .sidebar.collapsed.open {
+    transform: translate3d(0, 0, 0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .sidebar-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 100 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: rgba(15, 23, 42, 0.45) !important;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+
+  /* Show labels in the drawer even if the desktop sidebar was collapsed */
+  .react-app .sidebar.collapsed .nav-section-label,
+  .react-app .sidebar.collapsed .nav-item .label,
+  .react-app .sidebar.collapsed .nav-item .nav-item-label,
+  .react-app .sidebar.collapsed .nav-item-badge,
+  .react-app .sidebar.collapsed .mt-sidebar-action-card,
+  .react-app .sidebar.collapsed .mt-sidebar-profile-card,
+  .react-app .sidebar.collapsed .sidebar-brand-footer,
+  .app-shell.sidebar-collapsed .nav-section-label,
+  .app-shell.sidebar-collapsed .nav-item-label,
+  .app-shell.sidebar-collapsed .nav-item-badge,
+  .app-shell.sidebar-collapsed .mt-sidebar-action-card,
+  .app-shell.sidebar-collapsed .mt-sidebar-profile-card,
+  .app-shell.sidebar-collapsed .sidebar-brand-footer {
+    display: revert !important;
+  }
+
+  .react-app .sidebar.collapsed .nav-item,
+  .app-shell.sidebar-collapsed .react-app .nav-item {
+    grid-template-columns: 28px minmax(0, 1fr) !important;
+    justify-items: start !important;
+    padding: 0 14px !important;
+  }
+
+  body:has(.react-app .sidebar.open) {
+    overflow: hidden;
+  }
+}
+
+/* ——— Tablet: hamburger in topbar (no permanent sidebar column) ——— */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .react-app .topbar-menu-button.mobile-menu {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 12px;
+  }
+
+  /*
+   * Chalk pages hide the white title strip, but keep a floating menu control
+   * on the chalkboard so tablet users can open the drawer.
+   */
+  .react-app .lessons-view,
+  .react-app .create-lessons-view,
+  .react-app .rewards-view,
+  .react-app .calendar-view,
+  .react-app .students-view,
+  .react-app .attendance-view,
+  .react-app .add-student-view,
+  .react-app .report-cards-view,
+  .react-app .admin-view,
+  .react-app .quizzes-view,
+  .react-app .game-view,
+  .react-app .coming-soon-view,
+  .react-app .dashboard-view {
+    position: relative;
+  }
+
+  .react-app .lessons-view .topbar,
+  .react-app .create-lessons-view .topbar,
+  .react-app .rewards-view .topbar,
+  .react-app .calendar-view .topbar,
+  .react-app .students-view .topbar,
+  .react-app .attendance-view .topbar,
+  .react-app .add-student-view .topbar,
+  .react-app .report-cards-view .topbar,
+  .react-app .admin-view .topbar,
+  .react-app .quizzes-view .topbar,
+  .react-app .game-view .topbar,
+  .react-app .coming-soon-view .topbar,
+  .react-app .dashboard-view .topbar {
+    display: flex !important;
+    flex-direction: row !important;
+    position: absolute !important;
+    top: max(10px, var(--safe-top, 0px));
+    left: max(10px, var(--safe-left, 0px));
+    z-index: 40 !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .react-app .lessons-view .topbar-meta,
+  .react-app .create-lessons-view .topbar-meta,
+  .react-app .rewards-view .topbar-meta,
+  .react-app .calendar-view .topbar-meta,
+  .react-app .students-view .topbar-meta,
+  .react-app .attendance-view .topbar-meta,
+  .react-app .add-student-view .topbar-meta,
+  .react-app .report-cards-view .topbar-meta,
+  .react-app .admin-view .topbar-meta,
+  .react-app .quizzes-view .topbar-meta,
+  .react-app .game-view .topbar-meta,
+  .react-app .coming-soon-view .topbar-meta,
+  .react-app .dashboard-view .topbar-meta {
+    display: none !important;
+  }
+
+  .react-app .lessons-view .topbar-menu-button.mobile-menu,
+  .react-app .create-lessons-view .topbar-menu-button.mobile-menu,
+  .react-app .rewards-view .topbar-menu-button.mobile-menu,
+  .react-app .calendar-view .topbar-menu-button.mobile-menu,
+  .react-app .students-view .topbar-menu-button.mobile-menu,
+  .react-app .attendance-view .topbar-menu-button.mobile-menu,
+  .react-app .add-student-view .topbar-menu-button.mobile-menu,
+  .react-app .report-cards-view .topbar-menu-button.mobile-menu,
+  .react-app .admin-view .topbar-menu-button.mobile-menu,
+  .react-app .quizzes-view .topbar-menu-button.mobile-menu,
+  .react-app .game-view .topbar-menu-button.mobile-menu,
+  .react-app .coming-soon-view .topbar-menu-button.mobile-menu,
+  .react-app .dashboard-view .topbar-menu-button.mobile-menu {
+    display: inline-flex !important;
+    background: color-mix(in srgb, #000 32%, transparent);
+    color: #fff;
+    border: 1px solid color-mix(in srgb, #fff 28%, transparent);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  }
+
+  /* Room for the floating hamburger over the chalk title */
+  .react-app .lessons-view .page-chalk,
+  .react-app .create-lessons-view .page-chalk,
+  .react-app .rewards-view .page-chalk,
+  .react-app .calendar-view .page-chalk,
+  .react-app .students-view .page-chalk,
+  .react-app .attendance-view .page-chalk,
+  .react-app .add-student-view .page-chalk,
+  .react-app .report-cards-view .page-chalk,
+  .react-app .admin-view .page-chalk,
+  .react-app .quizzes-view .page-chalk,
+  .react-app .coming-soon-view .page-chalk {
+    padding-left: 64px;
+  }
+
+  .react-app .dashboard-view .chalkboard-header,
+  .react-app .dashboard-view .dash-chalk,
+  .react-app .dashboard-view .page-chalk {
+    padding-left: 64px;
+  }
+}
+
+/* ——— Phone: tab bar Menu is primary; keep chalk free of a second header ——— */
+@media (max-width: 767px) {
+  .react-app .lessons-view .topbar,
+  .react-app .create-lessons-view .topbar,
+  .react-app .rewards-view .topbar,
+  .react-app .calendar-view .topbar,
+  .react-app .dashboard-view .topbar {
+    display: none !important;
+  }
+
+  .react-app .mobile-tabbar {
+    z-index: 120 !important;
+  }
+}

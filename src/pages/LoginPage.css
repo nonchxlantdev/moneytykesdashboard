@@ -118,6 +118,20 @@
   gap: 18px;
 }
 
+.mt-login-form-demo {
+  margin-top: 8px;
+}
+
+.mt-login-card-demo .mt-login-submit {
+  min-height: 52px;
+  font-size: 1.05rem;
+}
+
+.mt-demo-back {
+  justify-self: center;
+  margin-top: -4px;
+}
+
 .mt-field-group {
   display: grid;
   gap: 9px;

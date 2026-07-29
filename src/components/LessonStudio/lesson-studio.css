@@ -753,11 +753,12 @@
     padding: 0 16px;
   }
 
-  .react-app .create-lessons-view .topbar {
-    display: block;
-    padding: 12px 16px 0;
-    background: transparent !important;
-    border: 0 !important;
+  .lesson-studio > .page-chalk {
+    padding: 14px 16px 12px;
+  }
+
+  .lesson-studio > .page-chalk .page-chalk-lead {
+    display: none;
   }
 }
 

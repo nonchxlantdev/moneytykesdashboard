@@ -70,6 +70,7 @@ import "./responsive.css";
 import "./theme-light.css";
 import "./dashboard-v2.css";
 import "./shell-v2.css";
+import "./mobile-nav.css";
 import "./students.css";
 import "./components/ui.css";
 import "./components/ui/shell-components.css";

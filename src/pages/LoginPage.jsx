@@ -5,6 +5,7 @@ import "./LoginPage.css";
 
 const teachersDashboardLogo = `${import.meta.env.BASE_URL}assets/teachersdashboardpng.png`;
 const moneyTykesLogo = `${import.meta.env.BASE_URL}Logo.png`;
+const DEMO_ACCESS_PIN = "9722";
 
 function validateEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -65,6 +66,8 @@ function LoginForm() {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [info, setInfo] = useState("");
+  const [demoPinStep, setDemoPinStep] = useState(false);
+  const [demoPin, setDemoPin] = useState("");
 
   function updateField(field, value) {
     setForm(current => ({ ...current, [field]: value }));
@@ -95,7 +98,11 @@ function LoginForm() {
   async function handleSubmit(event) {
     event.preventDefault();
     if (demoMode) {
-      await handleAccessDemo();
+      if (demoPinStep) {
+        await handleVerifyDemoPin(event);
+      } else {
+        setDemoPinStep(true);
+      }
       return;
     }
     if (!validateForm()) return;
@@ -117,7 +124,19 @@ function LoginForm() {
     window.location.href = loginHomeUrl();
   }
 
-  async function handleAccessDemo() {
+  function handleAccessDemo() {
+    setErrors({});
+    setDemoPin("");
+    setDemoPinStep(true);
+  }
+
+  async function handleVerifyDemoPin(event) {
+    event?.preventDefault?.();
+    const pin = demoPin.trim();
+    if (pin !== DEMO_ACCESS_PIN) {
+      setErrors({ form: "Incorrect access code. Try again." });
+      return;
+    }
     setSubmitting(true);
     setErrors({});
     const result = await enterDemo();
@@ -147,12 +166,18 @@ function LoginForm() {
   }
 
   return (
-    <article className="mt-login-card">
+    <article className={`mt-login-card ${demoMode ? "mt-login-card-demo" : ""}`}>
       <img className="mt-login-dashboard-logo" src={teachersDashboardLogo} alt="Teachers Dashboard" />
 
       <div className="mt-login-card-heading">
         <h1>Welcome back</h1>
-        <p className="mt-login-eyebrow">Sign in to your dashboard</p>
+        <p className="mt-login-eyebrow">
+          {demoMode
+            ? demoPinStep
+              ? "Enter the access code to continue"
+              : "Explore the teacher dashboard"
+            : "Sign in to your dashboard"}
+        </p>
       </div>
 
       {sessionNotice ? (
@@ -164,84 +189,136 @@ function LoginForm() {
         </p>
       ) : null}
 
-      <form className="mt-login-form" onSubmit={handleSubmit} noValidate>
-        <div className="mt-field-group">
-          <label htmlFor="mt-login-email">Email</label>
-          <div className={`mt-input-shell ${errors.email ? "mt-input-error" : ""}`}>
-            <Mail aria-hidden="true" />
-            <input
-              id="mt-login-email"
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={event => updateField("email", event.target.value)}
-              autoComplete="email"
-              aria-invalid={Boolean(errors.email)}
-              aria-describedby={errors.email ? "mt-login-email-error" : undefined}
-              placeholder="teacher@school.edu"
-            />
-          </div>
-          {errors.email && <p className="mt-error-message" id="mt-login-email-error">{errors.email}</p>}
-        </div>
+      {demoMode ? (
+        demoPinStep ? (
+          <form className="mt-login-form mt-login-form-demo" onSubmit={handleVerifyDemoPin} noValidate>
+            <div className="mt-field-group">
+              <label htmlFor="mt-demo-pin">Access code</label>
+              <div className={`mt-input-shell ${errors.form ? "mt-input-error" : ""}`}>
+                <Lock aria-hidden="true" />
+                <input
+                  id="mt-demo-pin"
+                  name="demoPin"
+                  type="password"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  autoComplete="one-time-code"
+                  autoFocus
+                  value={demoPin}
+                  onChange={event => {
+                    setDemoPin(event.target.value.replace(/\D/g, "").slice(0, 8));
+                    setErrors({});
+                  }}
+                  aria-invalid={Boolean(errors.form)}
+                  aria-describedby={errors.form ? "mt-demo-pin-error" : undefined}
+                  placeholder="Enter access code"
+                />
+              </div>
+            </div>
 
-        <div className="mt-field-group">
-          <label htmlFor="mt-login-password">Password</label>
-          <div className={`mt-input-shell ${errors.password ? "mt-input-error" : ""}`}>
-            <Lock aria-hidden="true" />
-            <input
-              id="mt-login-password"
-              name="password"
-              type="password"
-              value={form.password}
-              onChange={event => updateField("password", event.target.value)}
-              autoComplete="current-password"
-              aria-invalid={Boolean(errors.password)}
-              aria-describedby={errors.password ? "mt-login-password-error" : undefined}
-              placeholder="Enter your password"
-            />
-          </div>
-          {errors.password && (
-            <p className="mt-error-message" id="mt-login-password-error">
-              {errors.password}
-            </p>
-          )}
-        </div>
+            {errors.form ? (
+              <p className="mt-error-message" id="mt-demo-pin-error">
+                {errors.form}
+              </p>
+            ) : null}
 
-        <div className="mt-login-options">
-          <label className="mt-remember-control">
-            <input
-              type="checkbox"
-              checked={form.rememberMe}
-              onChange={event => updateField("rememberMe", event.target.checked)}
-            />
-            <span>Remember me</span>
-          </label>
-          <button
-            type="button"
-            className="mt-login-link-btn"
-            onClick={handleForgotPassword}
-            disabled={submitting || !supabaseMode}
-          >
-            Forgot password?
-          </button>
-        </div>
-
-        {errors.form ? <p className="mt-error-message">{errors.form}</p> : null}
-        {info ? <p className="mt-access-note" role="status">{info}</p> : null}
-
-        {demoMode ? (
-          <button className="mt-login-submit" type="button" disabled={submitting} onClick={handleAccessDemo}>
-            {submitting ? "Opening…" : "Access demo"}
-          </button>
+            <button className="mt-login-submit" type="submit" disabled={submitting || !demoPin}>
+              {submitting ? "Opening…" : "Continue"}
+            </button>
+            <button
+              type="button"
+              className="mt-login-link-btn mt-demo-back"
+              disabled={submitting}
+              onClick={() => {
+                setDemoPinStep(false);
+                setDemoPin("");
+                setErrors({});
+              }}
+            >
+              Back
+            </button>
+          </form>
         ) : (
+          <div className="mt-login-form mt-login-form-demo">
+            {errors.form ? <p className="mt-error-message">{errors.form}</p> : null}
+            <button className="mt-login-submit" type="button" disabled={submitting} onClick={handleAccessDemo}>
+              Access demo
+            </button>
+          </div>
+        )
+      ) : (
+        <form className="mt-login-form" onSubmit={handleSubmit} noValidate>
+          <div className="mt-field-group">
+            <label htmlFor="mt-login-email">Email</label>
+            <div className={`mt-input-shell ${errors.email ? "mt-input-error" : ""}`}>
+              <Mail aria-hidden="true" />
+              <input
+                id="mt-login-email"
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={event => updateField("email", event.target.value)}
+                autoComplete="email"
+                aria-invalid={Boolean(errors.email)}
+                aria-describedby={errors.email ? "mt-login-email-error" : undefined}
+                placeholder="teacher@school.edu"
+              />
+            </div>
+            {errors.email && <p className="mt-error-message" id="mt-login-email-error">{errors.email}</p>}
+          </div>
+
+          <div className="mt-field-group">
+            <label htmlFor="mt-login-password">Password</label>
+            <div className={`mt-input-shell ${errors.password ? "mt-input-error" : ""}`}>
+              <Lock aria-hidden="true" />
+              <input
+                id="mt-login-password"
+                name="password"
+                type="password"
+                value={form.password}
+                onChange={event => updateField("password", event.target.value)}
+                autoComplete="current-password"
+                aria-invalid={Boolean(errors.password)}
+                aria-describedby={errors.password ? "mt-login-password-error" : undefined}
+                placeholder="Enter your password"
+              />
+            </div>
+            {errors.password && (
+              <p className="mt-error-message" id="mt-login-password-error">
+                {errors.password}
+              </p>
+            )}
+          </div>
+
+          <div className="mt-login-options">
+            <label className="mt-remember-control">
+              <input
+                type="checkbox"
+                checked={form.rememberMe}
+                onChange={event => updateField("rememberMe", event.target.checked)}
+              />
+              <span>Remember me</span>
+            </label>
+            <button
+              type="button"
+              className="mt-login-link-btn"
+              onClick={handleForgotPassword}
+              disabled={submitting || !supabaseMode}
+            >
+              Forgot password?
+            </button>
+          </div>
+
+          {errors.form ? <p className="mt-error-message">{errors.form}</p> : null}
+          {info ? <p className="mt-access-note" role="status">{info}</p> : null}
+
           <button className="mt-login-submit" type="submit" disabled={submitting}>
             {submitting ? "Signing in…" : "Log In"}
           </button>
-        )}
-      </form>
+        </form>
+      )}
 
       {!demoMode ? <p className="mt-access-note">Need access? Contact your school administrator.</p> : null}
     </article>
   );
 }
-
