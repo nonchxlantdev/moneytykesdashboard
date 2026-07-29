@@ -1,12 +1,12 @@
 /**
  * Self-hosted body font — Inter (woff2 only, required weights).
  * Display font (Poppins) is loaded via Google Fonts in index.html.
- * Served from /public/fonts; paths respect Vite base `/moneytykesdashboard/`.
+ * Served from /public/fonts. Vite prefixes these paths with the configured base.
  */
 
 @font-face {
   font-family: "Inter";
-  src: url("/moneytykesdashboard/fonts/inter-400.woff2") format("woff2");
+  src: url("/fonts/inter-400.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -14,7 +14,7 @@
 
 @font-face {
   font-family: "Inter";
-  src: url("/moneytykesdashboard/fonts/inter-500.woff2") format("woff2");
+  src: url("/fonts/inter-500.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -22,7 +22,7 @@
 
 @font-face {
   font-family: "Inter";
-  src: url("/moneytykesdashboard/fonts/inter-600.woff2") format("woff2");
+  src: url("/fonts/inter-600.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
   font-display: swap;

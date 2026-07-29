@@ -4,7 +4,9 @@ import { copyFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 export default defineConfig({
-  base: "/teacher-dashboard/",
+  // Vercel serves this app from the domain root. Keep the repository subpath
+  // for the existing GitHub Pages workflow.
+  base: process.env.VERCEL ? "/" : "/teacher-dashboard/",
   resolve: {
     dedupe: ["react", "react-dom"]
   },
