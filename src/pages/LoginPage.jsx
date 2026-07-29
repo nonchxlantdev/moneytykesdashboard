@@ -11,13 +11,6 @@ function validateEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-function loginHomeUrl() {
-  const base = import.meta.env.BASE_URL.endsWith("/")
-    ? import.meta.env.BASE_URL
-    : `${import.meta.env.BASE_URL}/`;
-  return base;
-}
-
 export default function LoginPage() {
   return (
     <AuthLayout>
@@ -119,9 +112,8 @@ function LoginForm() {
         ...current,
         form: result.error || authError || "Sign in failed."
       }));
-      return;
     }
-    window.location.href = loginHomeUrl();
+    // Successful sign-in: App shows the chalk loader, then enters the dashboard.
   }
 
   function handleAccessDemo() {
@@ -143,9 +135,8 @@ function LoginForm() {
     setSubmitting(false);
     if (!result.ok) {
       setErrors({ form: result.error || "Could not open demo." });
-      return;
     }
-    window.location.href = loginHomeUrl();
+    // Successful demo entry: App shows the chalk loader, then enters the dashboard.
   }
 
   async function handleForgotPassword(event) {

@@ -214,7 +214,11 @@ function App() {
       return;
     }
     if (isAuthenticated && isLoginRoute) {
-      window.location.replace(base);
+      // Hold the chalk loader briefly so login → dashboard matches in-app page loads.
+      const timer = window.setTimeout(() => {
+        window.location.replace(base);
+      }, 650);
+      return () => window.clearTimeout(timer);
     }
   }, [bootstrapping, isAuthenticated, isLoginRoute]);
 
@@ -391,7 +395,7 @@ function App() {
     refreshCoreData
   };
 
-  if (bootstrapping) {
+  if (bootstrapping || (isAuthenticated && isLoginRoute)) {
     return (
       <div className="app-shell react-app theme-light" style={{ minHeight: "100vh" }}>
         <PageChalkLoader active />
