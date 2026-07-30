@@ -1,0 +1,148 @@
+/**
+ * Untitled UI–style dropdown menu (MoneyTykes tokens).
+ */
+
+.uu-dropdown {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.uu-dropdown--block {
+  display: block;
+  width: 100%;
+}
+
+.uu-dropdown--block > .uu-btn {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.uu-dropdown.is-open > .uu-btn [data-icon]:last-child,
+.uu-dropdown[data-open] > .uu-btn .uu-btn__icon:last-child {
+  transform: rotate(180deg);
+}
+
+.uu-dropdown > .uu-btn [data-icon],
+.uu-dropdown > .uu-btn .uu-btn__icon {
+  transition: transform 160ms ease;
+}
+
+.uu-dropdown-popover {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: max(100%, 12rem);
+  padding: 4px;
+  border: 1px solid #e4e7ec;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow:
+    0 12px 32px rgba(16, 22, 47, 0.12),
+    0 2px 6px rgba(16, 22, 47, 0.06);
+}
+
+.uu-dropdown-popover.placement-bottom-end,
+.uu-dropdown-popover.placement-bottom-right {
+  left: auto;
+  right: 0;
+}
+
+.uu-dropdown-popover.placement-top,
+.uu-dropdown-popover.placement-top-start {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+
+.uu-dropdown-popover.w-full,
+.uu-dropdown-popover.uu-dropdown-popover--stretch {
+  left: 0;
+  right: 0;
+  min-width: 100%;
+  width: 100%;
+}
+
+.uu-dropdown-menu {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  outline: none;
+}
+
+.uu-dropdown-section {
+  display: grid;
+  gap: 2px;
+}
+
+.uu-dropdown-section-header {
+  padding: 8px 10px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #667085;
+}
+
+.uu-dropdown-separator {
+  height: 1px;
+  margin: 4px 6px;
+  background: #f2f4f7;
+}
+
+.uu-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #10162f;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.uu-dropdown-item:hover,
+.uu-dropdown-item:focus-visible {
+  background: #f9fafb;
+  outline: none;
+}
+
+.uu-dropdown-item.is-disabled,
+.uu-dropdown-item:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.uu-dropdown-item-icon,
+.uu-dropdown-item [data-icon] {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  color: #667085;
+}
+
+.uu-dropdown-item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.uu-dropdown-item-addon {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 500;
+  color: #98a2b3;
+}
+
+.uu-dropdown-item.is-selected {
+  background: color-mix(in srgb, var(--mt-primary, #00a896) 10%, #fff);
+  color: var(--mt-primary-strong, #008f84);
+  font-weight: 600;
+}

@@ -18,6 +18,9 @@ function resolveBase() {
 export default defineConfig({
   base: resolveBase(),
   resolve: {
+    alias: {
+      "@": resolve("src")
+    },
     dedupe: ["react", "react-dom"]
   },
   plugins: [

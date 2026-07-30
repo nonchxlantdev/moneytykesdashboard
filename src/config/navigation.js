@@ -2,6 +2,7 @@ import {
   IconBook,
   IconCalculator,
   IconCalendar,
+  IconClipboardCheck,
   IconClipboardList,
   IconFileCertificate,
   IconLayoutDashboard,
@@ -31,8 +32,15 @@ export const navSections = [
         label: "Report Cards",
         view: "report-cards",
         icon: IconFileCertificate,
-        badge: { text: "New", variant: "soon" },
         tourId: "nav-report-cards"
+      },
+      {
+        id: "grades",
+        label: "Grades",
+        view: "grades",
+        icon: IconClipboardCheck,
+        badge: { text: "New", variant: "soon" },
+        tourId: "nav-grades"
       }
     ]
   },

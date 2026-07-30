@@ -23,9 +23,13 @@ export function defaultTemplate(school = {}) {
     accentColor: "",
     terms: ["1st Term", "2nd Term", "3rd Term"],
     subjects: [
-      { name: "Financial Literacy", instructor: "", hours: 40 },
-      { name: "Mathematics", instructor: "", hours: 40 },
-      { name: "Language Arts", instructor: "", hours: 40 }
+      { name: "Math", instructor: "", hours: 40 },
+      { name: "English", instructor: "", hours: 40 },
+      { name: "Literature", instructor: "", hours: 40 },
+      { name: "History", instructor: "", hours: 40 },
+      { name: "Social Studies", instructor: "", hours: 40 },
+      { name: "Science", instructor: "", hours: 40 },
+      { name: "Financial Literacy", instructor: "", hours: 40 }
     ],
     columns: {
       showHours: true,
@@ -284,11 +288,13 @@ export function resolveTemplateAccent(template, themeId = DEFAULT_THEME) {
 }
 
 export function buildBlankCard({ student, classSection, schoolYear, term, template }) {
+  const terms = template.terms || [];
   const subjects = (template.subjects || []).map(subject => ({
     name: subject.name,
     instructor: subject.instructor || "",
     hours: Number(subject.hours) || 0,
-    termScores: (template.terms || []).map(() => null),
+    termScores: terms.map(() => null),
+    termScoreSources: terms.map(() => "auto"),
     avg: null
   }));
 
@@ -344,10 +350,17 @@ export function deriveStatus(card) {
 }
 
 export function recomputeCard(card) {
-  const subjects = (card.subjects || []).map(subject => ({
-    ...subject,
-    avg: subjectAverage(subject.termScores)
-  }));
+  const subjects = (card.subjects || []).map(subject => {
+    const termScores = [...(subject.termScores || [])];
+    const termScoreSources = [...(subject.termScoreSources || [])];
+    while (termScoreSources.length < termScores.length) termScoreSources.push("auto");
+    return {
+      ...subject,
+      termScores,
+      termScoreSources: termScoreSources.slice(0, Math.max(termScores.length, termScoreSources.length)),
+      avg: subjectAverage(termScores)
+    };
+  });
   const next = {
     ...card,
     subjects,

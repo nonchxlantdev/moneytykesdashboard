@@ -13,6 +13,7 @@ import Select from "../ui/Select";
 import RowOverflowMenu from "../Rewards/RowOverflowMenu";
 import PersonalizationSettings from "./PersonalizationSettings";
 import ReportCardTemplateSettings from "./ReportCardTemplateSettings";
+import GradingSettings from "./GradingSettings";
 import { isSupabaseEnabled } from "../../lib/featureFlags";
 import { inviteUser } from "../../data/inviteUser";
 import { resetUserPassword } from "../../data/resetUserPassword";
@@ -25,6 +26,7 @@ import { canAssignDevRole, normalizeRole, ROLE_LABELS, ROLES, roleLabel } from "
 import { calculateAgeFromDob } from "../../utils/ageFromDob";
 import "./admin-dashboard.css";
 import "../ReportCards/report-cards.css";
+import "../Grades/grades.css";
 
 const emptySchoolForm = {
   name: "",
@@ -135,7 +137,7 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
   const supabaseMode = isSupabaseEnabled();
   const [passwordResetBusy, setPasswordResetBusy] = useState(false);
 
-  const [tab, setTab] = useState("schools"); // schools | teachers | classes | report-template | sessions
+  const [tab, setTab] = useState("schools"); // schools | teachers | classes | report-template | grading | sessions
   const [schoolFormOpen, setSchoolFormOpen] = useState(false);
   const [teacherFormOpen, setTeacherFormOpen] = useState(false);
   const [classFormOpen, setClassFormOpen] = useState(false);
@@ -660,6 +662,16 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
             >
               Report Card Template
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === "grading"}
+              className={tab === "grading" ? "manage-tab active" : "manage-tab"}
+              data-tour="admin-tab-grading"
+              onClick={() => setTab("grading")}
+            >
+              Grading
+            </button>
           </div>
 
           <div className="manage-panel" role="tabpanel">
@@ -719,6 +731,7 @@ export default function AdminDashboard({ db, update, onCoreRefresh }) {
               <SessionsPanel onToast={message => update(() => {}, message)} />
             ) : null}
             {tab === "report-template" ? <ReportCardTemplateSettings schools={schools} teachers={teachers} /> : null}
+            {tab === "grading" ? <GradingSettings schools={schools} /> : null}
           </div>
         </div>
 

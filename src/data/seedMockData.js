@@ -11,7 +11,7 @@
 import { isDemoMode } from "../lib/featureFlags";
 
 const STORAGE_KEY = "moneytykes.teacher.dashboard.v3";
-const SEED_MARKER = "moneytykes.seed.demo.v8";
+const SEED_MARKER = "moneytykes.seed.demo.v11";
 const REWARDS_BANK_KEY = "rewards_bank";
 const CREATED_LESSONS_KEY = "created_lessons";
 const CALENDAR_EVENTS_KEY = "calendar_events";
@@ -21,6 +21,11 @@ const MY_DAY_REFLECTIONS_KEY = "mt.my_day.reflections.v1";
 const REPORT_TEMPLATE_KEY = "mt.report_card.templates.v1";
 const REPORT_CARDS_KEY = "mt.report_card.cards.v1";
 const REPORT_SECTIONS_KEY = "mt.report_card.class_sections.v1";
+const GRADES_CATEGORIES_KEY = "mt.grades.categories.v1";
+const GRADES_ITEMS_KEY = "mt.grades.items.v1";
+const GRADES_ENTRIES_KEY = "mt.grades.entries.v1";
+const GRADES_LETTER_SCALE_KEY = "mt.grades.letter_scale.v1";
+const GRADES_SEED_MARKER = "moneytykes.seed.grades.v3";
 
 const asset = path => `${import.meta.env.BASE_URL}${path}`;
 
@@ -538,9 +543,13 @@ function seedReportCards(students) {
     accentColor: "",
     terms: termLabels,
     subjects: [
-      { name: "Financial Literacy", instructor: `${TEACHER.firstName} ${TEACHER.lastName}`, hours: 40 },
-      { name: "Mathematics", instructor: `${TEACHER.firstName} ${TEACHER.lastName}`, hours: 40 },
-      { name: "Language Arts", instructor: "Grace Mwansa", hours: 40 }
+      { name: "Math", instructor: `${TEACHER.firstName} ${TEACHER.lastName}`, hours: 40 },
+      { name: "English", instructor: "Grace Mwansa", hours: 40 },
+      { name: "Literature", instructor: "Grace Mwansa", hours: 40 },
+      { name: "History", instructor: `${TEACHER.firstName} ${TEACHER.lastName}`, hours: 40 },
+      { name: "Social Studies", instructor: `${TEACHER.firstName} ${TEACHER.lastName}`, hours: 40 },
+      { name: "Science", instructor: `${TEACHER.firstName} ${TEACHER.lastName}`, hours: 40 },
+      { name: "Financial Literacy", instructor: `${TEACHER.firstName} ${TEACHER.lastName}`, hours: 40 }
     ],
     columns: {
       showHours: true,
@@ -564,6 +573,7 @@ function seedReportCards(students) {
           instructor: subject.instructor,
           hours: subject.hours,
           termScores,
+          termScoreSources: ["auto", "auto", "auto"],
           avg
         };
       });
@@ -614,12 +624,230 @@ function seedReportCards(students) {
   localStorage.setItem(REPORT_SECTIONS_KEY, JSON.stringify([classSection]));
 }
 
-/** Calendar, lessons, My Day, and report cards — used by local demo mode. */
+function seedGrades(students, todayDate) {
+  const classId = slugClass(CLASS_A);
+  const schoolKey = String(SCHOOL.id);
+  const teacherId = TEACHER.id;
+  const term = "1st Term";
+  const roster = Array.isArray(students) ? students : [];
+
+  const categories = [
+    { id: "gcat-quizzes", schoolId: SCHOOL.id, name: "Quizzes", weight: 15, dropLowest: 1, allowExtraCredit: false, order: 0 },
+    { id: "gcat-assignments", schoolId: SCHOOL.id, name: "Assignments", weight: 20, dropLowest: 0, allowExtraCredit: false, order: 1 },
+    { id: "gcat-tests", schoolId: SCHOOL.id, name: "Tests", weight: 30, dropLowest: 0, allowExtraCredit: false, order: 2 },
+    { id: "gcat-exams", schoolId: SCHOOL.id, name: "Exams", weight: 35, dropLowest: 0, allowExtraCredit: false, order: 3 },
+    { id: "gcat-projects", schoolId: SCHOOL.id, name: "Projects", weight: 0, dropLowest: 0, allowExtraCredit: false, order: 4 }
+  ];
+
+  const letterScale = [
+    { minPercent: 90, letter: "A" },
+    { minPercent: 80, letter: "B" },
+    { minPercent: 70, letter: "C" },
+    { minPercent: 60, letter: "D" },
+    { minPercent: 0, letter: "F" }
+  ];
+
+  /** Deterministic 8-student score rows with light per-subject variation. */
+  function row(base, subjectIndex = 0) {
+    return base.map((value, index) => {
+      if (value == null) return null;
+      const nudge = ((subjectIndex + index) % 3) - 1;
+      return Math.max(0, value + nudge);
+    });
+  }
+
+  const itemDefs = [
+    // Math (default subject in the toolbar)
+    { id: "gitem-math-quiz-fractions", subject: "Math", categoryId: "gcat-quizzes", title: "Fractions quiz", daysAgo: 18, entryMode: "points", maxPoints: 20, values: row([18, 16, 19, 14, 17, 15, 12, 9], 0) },
+    { id: "gitem-math-quiz-decimals", subject: "Math", categoryId: "gcat-quizzes", title: "Decimals pop quiz", daysAgo: 11, entryMode: "percent", maxPoints: null, values: row([90, 85, 78, 92, 70, 88, 65, 55], 0) },
+    { id: "gitem-math-assign-hw", subject: "Math", categoryId: "gcat-assignments", title: "Problem set 4", daysAgo: 14, entryMode: "points", maxPoints: 25, values: row([23, 22, 20, 18, 21, 19, 14, 11], 0) },
+    { id: "gitem-math-test-unit", subject: "Math", categoryId: "gcat-tests", title: "Unit test", daysAgo: 9, entryMode: "points", maxPoints: 50, values: row([44, 41, 46, 38, 40, 35, 28, 22], 0) },
+    { id: "gitem-math-exam-mid", subject: "Math", categoryId: "gcat-exams", title: "Midterm exam", daysAgo: 2, entryMode: "percent", maxPoints: null, values: row([86, 82, 90, 74, 79, 71, 63, 52], 0) },
+    {
+      id: "gitem-math-quiz-warmup",
+      subject: "Math",
+      categoryId: "gcat-quizzes",
+      title: "Warm-up quiz",
+      daysAgo: 4,
+      entryMode: "points",
+      maxPoints: 10,
+      values: [6, 9, 8, 7, 10, 5, 4, null],
+      statuses: ["graded", "graded", "graded", "graded", "graded", "graded", "missing", "excused"]
+    },
+
+    // English
+    { id: "gitem-eng-quiz-grammar", subject: "English", categoryId: "gcat-quizzes", title: "Grammar quiz", daysAgo: 16, entryMode: "points", maxPoints: 20, values: row([17, 19, 15, 16, 18, 14, 11, 10], 1) },
+    { id: "gitem-eng-assign-essay", subject: "English", categoryId: "gcat-assignments", title: "Persuasive paragraph", daysAgo: 8, entryMode: "percent", maxPoints: null, values: row([88, 84, 91, 76, 80, 72, 60, 58], 1) },
+    { id: "gitem-eng-test-reading", subject: "English", categoryId: "gcat-tests", title: "Reading test", daysAgo: 6, entryMode: "points", maxPoints: 40, values: row([36, 34, 38, 30, 33, 29, 24, 20], 1) },
+
+    // Literature
+    { id: "gitem-lit-quiz-plot", subject: "Literature", categoryId: "gcat-quizzes", title: "Plot elements quiz", daysAgo: 15, entryMode: "points", maxPoints: 15, values: row([14, 13, 15, 11, 12, 10, 8, 7], 2) },
+    { id: "gitem-lit-assign-journal", subject: "Literature", categoryId: "gcat-assignments", title: "Reading journal", daysAgo: 7, entryMode: "percent", maxPoints: null, values: row([86, 80, 89, 74, 78, 70, 62, 55], 2) },
+    { id: "gitem-lit-test-novel", subject: "Literature", categoryId: "gcat-tests", title: "Novel unit test", daysAgo: 3, entryMode: "points", maxPoints: 50, values: row([42, 40, 45, 36, 39, 34, 27, 21], 2) },
+
+    // History
+    { id: "gitem-hist-quiz-dates", subject: "History", categoryId: "gcat-quizzes", title: "Key dates quiz", daysAgo: 17, entryMode: "percent", maxPoints: null, values: row([84, 78, 90, 72, 80, 68, 60, 52], 3) },
+    { id: "gitem-hist-assign-map", subject: "History", categoryId: "gcat-assignments", title: "Map worksheet", daysAgo: 10, entryMode: "points", maxPoints: 20, values: row([18, 17, 19, 15, 16, 14, 11, 9], 3) },
+    { id: "gitem-hist-test-unit", subject: "History", categoryId: "gcat-tests", title: "Civilizations test", daysAgo: 5, entryMode: "points", maxPoints: 50, values: row([43, 40, 46, 37, 41, 33, 26, 22], 3) },
+
+    // Social Studies
+    { id: "gitem-ss-quiz-civics", subject: "Social Studies", categoryId: "gcat-quizzes", title: "Civics quiz", daysAgo: 13, entryMode: "points", maxPoints: 20, values: row([16, 18, 15, 17, 19, 13, 10, 8], 4) },
+    { id: "gitem-ss-assign-community", subject: "Social Studies", categoryId: "gcat-assignments", title: "Community report", daysAgo: 9, entryMode: "percent", maxPoints: null, values: row([82, 86, 79, 74, 88, 70, 64, 58], 4) },
+    {
+      id: "gitem-ss-project-group",
+      subject: "Social Studies",
+      categoryId: "gcat-projects",
+      title: "Group poster project",
+      daysAgo: 5,
+      entryMode: "points",
+      maxPoints: 40,
+      isGroup: true,
+      groupStudentIds: roster.slice(0, 4).map(student => student.id),
+      values: [36, 36, 36, 36, null, null, null, null],
+      groupOnly: true
+    },
+
+    // Science
+    { id: "gitem-sci-quiz-lab", subject: "Science", categoryId: "gcat-quizzes", title: "Lab safety quiz", daysAgo: 12, entryMode: "points", maxPoints: 10, values: row([9, 10, 8, 9, 10, 7, 6, 5], 5) },
+    { id: "gitem-sci-assign-observe", subject: "Science", categoryId: "gcat-assignments", title: "Observation log", daysAgo: 8, entryMode: "percent", maxPoints: null, values: row([87, 83, 90, 75, 81, 73, 61, 54], 5) },
+    { id: "gitem-sci-test-matter", subject: "Science", categoryId: "gcat-tests", title: "Matter unit test", daysAgo: 4, entryMode: "points", maxPoints: 50, values: row([45, 42, 47, 39, 41, 36, 29, 23], 5) },
+
+    // Financial Literacy (MoneyTykes subject)
+    { id: "gitem-fl-quiz-coins", subject: "Financial Literacy", categoryId: "gcat-quizzes", title: "Coins & notes quiz", daysAgo: 18, entryMode: "points", maxPoints: 20, values: row([18, 16, 19, 14, 17, 15, 12, 9], 6) },
+    { id: "gitem-fl-assign-budget", subject: "Financial Literacy", categoryId: "gcat-assignments", title: "Budget worksheet", daysAgo: 7, entryMode: "points", maxPoints: 25, values: row([22, 21, 24, 18, 20, 17, 13, 10], 6) },
+    { id: "gitem-fl-test-money", subject: "Financial Literacy", categoryId: "gcat-tests", title: "Money basics test", daysAgo: 3, entryMode: "percent", maxPoints: null, values: row([85, 81, 89, 73, 78, 70, 62, 50], 6) }
+  ];
+
+  const items = itemDefs.map(def => ({
+    id: def.id,
+    schoolId: SCHOOL.id,
+    classId,
+    subjectName: def.subject,
+    categoryId: def.categoryId,
+    term,
+    title: def.title,
+    date: iso(addDays(todayDate, -def.daysAgo)),
+    entryMode: def.entryMode,
+    maxPoints: def.maxPoints,
+    isGroup: Boolean(def.isGroup),
+    groupStudentIds: def.groupStudentIds || [],
+    createdBy: teacherId,
+    createdAt: iso(addDays(todayDate, -def.daysAgo)) + "T09:00:00.000Z"
+  }));
+
+  const scorePlan = Object.fromEntries(
+    itemDefs.map(def => [
+      def.id,
+      {
+        values: def.values,
+        statuses: def.statuses,
+        groupOnly: Boolean(def.groupOnly)
+      }
+    ])
+  );
+
+  const entries = [];
+  items.forEach(item => {
+    const plan = scorePlan[item.id];
+    if (!plan) return;
+    roster.forEach((student, index) => {
+      if (plan.groupOnly && !(item.groupStudentIds || []).map(String).includes(String(student.id))) {
+        return;
+      }
+      const rawValue = plan.values[index];
+      const status = plan.statuses?.[index] || (rawValue == null ? "missing" : "graded");
+      if (status === "excused") {
+        entries.push({
+          id: `gentry-${item.id}-${student.id}`,
+          itemId: item.id,
+          studentId: student.id,
+          rawValue: null,
+          status: "excused",
+          comment: "",
+          enteredAt: iso(todayDate) + "T12:00:00.000Z"
+        });
+        return;
+      }
+      if (rawValue == null && status === "missing") {
+        entries.push({
+          id: `gentry-${item.id}-${student.id}`,
+          itemId: item.id,
+          studentId: student.id,
+          rawValue: 0,
+          status: "missing",
+          comment: "",
+          enteredAt: iso(todayDate) + "T12:00:00.000Z"
+        });
+        return;
+      }
+      if (rawValue == null) return;
+      entries.push({
+        id: `gentry-${item.id}-${student.id}`,
+        itemId: item.id,
+        studentId: student.id,
+        rawValue,
+        status: status === "late" ? "late" : "graded",
+        comment: "",
+        enteredAt: iso(todayDate) + "T12:00:00.000Z"
+      });
+    });
+  });
+
+  localStorage.setItem(
+    GRADES_CATEGORIES_KEY,
+    JSON.stringify({ [schoolKey]: categories, default: categories })
+  );
+  localStorage.setItem(
+    GRADES_LETTER_SCALE_KEY,
+    JSON.stringify({ [schoolKey]: letterScale, default: letterScale })
+  );
+  localStorage.setItem(GRADES_ITEMS_KEY, JSON.stringify(items));
+  localStorage.setItem(GRADES_ENTRIES_KEY, JSON.stringify(entries));
+  localStorage.setItem(GRADES_SEED_MARKER, "1");
+}
+
+/** Backfill grades mock if the main demo seed already ran before grades existed. */
+function ensureGradesMockSeed() {
+  try {
+    let existing = null;
+    try {
+      existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    } catch {
+      existing = null;
+    }
+
+    const demoContext = isDemoMode() || looksLikeDemoRoster(existing || {});
+    if (!demoContext) return;
+
+    const existingItems = JSON.parse(localStorage.getItem(GRADES_ITEMS_KEY) || "[]");
+    const hasSubjectSeed =
+      Array.isArray(existingItems) &&
+      existingItems.some(
+        item =>
+          String(item?.subjectName || "") === "Math" || String(item?.id || "").startsWith("gitem-math-")
+      );
+    if (hasSubjectSeed) {
+      localStorage.setItem(GRADES_SEED_MARKER, "1");
+      return;
+    }
+
+    let students = Array.isArray(existing?.students) ? existing.students : [];
+    if (!students.length) students = buildStudents();
+    seedGrades(students, new Date());
+    // Keep report-card subject list in sync when grades subjects expand.
+    if (demoContext) seedReportCards(students);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Calendar, lessons, My Day, report cards, and grades — used by local demo mode. */
 function seedFeatureMocks(students, todayDate) {
   localStorage.setItem(CALENDAR_EVENTS_KEY, JSON.stringify(buildCalendarEvents(todayDate)));
   localStorage.setItem(CREATED_LESSONS_KEY, JSON.stringify(buildCreatedLessons(todayDate)));
   seedMyDay(todayDate);
   seedReportCards(students);
+  seedGrades(students, todayDate);
 }
 
 function syncDemoRoster(existing) {
@@ -670,17 +898,20 @@ function syncDemoRoster(existing) {
   });
   seedAttendance(students, todayDate);
   if (isDemoMode()) seedFeatureMocks(students, todayDate);
+  else if (looksLikeDemoRoster(next)) seedGrades(students, todayDate);
 }
 
 /**
  * Seed demo data once. Safe no-op for real teacher data.
  * v4 resets the demo roster to exactly 8 students so counts match.
  * Curriculum lessons refresh once for demo libraries (ids 8000–8999).
- * Demo mode (VITE_ALLOW_DEMO_MODE): v8 marker re-seeds mock data across all features.
+ * Demo mode (VITE_ALLOW_DEMO_MODE): v10 marker re-seeds mock data across all features
+ * including the Grades gradebook.
  */
 export function seedMockData() {
   try {
     refreshDemoCurriculumLessons();
+    ensureGradesMockSeed();
 
     if (localStorage.getItem(SEED_MARKER)) return;
 
@@ -731,7 +962,7 @@ export function seedMockData() {
       });
       seedAttendance(students, todayDate);
       seedFeatureMocks(students, todayDate);
-      ["v1", "v2", "v3", "v4", "v5", "v6", "v7"].forEach(v => localStorage.removeItem(`moneytykes.seed.demo.${v}`));
+      ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"].forEach(v => localStorage.removeItem(`moneytykes.seed.demo.${v}`));
       localStorage.setItem(SEED_MARKER, "1");
       return;
     }
@@ -740,7 +971,7 @@ export function seedMockData() {
       if (looksLikeDemoRoster(existing)) {
         syncDemoRoster(existing);
       }
-      ["v1", "v2", "v3", "v4", "v5", "v6", "v7"].forEach(v => localStorage.removeItem(`moneytykes.seed.demo.${v}`));
+      ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"].forEach(v => localStorage.removeItem(`moneytykes.seed.demo.${v}`));
       localStorage.setItem(SEED_MARKER, "1");
       return;
     }
@@ -783,7 +1014,7 @@ export function seedMockData() {
 
     seedAttendance(students, todayDate);
 
-    ["v1", "v2", "v3", "v4", "v5", "v6", "v7"].forEach(v => localStorage.removeItem(`moneytykes.seed.demo.${v}`));
+    ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8"].forEach(v => localStorage.removeItem(`moneytykes.seed.demo.${v}`));
     localStorage.setItem(SEED_MARKER, "1");
   } catch {
     /* best-effort: never block app startup on seeding */

@@ -50,6 +50,7 @@ import PageChalkLoader from "./components/shared/PageChalkLoader";
 import { useSupabaseCoreSync } from "./data/useSupabaseCoreSync";
 import RewardsPage from "./pages/RewardsPage";
 import ReportCardsPage from "./pages/ReportCardsPage";
+import GradesPage from "./pages/GradesPage";
 import AttendancePage from "./pages/Attendance";
 import CreateLessonsPage from "./pages/CreateLessonsPage";
 import LessonsLibraryPage from "./pages/LessonsLibraryPage";
@@ -88,7 +89,9 @@ import AddStudentWizard from "./components/AddStudent/AddStudentWizard";
 import { ThemeProvider } from "./themes/ThemeContext";
 import { getReportCardsForStudent, getTemplateForSchool, statusLabel } from "./utils/reportCardsStorage";
 import { downloadReportCardPdf } from "./utils/reportCardPdf";
+import StudentGradeDrilldown from "./components/Grades/StudentGradeDrilldown";
 import "./components/ReportCards/report-cards.css";
+import "./components/Grades/grades.css";
 
 import { navSections, ICON_SIZE, ICON_STROKE } from "./config/navigation";
 import { useTeacherDatabase, loadDatabase } from "./hooks/useTeacherDatabase";
@@ -427,7 +430,7 @@ function App() {
       />
       {menuOpen && <button className="sidebar-backdrop" type="button" aria-label="Close navigation menu" onClick={closeSidebarMenu} />}
       <main
-        className={`dashboard ${view === "game" ? "game-view" : ""} ${view === "dashboard" ? "dashboard-view" : ""} ${view === "students" ? "students-view" : ""} ${view === "attendance" ? "attendance-view" : ""} ${view === "add-student" ? "add-student-view" : ""} ${view === "lessons" ? "lessons-view" : ""} ${view === "create-lessons" ? "create-lessons-view" : ""} ${view === "calendar" ? "calendar-view" : ""} ${view === "rewards" ? "rewards-view" : ""} ${view === "quizzes" ? "quizzes-view" : ""} ${view === "my-day" ? "coming-soon-view" : ""} ${view === "admin" ? "admin-view" : ""} ${view === "report-cards" ? "report-cards-view" : ""}`}
+        className={`dashboard ${view === "game" ? "game-view" : ""} ${view === "dashboard" ? "dashboard-view" : ""} ${view === "students" ? "students-view" : ""} ${view === "attendance" ? "attendance-view" : ""} ${view === "add-student" ? "add-student-view" : ""} ${view === "lessons" ? "lessons-view" : ""} ${view === "create-lessons" ? "create-lessons-view" : ""} ${view === "calendar" ? "calendar-view" : ""} ${view === "rewards" ? "rewards-view" : ""} ${view === "quizzes" ? "quizzes-view" : ""} ${view === "my-day" ? "coming-soon-view" : ""} ${view === "admin" ? "admin-view" : ""} ${view === "report-cards" ? "report-cards-view" : ""} ${view === "grades" ? "grades-view" : ""}`}
         ref={mainContentRef}
       >
         <Topbar
@@ -464,6 +467,7 @@ function App() {
           )}
           {!pageLoading && view === "rewards" && <RewardsPage db={db} setToast={setToast} update={update} />}
           {!pageLoading && view === "report-cards" && <ReportCardsPage db={db} setToast={setToast} />}
+          {!pageLoading && view === "grades" && <GradesPage db={db} setToast={setToast} navigate={navigate} />}
           {!pageLoading && view === "game" && <GameDashboard setToast={setToast} />}
         </div>
       </main>
@@ -1740,6 +1744,8 @@ function StudentProfile({ student, onClose, onEdit, onDelete }) {
               <p className="rc-muted" style={{ margin: 0 }}>No report cards yet for this student.</p>
             )}
           </div>
+
+          <StudentGradeDrilldown student={student} db={{ className: student.classLabel }} />
         </div>
       </div>
       <div className="mt-student-profile-actions">

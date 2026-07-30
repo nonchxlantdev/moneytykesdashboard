@@ -123,6 +123,7 @@
   .react-app .attendance-view,
   .react-app .add-student-view,
   .react-app .report-cards-view,
+  .react-app .grades-view,
   .react-app .admin-view,
   .react-app .quizzes-view,
   .react-app .game-view,
@@ -139,6 +140,7 @@
   .react-app .attendance-view .topbar,
   .react-app .add-student-view .topbar,
   .react-app .report-cards-view .topbar,
+  .react-app .grades-view .topbar,
   .react-app .admin-view .topbar,
   .react-app .quizzes-view .topbar,
   .react-app .game-view .topbar,
@@ -167,6 +169,7 @@
   .react-app .attendance-view .topbar-meta,
   .react-app .add-student-view .topbar-meta,
   .react-app .report-cards-view .topbar-meta,
+  .react-app .grades-view .topbar-meta,
   .react-app .admin-view .topbar-meta,
   .react-app .quizzes-view .topbar-meta,
   .react-app .game-view .topbar-meta,
@@ -183,6 +186,7 @@
   .react-app .attendance-view .topbar-menu-button.mobile-menu,
   .react-app .add-student-view .topbar-menu-button.mobile-menu,
   .react-app .report-cards-view .topbar-menu-button.mobile-menu,
+  .react-app .grades-view .topbar-menu-button.mobile-menu,
   .react-app .admin-view .topbar-menu-button.mobile-menu,
   .react-app .quizzes-view .topbar-menu-button.mobile-menu,
   .react-app .game-view .topbar-menu-button.mobile-menu,
@@ -204,6 +208,7 @@
   .react-app .attendance-view .page-chalk,
   .react-app .add-student-view .page-chalk,
   .react-app .report-cards-view .page-chalk,
+  .react-app .grades-view .page-chalk,
   .react-app .admin-view .page-chalk,
   .react-app .quizzes-view .page-chalk,
   .react-app .coming-soon-view .page-chalk {
@@ -223,7 +228,9 @@
   .react-app .create-lessons-view .topbar,
   .react-app .rewards-view .topbar,
   .react-app .calendar-view .topbar,
-  .react-app .dashboard-view .topbar {
+  .react-app .dashboard-view .topbar,
+  .react-app .grades-view .topbar,
+  .react-app .report-cards-view .topbar {
     display: none !important;
   }
 

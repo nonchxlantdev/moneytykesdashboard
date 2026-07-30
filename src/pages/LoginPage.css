@@ -118,18 +118,18 @@
   gap: 18px;
 }
 
+.mt-login-form .uu-btn--block {
+  margin-top: 4px;
+  min-height: 48px;
+}
+
 .mt-login-form-demo {
   margin-top: 8px;
+  gap: 12px;
 }
 
-.mt-login-card-demo .mt-login-submit {
-  min-height: 52px;
-  font-size: 1.05rem;
-}
-
-.mt-demo-back {
+.mt-login-form-demo .uu-btn--link-gray {
   justify-self: center;
-  margin-top: -4px;
 }
 
 .mt-field-group {
@@ -187,6 +187,32 @@
   color: #8e98ac;
 }
 
+.mt-password-toggle {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  margin: 0 -6px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #008f84;
+  cursor: pointer;
+}
+
+.mt-password-toggle:hover,
+.mt-password-toggle:focus-visible {
+  background: rgba(0, 168, 150, 0.1);
+  outline: none;
+}
+
+.mt-password-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
 .mt-error-message {
   margin: 0;
   color: #c74710;
@@ -230,31 +256,6 @@
 .mt-login-options a:hover {
   color: #006d77;
   text-decoration: underline;
-}
-
-.mt-login-submit {
-  min-height: 52px;
-  margin-top: 4px;
-  border: 0;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #00a896 0%, #008f84 100%);
-  color: #ffffff;
-  box-shadow: 0 16px 30px rgba(0, 109, 119, 0.22);
-  font: inherit;
-  font-weight: 900;
-  cursor: pointer;
-  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
-}
-
-.mt-login-submit:hover {
-  transform: translateY(-1px);
-  background: linear-gradient(135deg, #009c8c 0%, #007d75 100%);
-  box-shadow: 0 20px 38px rgba(0, 109, 119, 0.28);
-}
-
-.mt-login-submit:focus-visible {
-  outline: 4px solid rgba(0, 168, 150, 0.24);
-  outline-offset: 3px;
 }
 
 .mt-login-link-btn {

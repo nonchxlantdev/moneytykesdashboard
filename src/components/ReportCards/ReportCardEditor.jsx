@@ -1,12 +1,15 @@
+import { RotateCcw } from "lucide-react";
 import InstructorSelect from "./InstructorSelect";
 import { formatPercent, parsePercentInput } from "../../utils/reportCardScores";
 import { recomputeCard } from "../../utils/reportCardsStorage";
+import { resetTermScoreToAuto } from "../../utils/gradesStorage";
 
 export default function ReportCardEditor({
   card,
   student,
   template,
   teachers = [],
+  schoolId = null,
   onChange,
   onSave,
   onCancel
@@ -15,6 +18,7 @@ export default function ReportCardEditor({
   const columns = template.columns || {};
   const name = `${student?.first || ""} ${student?.last || ""}`.trim();
   const templateInstructors = (template.subjects || []).map(subject => subject.instructor).filter(Boolean);
+  const resolvedSchoolId = schoolId ?? student?.schoolId ?? template?.schoolId ?? null;
 
   function updateSubject(index, patch) {
     const subjects = card.subjects.map((subject, i) => (i === index ? { ...subject, ...patch } : subject));
@@ -28,10 +32,17 @@ export default function ReportCardEditor({
       if (i !== subjectIndex) return subject;
       const termScores = [...(subject.termScores || [])];
       while (termScores.length < terms.length) termScores.push(null);
+      const termScoreSources = [...(subject.termScoreSources || [])];
+      while (termScoreSources.length < terms.length) termScoreSources.push("auto");
       termScores[termIndex] = parsed;
-      return { ...subject, termScores };
+      termScoreSources[termIndex] = "manual";
+      return { ...subject, termScores, termScoreSources };
     });
     onChange(recomputeCard({ ...card, subjects }));
+  }
+
+  function resetScoreToAuto(subjectIndex, termIndex) {
+    onChange(resetTermScoreToAuto({ card, subjectIndex, termIndex, schoolId: resolvedSchoolId }));
   }
 
   function updateAttendance(key, value) {
@@ -101,34 +112,55 @@ export default function ReportCardEditor({
                     />
                   </td>
                 ) : null}
-                {terms.map((_, termIndex) => (
-                  <td key={`${subject.name}-${termIndex}`}>
-                    <div className="rc-percent-field" title="Enter a percentage score from 0 to 100">
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        min="0"
-                        max="100"
-                        step="0.1"
-                        className="rc-percent-input"
-                        value={subject.termScores?.[termIndex] ?? ""}
-                        onChange={event => updateScore(subjectIndex, termIndex, event.target.value)}
-                        onBlur={event => {
-                          const parsed = parsePercentInput(event.target.value);
-                          if (parsed === undefined) {
-                            updateScore(subjectIndex, termIndex, subject.termScores?.[termIndex] ?? "");
-                            return;
-                          }
-                          updateScore(subjectIndex, termIndex, parsed == null ? "" : String(parsed));
-                        }}
-                        aria-label={`${subject.name} ${terms[termIndex] || `Term ${termIndex + 1}`} percent`}
-                      />
-                      <span className="rc-percent-suffix" aria-hidden="true">
-                        %
-                      </span>
-                    </div>
-                  </td>
-                ))}
+                {terms.map((_, termIndex) => {
+                  const source = subject.termScoreSources?.[termIndex] === "manual" ? "manual" : "auto";
+                  return (
+                    <td key={`${subject.name}-${termIndex}`}>
+                      <div className="rc-score-cell">
+                        <div className="rc-percent-field" title="Enter a percentage score from 0 to 100">
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            className="rc-percent-input"
+                            value={subject.termScores?.[termIndex] ?? ""}
+                            onChange={event => updateScore(subjectIndex, termIndex, event.target.value)}
+                            onBlur={event => {
+                              const parsed = parsePercentInput(event.target.value);
+                              if (parsed === undefined) {
+                                updateScore(subjectIndex, termIndex, subject.termScores?.[termIndex] ?? "");
+                                return;
+                              }
+                              updateScore(subjectIndex, termIndex, parsed == null ? "" : String(parsed));
+                            }}
+                            aria-label={`${subject.name} ${terms[termIndex] || `Term ${termIndex + 1}`} percent`}
+                          />
+                          <span className="rc-percent-suffix" aria-hidden="true">
+                            %
+                          </span>
+                        </div>
+                        <div className="rc-score-meta">
+                          <span className={`rc-score-source ${source}`} title={source === "manual" ? "Manual override" : "From gradebook"}>
+                            {source}
+                          </span>
+                          {source === "manual" ? (
+                            <button
+                              type="button"
+                              className="rc-score-reset"
+                              title="Reset to calculated gradebook score"
+                              aria-label={`Reset ${subject.name} ${terms[termIndex] || `Term ${termIndex + 1}`} to calculated`}
+                              onClick={() => resetScoreToAuto(subjectIndex, termIndex)}
+                            >
+                              <RotateCcw size={12} strokeWidth={2.25} />
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+                    </td>
+                  );
+                })}
                 <td>{formatPercent(subject.avg)}</td>
               </tr>
             ))}

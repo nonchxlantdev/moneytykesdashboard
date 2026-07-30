@@ -1,0 +1,989 @@
+/**
+ * Grades gradebook — mirrors Report Cards page shell styling, with a
+ * compact, single-density grid and one consistent control language
+ * (Select/DropdownSearch + the uu-btn Button) throughout the feature.
+ */
+
+.grades-page {
+  width: 100%;
+  min-width: 0;
+}
+
+.react-app .dashboard.grades-view {
+  padding-top: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: 28px !important;
+}
+
+.react-app .grades-view .topbar {
+  display: none;
+}
+
+.react-app .grades-view .page-swap {
+  padding: 0 0 28px !important;
+  max-width: none !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.gr-body {
+  width: 100%;
+  max-width: var(--mt-page-max, 1180px);
+  margin: 0 auto;
+  padding: 10px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.grades-page .form-card {
+  background: var(--mt-card, #fff);
+  border: 1px solid var(--card-border, #e1e6f0);
+  border-radius: var(--mt-radius-lg, 14px);
+  padding: 10px 12px;
+  overflow: visible;
+}
+
+/* Dense stats on Grades only — leave shared StatCard untouched elsewhere. */
+.grades-page .stats-row {
+  gap: 6px;
+}
+
+.grades-page .stat-card {
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+}
+
+.grades-page .stat-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.grades-page .stat-label {
+  font-size: 9px;
+}
+
+.grades-page .stat-value {
+  font-size: 1.15rem;
+}
+
+/* —— Toolbar —— */
+/* Class / Subject / Term render via the shared Select (DropdownSearch), so
+   they already carry their own label + control chrome; School year stays a
+   plain compact field styled to match the same height and label treatment. */
+.gr-toolbar {
+  display: grid;
+  grid-template-columns: minmax(170px, 1.1fr) minmax(150px, 1fr) minmax(130px, 0.85fr) minmax(110px, 0.7fr) auto;
+  gap: 10px;
+  align-items: end;
+  overflow: visible;
+}
+
+/* Match Class / Subject / Term Select height to the tightened School year input. */
+.grades-page .mt-dd-trigger {
+  min-height: 36px;
+  padding: 0 12px;
+}
+
+.gr-toolbar-class {
+  min-width: 0;
+  overflow: visible;
+}
+
+.gr-toolbar-class .class-selector,
+.gr-toolbar-class .mt-dd-search,
+.gr-toolbar .mt-dd-search {
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+}
+
+.gr-toolbar .mt-dd-trigger,
+.gr-toolbar-class .mt-dd-trigger {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.gr-toolbar .mt-dd-trigger-text,
+.gr-toolbar-class .mt-dd-trigger-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.gr-toolbar .mt-dd-trigger-actions,
+.gr-toolbar-class .mt-dd-trigger-actions {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.gr-toolbar .mt-dd-popover,
+.gr-modal .mt-dd-popover {
+  z-index: 90;
+}
+
+.gr-filter-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  overflow: visible;
+}
+
+.gr-filter-field span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.gr-toolbar input,
+.gr-modal input,
+.gr-modal select,
+.gr-settings input,
+.gr-settings select,
+.gr-drilldown select {
+  min-height: 36px;
+  border: 1px solid var(--card-border, #e1e6f0);
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #fff;
+  color: var(--mt-ink, #10162f);
+  font-size: 14px;
+}
+
+.gr-toolbar input:focus-visible,
+.gr-modal input:focus-visible,
+.gr-modal select:focus-visible,
+.gr-settings input:focus-visible,
+.gr-settings select:focus-visible,
+.gr-drilldown select:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--icon-accent) 45%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--icon-accent) 14%, transparent);
+}
+
+.gr-toolbar-actions {
+  display: flex;
+  align-items: end;
+}
+
+/* —— Grid card —— */
+/* Fill the page width; score columns share leftover space so Term
+   isn't followed by an empty void (and the card isn't a narrow island). */
+.gr-grid-card {
+  width: 100%;
+  max-width: 100%;
+  align-self: stretch;
+  padding: 0;
+  overflow: hidden;
+}
+
+.gr-grid-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--card-border, #e1e6f0);
+  background: #fafbfc;
+}
+
+.gr-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mt-ink-muted, #5f6f6c);
+}
+
+.gr-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.gr-legend-icon {
+  flex: 0 0 auto;
+}
+
+.gr-legend-icon--graded {
+  color: var(--mt-status-success, #059669);
+}
+
+.gr-legend-icon--missing {
+  color: var(--mt-status-danger, #e11d48);
+}
+
+.gr-legend-icon--excused {
+  color: var(--mt-status-neutral, #64748b);
+}
+
+.gr-legend-icon--late {
+  color: var(--mt-status-pending, #d97706);
+}
+
+.gr-grid-scroll {
+  overflow: auto;
+  width: 100%;
+  max-width: 100%;
+}
+
+.gr-grid {
+  width: 100%;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  font-size: 12px;
+}
+
+.gr-col-student {
+  width: 128px;
+}
+
+.gr-col-term {
+  width: 64px;
+}
+
+.gr-col-item {
+  /* Equal share of remaining width after student + term. */
+  width: auto;
+}
+
+.gr-grid th,
+.gr-grid td {
+  border-bottom: 1px solid var(--card-border, #e1e6f0);
+  border-right: 1px solid var(--card-border, #e1e6f0);
+  padding: 3px 4px;
+  vertical-align: middle;
+  background: #fff;
+}
+
+.gr-grid tbody tr:nth-child(even) td,
+.gr-grid tbody tr:nth-child(even) th.gr-sticky,
+.gr-grid tbody tr:nth-child(even) td.gr-term-score {
+  background: color-mix(in srgb, var(--icon-accent) 3%, #fff) !important;
+}
+
+.gr-grid tbody tr:hover td,
+.gr-grid tbody tr:hover th.gr-sticky,
+.gr-grid tbody tr:hover td.gr-term-score {
+  background: color-mix(in srgb, var(--icon-accent) 7%, #fff) !important;
+}
+
+.gr-sticky {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: 128px;
+  min-width: 128px;
+  max-width: 128px;
+  padding-left: 8px !important;
+  padding-right: 6px !important;
+  text-align: left;
+  background: #f8fafc !important;
+  box-shadow: 1px 0 0 var(--card-border, #e1e6f0);
+}
+
+thead .gr-sticky {
+  z-index: 5;
+}
+
+.gr-grid thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-shadow: 0 1px 0 var(--card-border, #e1e6f0);
+}
+
+.gr-grid thead th.gr-sticky {
+  z-index: 6;
+}
+
+.gr-grid thead th.gr-term-head {
+  z-index: 6;
+}
+
+.gr-cat-head {
+  text-align: center;
+  background: color-mix(in srgb, var(--icon-accent, #006d77) 10%, #fff) !important;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.gr-cat-head-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mt-ink, #1c2b2a);
+}
+
+.gr-cat-weight {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  background: color-mix(in srgb, var(--icon-accent, #006d77) 78%, #000 8%);
+  vertical-align: 1px;
+}
+
+.gr-item-head {
+  position: relative;
+  /* Share leftover width evenly across item columns (table-layout: fixed). */
+  width: auto;
+  min-width: 100px;
+  text-align: center;
+  font-weight: 600;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.gr-item-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.gr-item-meta {
+  margin-top: 1px;
+  font-size: 9.5px;
+  color: var(--mt-ink-muted, #5f6f6c);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.gr-item-actions {
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  margin: 0;
+  padding: 2px;
+  border-radius: 6px;
+  background: color-mix(in srgb, #fff 92%, var(--icon-accent));
+  box-shadow: 0 2px 8px rgba(16, 22, 47, 0.12);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 2px);
+  transition: opacity var(--mt-duration, 160ms) var(--mt-ease, ease), transform var(--mt-duration, 160ms) var(--mt-ease, ease);
+}
+
+.gr-item-head:hover .gr-item-actions,
+.gr-item-head:focus-within .gr-item-actions {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.gr-item-actions .uu-btn--icon-only.uu-btn--sm {
+  --uu-icon-size: 22px;
+  min-height: 22px;
+}
+
+.gr-student {
+  font-weight: 700;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* —— Score cell (single compact spreadsheet row) —— */
+.gr-cell {
+  position: relative;
+  width: auto;
+  min-width: 100px;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+
+.gr-score-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  min-height: 28px;
+}
+
+.gr-score-cell--grid {
+  padding-right: 2px;
+}
+
+.gr-score-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.gr-score-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 28px;
+  border: 1px solid var(--card-border, #e1e6f0);
+  border-radius: 6px;
+  padding: 0 6px;
+  text-align: center;
+  box-sizing: border-box;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mt-ink, #10162f);
+  background: #fff;
+}
+
+.gr-score-wrap.has-pct .gr-score-input {
+  padding-right: 34px;
+  padding-left: 6px;
+  text-align: left;
+}
+
+.gr-score-input:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--icon-accent) 55%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--icon-accent) 16%, transparent);
+}
+
+.gr-score-input:disabled {
+  background: color-mix(in srgb, #64748b 6%, #fff);
+  color: var(--mt-ink-muted, #5f6f6c);
+}
+
+.gr-cell-pct {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 9px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--mt-ink-muted, #8a9693);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Status control — quiet for graded, icon badge for exceptions */
+.gr-status-ctl {
+  position: relative;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  transition: opacity var(--mt-duration, 160ms) var(--mt-ease, ease), transform var(--mt-duration, 160ms) var(--mt-ease, ease);
+}
+
+.gr-status-ctl.is-quiet {
+  opacity: 0;
+  transform: translateY(-1px);
+}
+
+.gr-cell:hover .gr-status-ctl.is-quiet,
+.gr-cell:focus-within .gr-status-ctl.is-quiet,
+.gr-score-cell:hover .gr-status-ctl.is-quiet,
+.gr-score-cell:focus-within .gr-status-ctl.is-quiet,
+.gr-mobile-row:hover .gr-status-ctl.is-quiet,
+.gr-mobile-row:focus-within .gr-status-ctl.is-quiet,
+.gr-status-ctl.is-quiet:focus-within {
+  opacity: 0.85;
+  transform: none;
+}
+
+.gr-status-ctl.is-exception {
+  opacity: 1;
+}
+
+.gr-status-icon {
+  display: block;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+
+.gr-status-ctl--graded {
+  color: var(--mt-status-success, #059669);
+}
+
+.gr-status-ctl--missing {
+  color: var(--mt-status-danger, #e11d48);
+}
+
+.gr-status-ctl--excused {
+  color: var(--mt-status-neutral, #64748b);
+}
+
+.gr-status-ctl--late {
+  color: var(--mt-status-pending, #d97706);
+}
+
+.gr-status-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 12px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.gr-status-select:focus-visible {
+  outline: none;
+}
+
+.gr-status-ctl.is-quiet:focus-within,
+.gr-status-ctl.is-exception:focus-within {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--icon-accent) 16%, transparent);
+}
+
+.gr-cell.status-missing,
+.gr-mobile-row.status-missing {
+  background: color-mix(in srgb, var(--mt-status-danger, #e11d48) 6%, #fff);
+  box-shadow: inset 3px 0 0 var(--mt-status-danger, #e11d48);
+}
+
+.gr-cell.status-excused,
+.gr-mobile-row.status-excused {
+  background: color-mix(in srgb, var(--mt-status-neutral, #64748b) 6%, #fff);
+  box-shadow: inset 3px 0 0 var(--mt-status-neutral, #64748b);
+}
+
+.gr-cell.status-late,
+.gr-mobile-row.status-late {
+  background: color-mix(in srgb, var(--mt-status-pending, #d97706) 6%, #fff);
+  box-shadow: inset 3px 0 0 var(--mt-status-pending, #d97706);
+}
+
+.gr-term-head,
+.gr-term-score {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  width: 64px;
+  min-width: 64px;
+  max-width: 64px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 12px;
+  background: #f8fafc !important;
+  color: var(--mt-ink, #10162f);
+  box-shadow: -1px 0 0 var(--card-border, #e1e6f0);
+}
+
+.gr-grid thead th.gr-term-head {
+  z-index: 6;
+}
+
+/* —— Mobile list (≤640px, matches roster card breakpoint) —— */
+.gr-mobile-view {
+  display: none;
+  padding: 10px 12px;
+}
+
+.gr-mobile-head {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.gr-mobile-empty {
+  margin: 8px 0 0;
+  color: var(--mt-ink-muted, #5f6f6c);
+  font-size: 13px;
+}
+
+.gr-mobile-list {
+  display: grid;
+  gap: 8px;
+}
+
+.gr-mobile-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--card-border, #e1e6f0);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.gr-mobile-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.gr-mobile-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mt-ink, #10162f);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gr-mobile-term {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--mt-ink, #10162f);
+}
+
+.gr-score-cell--mobile .gr-score-input {
+  min-height: 36px;
+  font-size: 14px;
+  text-align: left;
+  padding-left: 10px;
+}
+
+.gr-score-cell--mobile .gr-status-ctl {
+  width: 28px;
+  height: 28px;
+}
+
+.gr-score-cell--mobile .gr-status-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.gr-score-cell--mobile .gr-status-ctl.is-quiet {
+  opacity: 0.55;
+  transform: none;
+}
+
+/* —— Modals —— */
+.gr-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  align-content: safe center;
+  padding: 20px;
+  overflow: auto;
+  background: rgba(16, 22, 47, 0.45);
+}
+
+.gr-modal {
+  width: min(560px, 100%);
+  max-height: min(90vh, 720px);
+  overflow: visible;
+  display: grid;
+  gap: 14px;
+  border-radius: var(--mt-radius-xl, 16px);
+  box-shadow: 0 24px 60px rgba(16, 22, 47, 0.22);
+}
+
+.gr-modal .mt-dd-search {
+  overflow: visible;
+}
+
+.gr-modal-sm {
+  width: min(420px, 100%);
+}
+
+.gr-modal-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+}
+
+.gr-modal-head h2 {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.gr-modal-head p {
+  margin: 0;
+  color: var(--mt-ink-muted, #5f6f6c);
+  font-size: 13px;
+}
+
+.gr-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.gr-modal-grid label,
+.gr-modal > label,
+.gr-settings label,
+.gr-drilldown-filters label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mt-ink-muted, #5f6f6c);
+}
+
+.gr-check {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mt-ink, #10162f);
+}
+
+.gr-group-list {
+  display: grid;
+  gap: 8px;
+}
+
+.gr-group-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 10px;
+  max-height: 180px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--card-border, #e1e6f0);
+  border-radius: 10px;
+}
+
+.gr-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.gr-error {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--mt-status-danger-soft, rgba(225, 29, 72, 0.12));
+  color: #b42318;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* —— Admin: Grading settings —— */
+.gr-settings-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 14px;
+}
+
+.gr-settings-head h3 {
+  margin: 0 0 4px;
+}
+
+.gr-settings-head p {
+  margin: 0;
+  color: var(--mt-ink-muted, #5f6f6c);
+  font-size: 13px;
+}
+
+.gr-cat-row,
+.gr-letter-row {
+  display: grid;
+  grid-template-columns: 1.4fr 0.7fr 0.7fr auto;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.gr-cat-row--head {
+  margin-bottom: 6px;
+  padding: 0 2px;
+}
+
+.gr-cat-row--head span {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mt-ink-muted, #8a9693);
+}
+
+.gr-cat-row-actions {
+  display: flex;
+  gap: 4px;
+  justify-self: end;
+}
+
+.gr-suffix-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.gr-suffix-field input {
+  width: 100%;
+  padding-right: 22px !important;
+}
+
+.gr-suffix-field span {
+  position: absolute;
+  right: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mt-ink-muted, #8a9693);
+  pointer-events: none;
+}
+
+.gr-letter-row {
+  grid-template-columns: 1fr 1fr auto;
+}
+
+.gr-weight-total {
+  margin: 4px 0 16px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.gr-weight-total.is-invalid {
+  color: #b42318;
+}
+
+.gr-weight-total.is-valid {
+  color: var(--icon-accent, #006d77);
+}
+
+.gr-settings-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--card-border, #e1e6f0);
+}
+
+/* —— Student drilldown —— */
+.gr-drilldown {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--card-border, #e1e6f0);
+}
+
+.gr-drilldown-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 10px;
+}
+
+.gr-drilldown-head h4 {
+  margin: 0;
+}
+
+.gr-drilldown-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.gr-drilldown-summary {
+  margin: 0 0 10px;
+  font-size: 13px;
+}
+
+.gr-breakdown,
+.gr-drilldown-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.gr-breakdown li,
+.gr-drilldown-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--card-border, #e1e6f0);
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.gr-drilldown-list li > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.gr-drilldown-list span {
+  color: var(--mt-ink-muted, #5f6f6c);
+  font-size: 12px;
+}
+
+.gr-drilldown-score {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .gr-toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .gr-toolbar-actions {
+    grid-column: 1 / -1;
+  }
+
+  .gr-modal-grid,
+  .gr-group-options {
+    grid-template-columns: 1fr;
+  }
+
+  .gr-cat-row,
+  .gr-cat-row--head {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .gr-cat-row-actions {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+/* Phone: replace matrix with per-student list (roster card breakpoint). */
+@media (max-width: 640px) {
+  .gr-desktop-view {
+    display: none !important;
+  }
+
+  .gr-mobile-view {
+    display: block;
+  }
+
+  .gr-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .grades-page .stats-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}

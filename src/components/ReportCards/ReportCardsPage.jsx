@@ -370,6 +370,7 @@ export default function ReportCardsPage({ db, setToast, navigate }) {
             card={editing.card}
             student={editing.student}
             template={baseTemplate}
+            schoolId={school?.id}
             teachers={(db.teachers || []).filter(
               teacher => !school?.id || String(teacher.schoolId) === String(school.id)
             )}

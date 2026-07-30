@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Heart, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Heart, Lock, Mail } from "lucide-react";
 import { useAuth } from "../auth/AuthProvider";
+import { Button } from "@/components/base/buttons/button";
 import "./LoginPage.css";
 
 const teachersDashboardLogo = `${import.meta.env.BASE_URL}assets/teachersdashboardpng.png`;
@@ -61,6 +62,8 @@ function LoginForm() {
   const [info, setInfo] = useState("");
   const [demoPinStep, setDemoPinStep] = useState(false);
   const [demoPin, setDemoPin] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showDemoPin, setShowDemoPin] = useState(false);
 
   function updateField(field, value) {
     setForm(current => ({ ...current, [field]: value }));
@@ -190,7 +193,7 @@ function LoginForm() {
                 <input
                   id="mt-demo-pin"
                   name="demoPin"
-                  type="password"
+                  type={showDemoPin ? "text" : "password"}
                   inputMode="numeric"
                   pattern="[0-9]*"
                   autoComplete="one-time-code"
@@ -204,6 +207,15 @@ function LoginForm() {
                   aria-describedby={errors.form ? "mt-demo-pin-error" : undefined}
                   placeholder="Enter access code"
                 />
+                <button
+                  type="button"
+                  className="mt-password-toggle"
+                  onClick={() => setShowDemoPin(current => !current)}
+                  aria-label={showDemoPin ? "Hide access code" : "Show access code"}
+                  aria-pressed={showDemoPin}
+                >
+                  {showDemoPin ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                </button>
               </div>
             </div>
 
@@ -213,13 +225,22 @@ function LoginForm() {
               </p>
             ) : null}
 
-            <button className="mt-login-submit" type="submit" disabled={submitting || !demoPin}>
+            <Button
+              className="uu-btn--block"
+              color="primary"
+              size="lg"
+              type="submit"
+              isDisabled={submitting || !demoPin}
+              isLoading={submitting}
+              showTextWhileLoading
+            >
               {submitting ? "Opening…" : "Continue"}
-            </button>
-            <button
+            </Button>
+            <Button
+              color="link-gray"
+              size="md"
               type="button"
-              className="mt-login-link-btn mt-demo-back"
-              disabled={submitting}
+              isDisabled={submitting}
               onClick={() => {
                 setDemoPinStep(false);
                 setDemoPin("");
@@ -227,14 +248,21 @@ function LoginForm() {
               }}
             >
               Back
-            </button>
+            </Button>
           </form>
         ) : (
           <div className="mt-login-form mt-login-form-demo">
             {errors.form ? <p className="mt-error-message">{errors.form}</p> : null}
-            <button className="mt-login-submit" type="button" disabled={submitting} onClick={handleAccessDemo}>
+            <Button
+              className="uu-btn--block"
+              color="primary"
+              size="lg"
+              type="button"
+              isDisabled={submitting}
+              onClick={handleAccessDemo}
+            >
               Access demo
-            </button>
+            </Button>
           </div>
         )
       ) : (
@@ -265,7 +293,7 @@ function LoginForm() {
               <input
                 id="mt-login-password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={form.password}
                 onChange={event => updateField("password", event.target.value)}
                 autoComplete="current-password"
@@ -273,6 +301,15 @@ function LoginForm() {
                 aria-describedby={errors.password ? "mt-login-password-error" : undefined}
                 placeholder="Enter your password"
               />
+              <button
+                type="button"
+                className="mt-password-toggle"
+                onClick={() => setShowPassword(current => !current)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+              </button>
             </div>
             {errors.password && (
               <p className="mt-error-message" id="mt-login-password-error">
@@ -303,9 +340,17 @@ function LoginForm() {
           {errors.form ? <p className="mt-error-message">{errors.form}</p> : null}
           {info ? <p className="mt-access-note" role="status">{info}</p> : null}
 
-          <button className="mt-login-submit" type="submit" disabled={submitting}>
+          <Button
+            className="uu-btn--block"
+            color="primary"
+            size="lg"
+            type="submit"
+            isDisabled={submitting}
+            isLoading={submitting}
+            showTextWhileLoading
+          >
             {submitting ? "Signing in…" : "Log In"}
-          </button>
+          </Button>
         </form>
       )}
 
