@@ -12,3 +12,4 @@ rmSync(resolve(docs, ".git"), { recursive: true, force: true });
 writeFileSync(resolve(docs, ".nojekyll"), "");
 
 console.log("Synced dist/ to docs/ for GitHub Pages.");
+
